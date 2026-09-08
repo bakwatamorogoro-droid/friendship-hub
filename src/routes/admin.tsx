@@ -220,10 +220,12 @@ function AdminPage() {
     const url = /^https?:\/\//i.test(newLink.url) ? newLink.url : `https://${newLink.url}`;
     const { error } = await (supabase.from("official_links") as any).insert({
       label: newLink.label.trim(), url, sort_order: links.length,
+      description: newLink.description.trim() || null,
+      image_url: newLink.image_url || null,
     });
     if (error) { toast.error(error.message); return; }
     toast.success("Kiungo kimeongezwa");
-    setNewLink({ label: "", url: "" });
+    setNewLink({ label: "", url: "", description: "", image_url: "" });
     loadAll();
   };
   const toggleLink = async (id: string, v: boolean) => {
@@ -235,14 +237,82 @@ function AdminPage() {
     await (supabase.from("official_links") as any).delete().eq("id", id);
     toast.success("Kimefutwa"); loadAll();
   };
+  const updateLinkField = async (id: string, field: string, value: string | null) => {
+    await (supabase.from("official_links") as any).update({ [field]: value }).eq("id", id);
+    setLinks((prev) => prev.map((l) => (l.id === id ? { ...l, [field]: value } : l)));
+  };
+
+  /** Pakia picha kwenye bucket ya site-assets na rudisha URL. */
+  const uploadAsset = async (file: File, prefix: string): Promise<string | null> => {
+    const path = `${prefix}-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+    const up = await supabase.storage.from("site-assets").upload(path, file, { upsert: false });
+    if (up.error) { toast.error(up.error.message); return null; }
+    return await createStorageUrl("site-assets", path);
+  };
 
   const postAnnouncement = async (e: React.FormEvent) => {
     e.preventDefault();
     const { data: { session } } = await supabase.auth.getSession();
-    const { error } = await supabase.from("announcements").insert({ title, content, author_id: session?.user.id });
+    if (editAnn) {
+      const { error } = await (supabase.from("announcements") as any).update({
+        title, content, excerpt: annExcerpt.trim() || null, image_url: annImage || null,
+      }).eq("id", editAnn.id);
+      if (error) { toast.error(error.message); return; }
+      toast.success("Tangazo limehaririwa");
+    } else {
+      const { error } = await (supabase.from("announcements") as any).insert({
+        title, content, author_id: session?.user.id,
+        excerpt: annExcerpt.trim() || null, image_url: annImage || null,
+      });
+      if (error) { toast.error(error.message); return; }
+      toast.success("Tangazo limechapishwa");
+    }
+    setTitle(""); setContent(""); setAnnExcerpt(""); setAnnImage(""); setEditAnn(null);
+    loadAll();
+  };
+
+  const startEditAnn = (a: Row) => {
+    setEditAnn(a);
+    setTitle(a.title ?? "");
+    setContent(a.content ?? "");
+    setAnnExcerpt(a.excerpt ?? "");
+    setAnnImage(a.image_url ?? "");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+  const cancelEditAnn = () => {
+    setEditAnn(null); setTitle(""); setContent(""); setAnnExcerpt(""); setAnnImage("");
+  };
+  const toggleAnnPublished = async (id: string, v: boolean) => {
+    const { error } = await (supabase.from("announcements") as any).update({ published: v }).eq("id", id);
     if (error) { toast.error(error.message); return; }
-    toast.success("Tangazo limechapishwa");
-    setTitle(""); setContent("");
+    setAnns((p) => p.map((a) => (a.id === id ? { ...a, published: v } : a)));
+  };
+  const deleteAnn = async (id: string) => {
+    if (!confirm("Futa tangazo hili?")) return;
+    const { error } = await (supabase.from("announcements") as any).delete().eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Tangazo limefutwa");
+    if (editAnn?.id === id) cancelEditAnn();
+    loadAll();
+  };
+
+  /** Weka muda wa mwisho wa huduma / idara. */
+  const saveDeadline = async (
+    table: "service_status" | "departments",
+    idField: "key" | "id",
+    id: string,
+    field: "deadline_at" | "deadline_note",
+    value: string,
+  ) => {
+    const val = value.trim() === "" ? null : field === "deadline_at" ? new Date(value).toISOString() : value;
+    const { error } = await (supabase.from(table) as any).update({ [field]: val }).eq(idField, id);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Muda umehifadhiwa");
+    if (table === "service_status") {
+      setServices((p) => p.map((s) => (s.key === id ? { ...s, [field]: val } : s)));
+    } else {
+      setDepts((p) => p.map((d) => (d.id === id ? { ...d, [field]: val } : d)));
+    }
   };
 
   const uploadHero = async (file: File) => {
