@@ -106,7 +106,7 @@ export function useOfficialLinks() {
   const [links, setLinks] = useState<OfficialLink[]>([]);
   useEffect(() => {
     (supabase.from("official_links") as any)
-      .select("id,label,url,sort_order,active")
+      .select("id,label,url,sort_order,active,image_url,description")
       .eq("active", true)
       .order("sort_order", { ascending: true })
       .then(({ data }: any) => setLinks((data as OfficialLink[]) ?? []));
