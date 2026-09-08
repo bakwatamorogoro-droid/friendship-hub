@@ -978,6 +978,39 @@ function AdminPage() {
           </TabsContent>
         )}
 
+        {isAdmin && (
+          <TabsContent value="leaderapps">
+            <div className="mt-6 max-w-4xl space-y-4">
+              <div className="panel-3d rounded-2xl p-5">
+                <h2 className="font-semibold text-lg">Maombi ya Usajili wa Viongozi</h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Hakuna uthibitisho wa barua pepe — Menejimenti ndiyo inaidhinisha. Baada ya kuidhinisha,
+                  kiongozi anaingia kwa REG namba na nenosiri lake na anapata paneli yake.
+                </p>
+              </div>
+              {leaderApps.length === 0 && <p className="text-sm text-muted-foreground">Hakuna maombi bado.</p>}
+              {leaderApps.map((a: any) => (
+                <div key={a.id} className="panel-3d flex flex-wrap items-center justify-between gap-3 rounded-2xl p-5">
+                  <div className="min-w-0">
+                    <p className="font-semibold">{a.full_name} — {a.position}</p>
+                    <p className="text-xs text-muted-foreground">
+                      REG: {a.registration_number} • Simu: {a.phone ?? "-"} •{" "}
+                      Idara: {depts.find((d) => d.id === a.department_id)?.name ?? "—"}
+                    </p>
+                    <p className="mt-1 text-xs font-medium text-primary">Hali: {a.status}</p>
+                  </div>
+                  {a.status === "pending" && (
+                    <div className="flex gap-2">
+                      <Button size="sm" className="btn-3d" onClick={() => onApproveLeader(a.id)}>Idhinisha</Button>
+                      <Button size="sm" variant="outline" className="btn-3d" onClick={() => onRejectLeader(a.id)}>Kataa</Button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </TabsContent>
+        )}
+
 
         <TabsContent value="password">
           <form onSubmit={changePassword} className="max-w-md space-y-4 mt-6 rounded-xl border border-border bg-card p-6">
