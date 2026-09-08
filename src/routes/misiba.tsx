@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { HeartCrack } from "lucide-react";
+import { Countdown } from "@/components/Countdown";
+import { useServiceDeadline } from "@/lib/use-deadline";
 
 export const Route = createFileRoute("/misiba")({
   head: () => ({
@@ -55,6 +57,8 @@ function MisibaPage() {
     setForm(empty);
   };
 
+  const dl = useServiceDeadline("misiba");
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
       <div className="digital-page-hero hero-3d">
@@ -65,6 +69,8 @@ function MisibaPage() {
           Jaza fomu hii na taarifa yako itafika kwa uongozi wa MUMSO moja kwa moja.
         </p>
       </div>
+
+      <Countdown deadline={dl?.deadline_at} note={dl?.deadline_note} className="mt-6" />
 
       <form onSubmit={submit} className="digital-card panel-3d mt-8 p-6 space-y-4">
         <div className="grid gap-4 md:grid-cols-2">

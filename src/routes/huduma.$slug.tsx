@@ -10,6 +10,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Building2, Paperclip, X } from "lucide-react";
 import { useDepartmentBySlug, useDepartmentCategories, useFormCategories } from "@/lib/use-site-settings";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Countdown } from "@/components/Countdown";
+import { useDepartmentDeadline } from "@/lib/use-deadline";
 
 export const Route = createFileRoute("/huduma/$slug")({
   head: ({ params }) => ({
@@ -130,6 +132,8 @@ function DepartmentPage() {
     );
   }
 
+  const dl = useDepartmentDeadline(dept?.id);
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
       <Link to="/huduma" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary mb-4">
@@ -152,6 +156,8 @@ function DepartmentPage() {
           </div>
         </div>
       </div>
+
+      <Countdown deadline={dl?.deadline_at} note={dl?.deadline_note} className="mt-6" />
 
       <form onSubmit={submit} className="digital-card mt-8 p-6 space-y-5">
         <p className="text-sm text-muted-foreground">

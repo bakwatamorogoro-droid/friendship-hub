@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useFormCategories } from "@/lib/use-site-settings";
+import { Countdown } from "@/components/Countdown";
+import { useServiceDeadline } from "@/lib/use-deadline";
 
 export const Route = createFileRoute("/mikopo")({
   head: () => ({
@@ -56,12 +58,16 @@ function MikopoPage() {
     setForm({ full_name: "", form_four_index: "", registration_number: "", course: "", year_of_study: "", phone: "", problem_type: "", problem_description: "" });
   };
 
+  const dl = useServiceDeadline("mikopo");
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
       <div className="digital-page-hero">
         <h1 className="text-3xl md:text-4xl font-bold relative z-10">Huduma ya Mikopo</h1>
         <p className="mt-2 text-primary-foreground/85 relative z-10">Jaza fomu hii kuomba huduma yoyote inayohusu mkopo wako wa HESLB.</p>
       </div>
+
+      <Countdown deadline={dl?.deadline_at} note={dl?.deadline_note} className="mt-6" />
 
       <form onSubmit={submit} className="digital-card mt-8 p-6 space-y-5">
         <div className="space-y-2 digital-field">
