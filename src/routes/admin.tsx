@@ -61,7 +61,12 @@ function AdminPage() {
   const [myDeptId, setMyDeptId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>("deptsubs");
   const [links, setLinks] = useState<Row[]>([]);
-  const [newLink, setNewLink] = useState({ label: "", url: "" });
+  const [newLink, setNewLink] = useState({ label: "", url: "", description: "", image_url: "" });
+  const [anns, setAnns] = useState<Row[]>([]);
+  const [annImage, setAnnImage] = useState<string>("");
+  const [annExcerpt, setAnnExcerpt] = useState<string>("");
+  const [annUploading, setAnnUploading] = useState(false);
+  const [editAnn, setEditAnn] = useState<Row | null>(null);
 
   useEffect(() => {
     (async () => {
