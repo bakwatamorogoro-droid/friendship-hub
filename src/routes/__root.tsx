@@ -115,8 +115,18 @@ function RootShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+const FORM_ONLY_PATHS = ["/misiba", "/mikopo", "/changamoto"];
+
+function isFormOnlyPath(pathname: string) {
+  if (FORM_ONLY_PATHS.includes(pathname)) return true;
+  // /huduma/<slug> ni fomu ya idara; /huduma pekee ni orodha
+  return /^\/huduma\/[^/]+$/.test(pathname);
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const formOnly = isFormOnlyPath(pathname);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -126,12 +136,26 @@ function RootComponent() {
           <RouteLoadingBar />
           <PageLoadingOverlay />
           <MaintenanceGate />
-          <Header />
+          {formOnly ? (
+            <div className="border-b border-border bg-background/90 px-4 py-3 backdrop-blur">
+              <div className="mx-auto flex max-w-3xl items-center justify-between">
+                <Link
+                  to="/huduma"
+                  className="inline-flex items-center gap-2 rounded-lg border border-border bg-secondary px-3 py-1.5 text-sm font-semibold text-foreground/80 transition hover:border-primary hover:text-primary"
+                >
+                  ← Rudi kwa Huduma
+                </Link>
+                <span className="text-sm font-bold uppercase tracking-wide text-primary">MUMSO</span>
+              </div>
+            </div>
+          ) : (
+            <Header />
+          )}
           <main className="flex-1">
             <RouteFade />
           </main>
-          <Footer />
-          <MumAiWidget />
+          {!formOnly && <Footer />}
+          {!formOnly && <MumAiWidget />}
           <Toaster />
         </div>
       </LanguageProvider>
