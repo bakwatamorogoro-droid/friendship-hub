@@ -308,18 +308,31 @@ function PresidentBanner() {
   );
 }
 
-type NewsItem = { id: string; title: string; content: string; created_at: string };
+type NewsItem = {
+  id: string;
+  title: string;
+  content: string;
+  created_at: string;
+  image_url: string | null;
+  excerpt: string | null;
+};
 
 function NewsSection() {
   const { t, lang } = useI18n();
   const [items, setItems] = useState<NewsItem[]>([]);
   useEffect(() => {
-    supabase.from("announcements")
-      .select("id,title,content,created_at")
+    (supabase.from("announcements") as any)
+      .select("id,title,content,created_at,image_url,excerpt")
       .eq("published", true)
       .order("created_at", { ascending: false })
       .limit(6)
-      .then(({ data }) => setItems((data ?? []) as NewsItem[]));
+      .then(async ({ data }: any) => {
+        const rows = ((data ?? []) as NewsItem[]);
+        const withImgs = await Promise.all(
+          rows.map(async (r) => ({ ...r, image_url: await resolveStorageUrl(r.image_url) })),
+        );
+        setItems(withImgs);
+      });
   }, []);
 
   return (
@@ -333,7 +346,7 @@ function NewsSection() {
             <p className="mt-2 text-muted-foreground text-base md:text-lg">{t("home.news_sub")}</p>
           </div>
           <Link to="/matangazo">
-            <Button variant="outline" className="font-semibold">
+            <Button variant="outline" className="font-semibold btn-3d">
               {t("home.news_all")} <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </Link>
@@ -341,19 +354,43 @@ function NewsSection() {
         {items.length === 0 ? (
           <p className="text-muted-foreground">{t("home.news_empty")}</p>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {items.map((a, i) => (
               <Link
                 key={a.id}
-                to="/matangazo"
-                className={`group flex flex-col rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:-translate-y-1 hover:shadow-[var(--shadow-elegant)] ${i === 0 ? "lg:col-span-2 lg:flex-row lg:gap-6" : ""}`}
+                to="/matangazo/$id"
+                params={{ id: a.id }}
+                className={`group digital-card flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition hover:-translate-y-1 hover:shadow-[var(--shadow-elegant)] ${i === 0 ? "sm:col-span-2" : ""}`}
               >
-                <div className="flex-1">
-                  <span className="inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-primary">
+                <div className={`relative w-full overflow-hidden bg-primary/10 ${i === 0 ? "h-56 sm:h-72" : "h-44"}`}>
+                  {a.image_url ? (
+                    <img
+                      src={a.image_url}
+                      alt={a.title}
+                      loading="lazy"
+                      className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="grid h-full w-full place-items-center bg-gradient-to-br from-primary to-accent/60 text-primary-foreground">
+                      <Megaphone className="h-12 w-12 opacity-80" />
+                    </div>
+                  )}
+                  {i === 0 && (
+                    <span className="absolute left-3 top-3 rounded-full bg-accent px-3 py-1 text-xs font-bold uppercase tracking-wider text-accent-foreground">
+                      Jipya
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-1 flex-col p-5">
+                  <span className="text-xs font-bold uppercase tracking-wider text-primary">
                     {new Date(a.created_at).toLocaleDateString(lang === "sw" ? "sw-TZ" : "en-GB", { dateStyle: "long" })}
                   </span>
-                  <h3 className="mt-3 text-xl font-bold text-foreground group-hover:text-primary transition">{a.title}</h3>
-                  <p className="mt-2 text-base text-muted-foreground line-clamp-3 whitespace-pre-wrap">{a.content}</p>
+                  <h3 className={`mt-2 font-bold text-foreground group-hover:text-primary transition ${i === 0 ? "text-2xl" : "text-lg"}`}>
+                    {a.title}
+                  </h3>
+                  <p className="mt-2 line-clamp-3 text-sm text-muted-foreground whitespace-pre-wrap">
+                    {a.excerpt || a.content}
+                  </p>
                   <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary">
                     {t("home.read")} <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
                   </span>
@@ -367,6 +404,36 @@ function NewsSection() {
   );
 }
 
+function LinkCard({ l }: { l: any }) {
+  const img = useResolvedUrl(l.image_url);
+  return (
+    <a
+      href={l.url}
+      target="_blank"
+      rel="noreferrer noopener"
+      className="group digital-card flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] transition hover:-translate-y-1 hover:border-primary hover:shadow-[var(--shadow-elegant)]"
+    >
+      <div className="relative h-36 w-full overflow-hidden">
+        {img ? (
+          <img src={img} alt={l.label} loading="lazy" className="h-full w-full object-cover transition duration-700 group-hover:scale-105" />
+        ) : (
+          <div className="grid h-full w-full place-items-center bg-gradient-to-br from-primary via-primary to-accent/70 text-primary-foreground">
+            <LinkIcon className="h-10 w-10 opacity-85" />
+          </div>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" />
+      </div>
+      <div className="flex items-center justify-between gap-3 p-5">
+        <div className="min-w-0">
+          <p className="truncate text-base font-semibold text-foreground group-hover:text-primary transition">{l.label}</p>
+          {l.description && <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{l.description}</p>}
+        </div>
+        <ExternalLink className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-primary" />
+      </div>
+    </a>
+  );
+}
+
 function LinksSection() {
   const links = useOfficialLinks();
   const { t } = useI18n();
@@ -377,23 +444,9 @@ function LinksSection() {
         <h2 className="text-3xl md:text-4xl font-bold text-foreground">{t("home.links")}</h2>
         <p className="mt-2 text-muted-foreground text-base md:text-lg">{t("home.links_sub")}</p>
       </div>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {links.map((l) => (
-          <a
-            key={l.id}
-            href={l.url}
-            target="_blank"
-            rel="noreferrer noopener"
-            className="group flex items-center justify-between gap-3 rounded-2xl border border-border bg-card px-5 py-4 shadow-[var(--shadow-card)] transition hover:-translate-y-0.5 hover:border-primary hover:shadow-[var(--shadow-elegant)]"
-          >
-            <span className="flex items-center gap-3 min-w-0">
-              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition">
-                <LinkIcon className="h-5 w-5" />
-              </span>
-              <span className="truncate text-base font-semibold text-foreground group-hover:text-primary transition">{l.label}</span>
-            </span>
-            <ExternalLink className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-primary" />
-          </a>
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {links.map((l: any) => (
+          <LinkCard key={l.id} l={l} />
         ))}
       </div>
     </section>

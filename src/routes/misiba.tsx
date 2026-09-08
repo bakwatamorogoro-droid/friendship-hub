@@ -1,13 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
-import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { showStatus } from "@/lib/status";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { HeartCrack } from "lucide-react";
+import { Countdown } from "@/components/Countdown";
+import { useServiceDeadline } from "@/lib/use-deadline";
 
 export const Route = createFileRoute("/misiba")({
   head: () => ({
@@ -46,14 +48,16 @@ function MisibaPage() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const parsed = schema.safeParse(form);
-    if (!parsed.success) { toast.error("Tafadhali jaza taarifa zote kwa usahihi."); return; }
+    if (!parsed.success) { showStatus("error", "Tafadhali jaza taarifa zote kwa usahihi."); return; }
     setLoading(true);
     const { error } = await supabase.from("deaths").insert(parsed.data);
     setLoading(false);
-    if (error) { toast.error("Hitilafu: " + error.message); return; }
-    toast.success("Taarifa imepokelewa. Tunakupa pole.");
+    if (error) { showStatus("error", "Hitilafu: " + error.message); return; }
+    showStatus("success", "Taarifa imepokelewa. Tunakupa pole.");
     setForm(empty);
   };
+
+  const dl = useServiceDeadline("misiba");
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
@@ -65,6 +69,8 @@ function MisibaPage() {
           Jaza fomu hii na taarifa yako itafika kwa uongozi wa MUMSO moja kwa moja.
         </p>
       </div>
+
+      <Countdown deadline={dl?.deadline_at} note={dl?.deadline_note} className="mt-6" />
 
       <form onSubmit={submit} className="digital-card panel-3d mt-8 p-6 space-y-4">
         <div className="grid gap-4 md:grid-cols-2">

@@ -23,6 +23,7 @@ import { Route as MisibaRouteImport } from './routes/misiba'
 import { Route as PublicRouteImport } from './routes/public'
 import { Route as HudumaIndexRouteImport } from './routes/huduma.index'
 import { Route as HudumaSlugRouteImport } from './routes/huduma.$slug'
+import { Route as MatangazoIdRouteImport } from './routes/matangazo.$id'
 import { Route as ViongoziIndexRouteImport } from './routes/viongozi.index'
 import { Route as ViongoziSlugRouteImport } from './routes/viongozi.$slug'
 import { Route as ApiPublicBootstrapAdminRouteImport } from './routes/api/public/bootstrap-admin'
@@ -97,6 +98,11 @@ const HudumaSlugRoute = HudumaSlugRouteImport.update({
   path: '/huduma/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MatangazoIdRoute = MatangazoIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => MatangazoRoute,
+} as any)
 const ViongoziIndexRoute = ViongoziIndexRouteImport.update({
   id: '/viongozi/',
   path: '/viongozi/',
@@ -122,11 +128,12 @@ export interface FileRoutesByFullPath {
   '/jisajili-kiongozi': typeof JisajiliKiongoziRoute
   '/login': typeof LoginRoute
   '/mahafa': typeof MahafaRoute
-  '/matangazo': typeof MatangazoRoute
+  '/matangazo': typeof MatangazoRouteWithChildren
   '/mikopo': typeof MikopoRoute
   '/misiba': typeof MisibaRoute
   '/public': typeof PublicRoute
   '/huduma/$slug': typeof HudumaSlugRoute
+  '/matangazo/$id': typeof MatangazoIdRoute
   '/viongozi/$slug': typeof ViongoziSlugRoute
   '/huduma/': typeof HudumaIndexRoute
   '/viongozi/': typeof ViongoziIndexRoute
@@ -141,11 +148,12 @@ export interface FileRoutesByTo {
   '/jisajili-kiongozi': typeof JisajiliKiongoziRoute
   '/login': typeof LoginRoute
   '/mahafa': typeof MahafaRoute
-  '/matangazo': typeof MatangazoRoute
+  '/matangazo': typeof MatangazoRouteWithChildren
   '/mikopo': typeof MikopoRoute
   '/misiba': typeof MisibaRoute
   '/public': typeof PublicRoute
   '/huduma/$slug': typeof HudumaSlugRoute
+  '/matangazo/$id': typeof MatangazoIdRoute
   '/viongozi/$slug': typeof ViongoziSlugRoute
   '/huduma': typeof HudumaIndexRoute
   '/viongozi': typeof ViongoziIndexRoute
@@ -161,11 +169,12 @@ export interface FileRoutesById {
   '/jisajili-kiongozi': typeof JisajiliKiongoziRoute
   '/login': typeof LoginRoute
   '/mahafa': typeof MahafaRoute
-  '/matangazo': typeof MatangazoRoute
+  '/matangazo': typeof MatangazoRouteWithChildren
   '/mikopo': typeof MikopoRoute
   '/misiba': typeof MisibaRoute
   '/public': typeof PublicRoute
   '/huduma/$slug': typeof HudumaSlugRoute
+  '/matangazo/$id': typeof MatangazoIdRoute
   '/viongozi/$slug': typeof ViongoziSlugRoute
   '/huduma/': typeof HudumaIndexRoute
   '/viongozi/': typeof ViongoziIndexRoute
@@ -187,6 +196,7 @@ export interface FileRouteTypes {
     | '/misiba'
     | '/public'
     | '/huduma/$slug'
+    | '/matangazo/$id'
     | '/viongozi/$slug'
     | '/huduma/'
     | '/viongozi/'
@@ -206,6 +216,7 @@ export interface FileRouteTypes {
     | '/misiba'
     | '/public'
     | '/huduma/$slug'
+    | '/matangazo/$id'
     | '/viongozi/$slug'
     | '/huduma'
     | '/viongozi'
@@ -225,6 +236,7 @@ export interface FileRouteTypes {
     | '/misiba'
     | '/public'
     | '/huduma/$slug'
+    | '/matangazo/$id'
     | '/viongozi/$slug'
     | '/huduma/'
     | '/viongozi/'
@@ -240,7 +252,7 @@ export interface RootRouteChildren {
   JisajiliKiongoziRoute: typeof JisajiliKiongoziRoute
   LoginRoute: typeof LoginRoute
   MahafaRoute: typeof MahafaRoute
-  MatangazoRoute: typeof MatangazoRoute
+  MatangazoRoute: typeof MatangazoRouteWithChildren
   MikopoRoute: typeof MikopoRoute
   MisibaRoute: typeof MisibaRoute
   PublicRoute: typeof PublicRoute
@@ -351,6 +363,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HudumaSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/matangazo/$id': {
+      id: '/matangazo/$id'
+      path: '/$id'
+      fullPath: '/matangazo/$id'
+      preLoaderRoute: typeof MatangazoIdRouteImport
+      parentRoute: typeof MatangazoRoute
+    }
     '/viongozi/': {
       id: '/viongozi/'
       path: '/viongozi'
@@ -375,6 +394,18 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface MatangazoRouteChildren {
+  MatangazoIdRoute: typeof MatangazoIdRoute
+}
+
+const MatangazoRouteChildren: MatangazoRouteChildren = {
+  MatangazoIdRoute: MatangazoIdRoute,
+}
+
+const MatangazoRouteWithChildren = MatangazoRoute._addFileChildren(
+  MatangazoRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
@@ -384,7 +415,7 @@ const rootRouteChildren: RootRouteChildren = {
   JisajiliKiongoziRoute: JisajiliKiongoziRoute,
   LoginRoute: LoginRoute,
   MahafaRoute: MahafaRoute,
-  MatangazoRoute: MatangazoRoute,
+  MatangazoRoute: MatangazoRouteWithChildren,
   MikopoRoute: MikopoRoute,
   MisibaRoute: MisibaRoute,
   PublicRoute: PublicRoute,

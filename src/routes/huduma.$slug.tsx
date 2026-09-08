@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
-import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { showStatus } from "@/lib/status";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,6 +10,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Building2, Paperclip, X } from "lucide-react";
 import { useDepartmentBySlug, useDepartmentCategories, useFormCategories } from "@/lib/use-site-settings";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Countdown } from "@/components/Countdown";
+import { useDepartmentDeadline } from "@/lib/use-deadline";
 
 export const Route = createFileRoute("/huduma/$slug")({
   head: ({ params }) => ({
@@ -51,6 +53,7 @@ function DepartmentPage() {
   const deptCats = useDepartmentCategories(dept?.id);
   const legacyCats = useFormCategories(/mkopo|mikopo|fedha|loan/i.test(slug) ? "mikopo" : "huduma");
   const cats = deptCats.length > 0 ? deptCats : legacyCats;
+  const dl = useDepartmentDeadline(dept?.id);
 
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
@@ -62,10 +65,10 @@ function DepartmentPage() {
   const pickFile = (f: File | null) => {
     if (!f) { setFile(null); return; }
     if (!ALLOWED.includes(f.type)) {
-      toast.error("Faili linaruhusiwa: PDF, picha (JPG/PNG) au Word.");
+      showStatus("error", "Faili linaruhusiwa: PDF, picha (JPG/PNG) au Word.");
       return;
     }
-    if (f.size > MAX_SIZE) { toast.error("Faili ni kubwa mno (kikomo MB 25)."); return; }
+    if (f.size > MAX_SIZE) { showStatus("error", "Faili ni kubwa mno (kikomo MB 25)."); return; }
     setFile(f);
   };
 
@@ -74,11 +77,11 @@ function DepartmentPage() {
     if (!dept) return;
     const parsed = schema.safeParse(form);
     if (!parsed.success) {
-      toast.error(parsed.error.issues[0]?.message ?? "Tafadhali jaza taarifa zote.");
+      showStatus("error", parsed.error.issues[0]?.message ?? "Tafadhali jaza taarifa zote.");
       return;
     }
     if (!parsed.data.description && !file) {
-      toast.error("Andika maelezo ya huduma unayohitaji au ambatanisha faili.");
+      showStatus("error", "Andika maelezo ya huduma unayohitaji au ambatanisha faili.");
       return;
     }
     setLoading(true);
@@ -93,7 +96,7 @@ function DepartmentPage() {
       });
       if (upErr) {
         setLoading(false);
-        toast.error("Imeshindikana kupakia faili: " + upErr.message);
+        showStatus("error", "Imeshindikana kupakia faili: " + upErr.message);
         return;
       }
       attachment_url = supabase.storage.from("submissions").getPublicUrl(path).data.publicUrl;
@@ -113,8 +116,8 @@ function DepartmentPage() {
       attachment_name,
     });
     setLoading(false);
-    if (error) { toast.error("Hitilafu: " + error.message); return; }
-    toast.success(`Ombi lako limepokelewa na ${dept.name}.`);
+    if (error) { showStatus("error", "Hitilafu: " + error.message); return; }
+    showStatus("success", `Ombi lako limepokelewa na ${dept.name}.`);
     setForm({ full_name: "", registration_number: "", phone: "", gender: "", course: "", category: "", description: "" });
     setFile(null);
   };
@@ -129,6 +132,7 @@ function DepartmentPage() {
       </div>
     );
   }
+
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
@@ -152,6 +156,8 @@ function DepartmentPage() {
           </div>
         </div>
       </div>
+
+      <Countdown deadline={dl?.deadline_at} note={dl?.deadline_note} className="mt-6" />
 
       <form onSubmit={submit} className="digital-card mt-8 p-6 space-y-5">
         <p className="text-sm text-muted-foreground">

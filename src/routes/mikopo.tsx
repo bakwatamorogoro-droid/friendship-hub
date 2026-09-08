@@ -1,14 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
-import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { showStatus } from "@/lib/status";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useFormCategories } from "@/lib/use-site-settings";
+import { Countdown } from "@/components/Countdown";
+import { useServiceDeadline } from "@/lib/use-deadline";
 
 export const Route = createFileRoute("/mikopo")({
   head: () => ({
@@ -47,14 +49,16 @@ function MikopoPage() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const parsed = schema.safeParse(form);
-    if (!parsed.success) { toast.error(parsed.error.issues[0]?.message ?? "Tafadhali jaza taarifa zote kwa usahihi."); return; }
+    if (!parsed.success) { showStatus("error", parsed.error.issues[0]?.message ?? "Tafadhali jaza taarifa zote kwa usahihi."); return; }
     setLoading(true);
     const { error } = await supabase.from("loan_requests").insert({ ...parsed.data, email: "" });
     setLoading(false);
-    if (error) { toast.error("Hitilafu: " + error.message); return; }
-    toast.success("Ombi lako limepokelewa. Tutawasiliana nawe.");
+    if (error) { showStatus("error", "Hitilafu: " + error.message); return; }
+    showStatus("success", "Ombi lako limepokelewa. Tutawasiliana nawe.");
     setForm({ full_name: "", form_four_index: "", registration_number: "", course: "", year_of_study: "", phone: "", problem_type: "", problem_description: "" });
   };
+
+  const dl = useServiceDeadline("mikopo");
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
@@ -62,6 +66,8 @@ function MikopoPage() {
         <h1 className="text-3xl md:text-4xl font-bold relative z-10">Huduma ya Mikopo</h1>
         <p className="mt-2 text-primary-foreground/85 relative z-10">Jaza fomu hii kuomba huduma yoyote inayohusu mkopo wako wa HESLB.</p>
       </div>
+
+      <Countdown deadline={dl?.deadline_at} note={dl?.deadline_note} className="mt-6" />
 
       <form onSubmit={submit} className="digital-card mt-8 p-6 space-y-5">
         <div className="space-y-2 digital-field">

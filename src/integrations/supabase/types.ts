@@ -14,30 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_knowledge: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          kind: string
+          published: boolean
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          kind?: string
+          published?: boolean
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          published?: boolean
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       announcements: {
         Row: {
           author_id: string | null
           content: string
           created_at: string
+          excerpt: string | null
           id: string
+          image_url: string | null
           published: boolean
           title: string
+          updated_at: string
         }
         Insert: {
           author_id?: string | null
           content: string
           created_at?: string
+          excerpt?: string | null
           id?: string
+          image_url?: string | null
           published?: boolean
           title: string
+          updated_at?: string
         }
         Update: {
           author_id?: string | null
           content?: string
           created_at?: string
+          excerpt?: string | null
           id?: string
+          image_url?: string | null
           published?: boolean
           title?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -205,9 +244,12 @@ export type Database = {
         Row: {
           active: boolean
           created_at: string
+          deadline_at: string | null
+          deadline_note: string | null
           description: string | null
           icon: string | null
           id: string
+          image_url: string | null
           leader_contact: string | null
           leader_name: string | null
           name: string
@@ -218,9 +260,12 @@ export type Database = {
         Insert: {
           active?: boolean
           created_at?: string
+          deadline_at?: string | null
+          deadline_note?: string | null
           description?: string | null
           icon?: string | null
           id?: string
+          image_url?: string | null
           leader_contact?: string | null
           leader_name?: string | null
           name: string
@@ -231,9 +276,12 @@ export type Database = {
         Update: {
           active?: boolean
           created_at?: string
+          deadline_at?: string | null
+          deadline_note?: string | null
           description?: string | null
           icon?: string | null
           id?: string
+          image_url?: string | null
           leader_contact?: string | null
           leader_name?: string | null
           name?: string
@@ -494,7 +542,9 @@ export type Database = {
         Row: {
           active: boolean
           created_at: string
+          description: string | null
           id: string
+          image_url: string | null
           label: string
           sort_order: number
           updated_at: string
@@ -503,7 +553,9 @@ export type Database = {
         Insert: {
           active?: boolean
           created_at?: string
+          description?: string | null
           id?: string
+          image_url?: string | null
           label: string
           sort_order?: number
           updated_at?: string
@@ -512,7 +564,9 @@ export type Database = {
         Update: {
           active?: boolean
           created_at?: string
+          description?: string | null
           id?: string
+          image_url?: string | null
           label?: string
           sort_order?: number
           updated_at?: string
@@ -546,19 +600,28 @@ export type Database = {
       }
       service_status: {
         Row: {
+          deadline_at: string | null
+          deadline_note: string | null
           enabled: boolean
+          image_url: string | null
           key: string
           label: string
           updated_at: string
         }
         Insert: {
+          deadline_at?: string | null
+          deadline_note?: string | null
           enabled?: boolean
+          image_url?: string | null
           key: string
           label: string
           updated_at?: string
         }
         Update: {
+          deadline_at?: string | null
+          deadline_note?: string | null
           enabled?: boolean
+          image_url?: string | null
           key?: string
           label?: string
           updated_at?: string
