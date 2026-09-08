@@ -55,7 +55,19 @@ export function Footer() {
       </div>
       <div className="border-t border-white/10 py-4 text-center text-xs opacity-90 space-y-1 px-4">
         <div>© {new Date().getFullYear()} Muslim University of Morogoro Students Organization (MUMSO). Haki zote zimehifadhiwa.</div>
-        <div className="text-[11px] opacity-80">Designed &amp; Developed by <span className="font-semibold">Viwango</span></div>
+        <div className="text-[11px] opacity-80">
+          Designed &amp; Developed by <span className="font-semibold">Viwango</span>
+          <Link
+            to="/login"
+            aria-label="Mfumo"
+            title="Mfumo"
+            className="ml-2 select-none text-white/20 transition hover:text-white/70"
+          >
+            ·
+          </Link>
+        </div>
+      </div>
+
       </div>
     </footer>
   );
