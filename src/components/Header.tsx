@@ -98,12 +98,8 @@ export function Header() {
           </nav>
           <div className="flex items-center gap-2 justify-end">
             <LangToggle />
-            {userId ? (
-              <Link to="/admin"><Button size="sm">{t("nav.dashboard")}</Button></Link>
-            ) : (
-              <Link to="/login"><Button size="sm">{t("nav.login")}</Button></Link>
-            )}
           </div>
+
         </div>
 
 
@@ -131,9 +127,12 @@ export function Header() {
               {t(n.key)}
             </Link>
           ))}
-          <Link to={userId ? "/admin" : "/login"} onClick={() => setOpen(false)} className="block">
-            <Button className="w-full" size="sm">{userId ? t("nav.dashboard") : t("nav.login")}</Button>
-          </Link>
+          {userId && (
+            <Link to="/admin" onClick={() => setOpen(false)} className="block">
+              <Button className="w-full" size="sm">{t("nav.dashboard")}</Button>
+            </Link>
+          )}
+
         </div>
       )}
       <AnnouncementsTicker />

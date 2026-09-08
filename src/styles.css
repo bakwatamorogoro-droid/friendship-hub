@@ -362,3 +362,91 @@
 /* Ukubwa wa maandishi wa mfumo mzima (kidogo makubwa) */
 html { font-size: 17px; }
 @media (max-width: 640px) { html { font-size: 16px; } }
+
+/* ============ Muonekano wa 3D wa kisasa (mfumo mzima) ============ */
+:root {
+  --d3-light: oklch(1 0 0 / 0.75);
+  --d3-shadow: oklch(0.25 0.05 150 / 0.18);
+  --d3-shadow-strong: oklch(0.25 0.05 150 / 0.28);
+}
+
+.panel-3d {
+  position: relative;
+  background: linear-gradient(180deg, color-mix(in oklab, var(--card) 96%, var(--primary)), var(--card));
+  border: 1px solid color-mix(in oklab, var(--border) 70%, var(--primary));
+  box-shadow:
+    0 1px 0 var(--d3-light) inset,
+    0 -2px 0 color-mix(in oklab, var(--primary) 10%, transparent) inset,
+    0 18px 38px -22px var(--d3-shadow-strong),
+    0 6px 14px -10px var(--d3-shadow);
+  transition: transform .25s cubic-bezier(.2,.9,.25,1), box-shadow .25s;
+}
+.panel-3d:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 1px 0 var(--d3-light) inset,
+    0 24px 48px -24px var(--d3-shadow-strong),
+    0 10px 18px -12px var(--d3-shadow);
+}
+
+.hero-3d {
+  box-shadow:
+    0 1px 0 oklch(1 0 0 / 0.25) inset,
+    0 26px 50px -26px var(--d3-shadow-strong);
+  transform: perspective(1200px) rotateX(0.6deg);
+}
+
+.btn-3d {
+  box-shadow:
+    0 1px 0 oklch(1 0 0 / 0.35) inset,
+    0 6px 0 -2px color-mix(in oklab, var(--primary) 40%, black),
+    0 12px 22px -12px var(--d3-shadow-strong);
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.btn-3d:hover { transform: translateY(-1px); }
+.btn-3d:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 -1px color-mix(in oklab, var(--primary) 40%, black), 0 6px 12px -8px var(--d3-shadow);
+}
+
+/* Lift menu bar ya kisasa (paneli za viongozi & menejimenti) */
+.lift-menu {
+  background: linear-gradient(180deg, color-mix(in oklab, var(--card) 92%, var(--primary)), var(--card));
+  border: 1px solid color-mix(in oklab, var(--border) 60%, var(--primary));
+  box-shadow:
+    0 1px 0 var(--d3-light) inset,
+    0 20px 40px -26px var(--d3-shadow-strong);
+  backdrop-filter: blur(8px);
+}
+.lift-menu-item {
+  position: relative;
+  border-radius: 0.85rem;
+  padding: 0.6rem 0.8rem;
+  font-weight: 500;
+  transition: transform .18s cubic-bezier(.2,.9,.25,1), box-shadow .18s, background-color .18s;
+}
+.lift-menu-item:hover {
+  transform: translateX(3px) translateY(-1px);
+  background: color-mix(in oklab, var(--primary) 10%, transparent);
+  box-shadow: 0 8px 16px -12px var(--d3-shadow-strong);
+}
+.lift-menu-item[data-state="active"] {
+  transform: translateY(-2px);
+  box-shadow:
+    0 1px 0 oklch(1 0 0 / 0.3) inset,
+    0 8px 0 -4px color-mix(in oklab, var(--primary) 45%, black),
+    0 14px 26px -14px var(--d3-shadow-strong);
+}
+
+/* 3D kwa kadi na fomu zilizopo mfumo mzima */
+.digital-card {
+  box-shadow:
+    0 12px 40px -16px var(--form-blue-glow),
+    inset 0 1px 0 oklch(1 0 0 / 0.6),
+    0 22px 44px -26px var(--d3-shadow-strong);
+  transition: transform .25s cubic-bezier(.2,.9,.25,1), box-shadow .25s;
+}
+.digital-card:hover { transform: translateY(-3px); }
+.digital-page-hero {
+  box-shadow: 0 26px 50px -28px var(--d3-shadow-strong), inset 0 1px 0 oklch(1 0 0 / 0.25);
+}

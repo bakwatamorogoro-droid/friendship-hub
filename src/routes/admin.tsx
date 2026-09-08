@@ -438,37 +438,49 @@ function AdminPage() {
     );
   }
 
+  const menuCls =
+    "lift-menu-item justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground";
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-10">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+      <div className="panel-3d flex flex-wrap items-center justify-between gap-4 rounded-2xl p-5">
+        <div>
+          <h1 className="text-3xl font-bold">{isAdmin ? "Management System" : "Paneli ya Kiongozi"}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {isAdmin
+              ? "Menejimenti inadhibiti mfumo wote na kuidhinisha viongozi."
+              : "Hii ni paneli yako binafsi — unaona maombi ya idara yako pekee."}
+          </p>
+        </div>
         <div className="flex gap-2">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Tafuta..." className="pl-9 w-64" />
           </div>
-          <Button variant="outline" onClick={signOut}><LogOut className="mr-2 h-4 w-4" />Toka</Button>
+          <Button variant="outline" className="btn-3d" onClick={signOut}><LogOut className="mr-2 h-4 w-4" />Toka</Button>
         </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} orientation="vertical" className="mt-6 flex flex-col lg:flex-row gap-6 items-start">
-        <TabsList className="flex lg:flex-col h-auto w-full lg:w-60 shrink-0 items-stretch justify-start gap-1 bg-card border border-border rounded-xl p-2 overflow-x-auto lg:overflow-visible lg:sticky lg:top-24">
-          <TabsTrigger value="deptsubs" className="justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Huduma za Wanafunzi ({deptSubs.length})</TabsTrigger>
-          {isAdmin && <TabsTrigger value="challenges" className="justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Maombi ya Huduma ({challenges.length})</TabsTrigger>}
-          {isAdmin && <TabsTrigger value="loans" className="justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Mikopo ({loans.length})</TabsTrigger>}
-          {isAdmin && <TabsTrigger value="deaths" className="justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Misiba ({deaths.length})</TabsTrigger>}
-          <TabsTrigger value="announce" className="justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Tangaza</TabsTrigger>
-          {isAdmin && <TabsTrigger value="banner" className="justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Banner</TabsTrigger>}
-          <TabsTrigger value="departments" className="justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">{isAdmin ? `Idara (${depts.length})` : "Wizara Yangu"}</TabsTrigger>
-          {isAdmin && <TabsTrigger value="graduations" className="justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Mahafali ({grads.length})</TabsTrigger>}
-          {isAdmin && <TabsTrigger value="settings" className="justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Mawasiliano</TabsTrigger>}
-          {isAdmin && <TabsTrigger value="links" className="justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Tovuti Muhimu ({links.length})</TabsTrigger>}
-          {isAdmin && <TabsTrigger value="services" className="justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Huduma</TabsTrigger>}
-          <TabsTrigger value="categories" className="justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Fomu za Idara ({cats.length})</TabsTrigger>
-          {isAdmin && <TabsTrigger value="users" className="justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Watumiaji</TabsTrigger>}
-          {isAdmin && <TabsTrigger value="leaders" className="justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Viongozi</TabsTrigger>}
-          <TabsTrigger value="password" className="justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Nenosiri</TabsTrigger>
+        <TabsList className="lift-menu flex lg:flex-col h-auto w-full lg:w-64 shrink-0 items-stretch justify-start gap-1.5 rounded-2xl p-2.5 overflow-x-auto lg:overflow-visible lg:sticky lg:top-24">
+          <TabsTrigger value="deptsubs" className={menuCls}>Huduma za Wanafunzi ({deptSubs.length})</TabsTrigger>
+          {isAdmin && <TabsTrigger value="challenges" className={menuCls}>Maombi ya Huduma ({challenges.length})</TabsTrigger>}
+          {isAdmin && <TabsTrigger value="loans" className={menuCls}>Mikopo ({loans.length})</TabsTrigger>}
+          {isAdmin && <TabsTrigger value="deaths" className={menuCls}>Misiba ({deaths.length})</TabsTrigger>}
+          <TabsTrigger value="announce" className={menuCls}>Tangaza</TabsTrigger>
+          {isAdmin && <TabsTrigger value="banner" className={menuCls}>Banner</TabsTrigger>}
+          <TabsTrigger value="departments" className={menuCls}>{isAdmin ? `Idara (${depts.length})` : "Wizara Yangu"}</TabsTrigger>
+          {isAdmin && <TabsTrigger value="graduations" className={menuCls}>Mahafali ({grads.length})</TabsTrigger>}
+          {isAdmin && <TabsTrigger value="settings" className={menuCls}>Mawasiliano</TabsTrigger>}
+          {isAdmin && <TabsTrigger value="links" className={menuCls}>Tovuti Muhimu ({links.length})</TabsTrigger>}
+          {isAdmin && <TabsTrigger value="services" className={menuCls}>Huduma</TabsTrigger>}
+          <TabsTrigger value="categories" className={menuCls}>Fomu za Idara ({cats.length})</TabsTrigger>
+          {isAdmin && <TabsTrigger value="users" className={menuCls}>Watumiaji</TabsTrigger>}
+          {isAdmin && <TabsTrigger value="leaders" className={menuCls}>Viongozi</TabsTrigger>}
+          {isAdmin && <TabsTrigger value="leaderapps" className={menuCls}>Maombi ya Viongozi ({leaderApps.filter((a: any) => a.status === "pending").length})</TabsTrigger>}
+          <TabsTrigger value="password" className={menuCls}>Nenosiri</TabsTrigger>
         </TabsList>
+
         <div className="flex-1 min-w-0 w-full">
 
         <TabsContent value="challenges">
@@ -963,6 +975,39 @@ function AdminPage() {
         {isAdmin && (
           <TabsContent value="leaders">
             <LeadersManager />
+          </TabsContent>
+        )}
+
+        {isAdmin && (
+          <TabsContent value="leaderapps">
+            <div className="mt-6 max-w-4xl space-y-4">
+              <div className="panel-3d rounded-2xl p-5">
+                <h2 className="font-semibold text-lg">Maombi ya Usajili wa Viongozi</h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Hakuna uthibitisho wa barua pepe — Menejimenti ndiyo inaidhinisha. Baada ya kuidhinisha,
+                  kiongozi anaingia kwa REG namba na nenosiri lake na anapata paneli yake.
+                </p>
+              </div>
+              {leaderApps.length === 0 && <p className="text-sm text-muted-foreground">Hakuna maombi bado.</p>}
+              {leaderApps.map((a: any) => (
+                <div key={a.id} className="panel-3d flex flex-wrap items-center justify-between gap-3 rounded-2xl p-5">
+                  <div className="min-w-0">
+                    <p className="font-semibold">{a.full_name} — {a.position}</p>
+                    <p className="text-xs text-muted-foreground">
+                      REG: {a.registration_number} • Simu: {a.phone ?? "-"} •{" "}
+                      Idara: {depts.find((d) => d.id === a.department_id)?.name ?? "—"}
+                    </p>
+                    <p className="mt-1 text-xs font-medium text-primary">Hali: {a.status}</p>
+                  </div>
+                  {a.status === "pending" && (
+                    <div className="flex gap-2">
+                      <Button size="sm" className="btn-3d" onClick={() => onApproveLeader(a.id)}>Idhinisha</Button>
+                      <Button size="sm" variant="outline" className="btn-3d" onClick={() => onRejectLeader(a.id)}>Kataa</Button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </TabsContent>
         )}
 
