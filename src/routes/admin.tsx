@@ -631,12 +631,57 @@ function AdminPage() {
         </TabsContent>
 
         <TabsContent value="announce">
-          <form onSubmit={postAnnouncement} className="max-w-2xl space-y-4 mt-6 rounded-xl border border-border bg-card p-6">
-            <h2 className="font-semibold text-lg">Chapisha Tangazo</h2>
-            <div className="space-y-2"><Label>Kichwa</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} required maxLength={200} /></div>
-            <div className="space-y-2"><Label>Maudhui</Label><Textarea value={content} onChange={(e) => setContent(e.target.value)} required rows={8} /></div>
-            <Button type="submit">Chapisha</Button>
-          </form>
+          <div className="max-w-3xl mt-6 space-y-6">
+            <form onSubmit={postAnnouncement} className="space-y-4 rounded-xl border border-border bg-card p-6">
+              <h2 className="font-semibold text-lg">{editAnn ? "Hariri Tangazo" : "Chapisha Tangazo"}</h2>
+              <div className="space-y-2"><Label>Kichwa</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} required maxLength={200} /></div>
+              <div className="space-y-2"><Label>Muhtasari mfupi (hiari)</Label><Input value={annExcerpt} onChange={(e) => setAnnExcerpt(e.target.value)} maxLength={300} /></div>
+              <div className="space-y-2">
+                <Label>Picha ya tangazo</Label>
+                <div className="flex items-center gap-3">
+                  <Input type="file" accept="image/*" disabled={annUploading}
+                    onChange={async (e) => {
+                      const f = e.target.files?.[0]; if (!f) return;
+                      setAnnUploading(true);
+                      const url = await uploadAsset(f, "announcement");
+                      setAnnUploading(false);
+                      if (url) setAnnImage(url);
+                    }} />
+                  {annImage && <img src={annImage} alt="" className="h-14 w-14 rounded-lg border object-cover" />}
+                </div>
+              </div>
+              <div className="space-y-2"><Label>Maudhui yote</Label><Textarea value={content} onChange={(e) => setContent(e.target.value)} required rows={8} /></div>
+              <div className="flex gap-2">
+                <Button type="submit" disabled={annUploading}>{editAnn ? "Hifadhi Mabadiliko" : "Chapisha"}</Button>
+                {editAnn && <Button type="button" variant="outline" onClick={cancelEditAnn}>Ghairi</Button>}
+              </div>
+            </form>
+
+            <div className="space-y-3">
+              <h3 className="font-semibold">Matangazo Yote ({anns.length})</h3>
+              {anns.length === 0 && <p className="text-sm text-muted-foreground">Hakuna matangazo bado.</p>}
+              {anns.map((a) => (
+                <div key={a.id} className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card p-4">
+                  {a.image_url
+                    ? <img src={a.image_url} alt="" className="h-16 w-24 rounded-lg border object-cover" />
+                    : <span className="grid h-16 w-24 place-items-center rounded-lg bg-primary/10 text-xs text-primary">Hakuna picha</span>}
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold truncate">{a.title}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(a.created_at).toLocaleDateString("sw-TZ", { dateStyle: "long" })} · {a.published ? "Imechapishwa" : "Rasimu"}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch checked={!!a.published} onCheckedChange={(v) => toggleAnnPublished(a.id, v)} />
+                    <Button size="sm" variant="outline" onClick={() => startEditAnn(a)}>Hariri</Button>
+                    <Button size="icon" variant="ghost" onClick={() => deleteAnn(a.id)}>
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </TabsContent>
 
         <TabsContent value="banner">
@@ -845,6 +890,24 @@ function AdminPage() {
                       <Input defaultValue={d.leader_name ?? ""} onBlur={(e) => updateDeptField(d.id, "leader_name", e.target.value)} /></div>
                     <div className="space-y-1"><Label className="text-xs">Mawasiliano</Label>
                       <Input defaultValue={d.leader_contact ?? ""} onBlur={(e) => updateDeptField(d.id, "leader_contact", e.target.value)} /></div>
+                    <div className="space-y-1"><Label className="text-xs">Muda wa mwisho (countdown)</Label>
+                      <Input type="datetime-local"
+                        defaultValue={d.deadline_at ? new Date(d.deadline_at).toISOString().slice(0, 16) : ""}
+                        onBlur={(e) => saveDeadline("departments", "id", d.id, "deadline_at", e.target.value)} /></div>
+                    <div className="space-y-1"><Label className="text-xs">Maelezo ya muda</Label>
+                      <Input defaultValue={d.deadline_note ?? ""}
+                        onBlur={(e) => saveDeadline("departments", "id", d.id, "deadline_note", e.target.value)} /></div>
+                    <div className="space-y-1 md:col-span-2"><Label className="text-xs">Picha ya idara</Label>
+                      <div className="flex items-center gap-2">
+                        <Input type="file" accept="image/*"
+                          onChange={async (e) => {
+                            const f = e.target.files?.[0]; if (!f) return;
+                            const url = await uploadAsset(f, "dept");
+                            if (url) { await updateDeptField(d.id, "image_url", url); toast.success("Picha imehifadhiwa"); loadAll(); }
+                          }} />
+                        {d.image_url && <img src={d.image_url} alt="" className="h-10 w-10 rounded object-cover border" />}
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -936,6 +999,26 @@ function AdminPage() {
                   <Switch checked={s.enabled} onCheckedChange={(v) => toggleService(s.key, v)} />
                 </div>
               ))}
+              <div className="pt-4 space-y-3">
+                <h3 className="font-semibold">Muda wa Mwisho wa Kila Huduma</h3>
+                <p className="text-xs text-muted-foreground">Weka tarehe na saa ya mwisho — wanafunzi wataona siku, masaa, dakika na sekunde zilizobaki.</p>
+                {services.map((s) => (
+                  <div key={`dl-${s.key}`} className="grid gap-3 rounded-lg border border-border p-3 md:grid-cols-[1fr_1fr]">
+                    <div className="space-y-1">
+                      <Label className="text-xs">{s.label} — muda wa mwisho</Label>
+                      <Input type="datetime-local"
+                        defaultValue={s.deadline_at ? new Date(s.deadline_at).toISOString().slice(0, 16) : ""}
+                        onBlur={(e) => saveDeadline("service_status", "key", s.key, "deadline_at", e.target.value)} />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Maelezo ya muda</Label>
+                      <Input placeholder="Mf. Maombi yanafungwa saa 11 jioni"
+                        defaultValue={s.deadline_note ?? ""}
+                        onBlur={(e) => saveDeadline("service_status", "key", s.key, "deadline_note", e.target.value)} />
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </TabsContent>
@@ -1110,29 +1193,58 @@ function AdminPage() {
               <form onSubmit={addLink} className="rounded-xl border border-border bg-card p-6 space-y-4">
                 <div>
                   <h2 className="font-semibold text-lg">Tovuti Muhimu (Official Links)</h2>
-                  <p className="text-sm text-muted-foreground mt-1">Ongeza viungo vya tovuti rasmi (mfano: MUM website, HESLB, TCU). Vinaonekana kwenye footer ya tovuti.</p>
+                  <p className="text-sm text-muted-foreground mt-1">Ongeza viungo vya tovuti rasmi (mfano: MUM website, HESLB, TCU). Vinaonekana kama kadi zenye picha kwenye ukurasa wa nyumbani.</p>
                 </div>
-                <div className="grid gap-3 md:grid-cols-[1fr_1.5fr_auto]">
+                <div className="grid gap-3 md:grid-cols-2">
                   <Input placeholder="Jina la kiungo" value={newLink.label}
                     onChange={(e) => setNewLink({ ...newLink, label: e.target.value })} required />
                   <Input placeholder="https://mum.ac.tz" value={newLink.url}
                     onChange={(e) => setNewLink({ ...newLink, url: e.target.value })} required />
-                  <Button type="submit"><Plus className="mr-1 h-4 w-4" />Ongeza</Button>
+                  <Input placeholder="Maelezo mafupi (hiari)" value={newLink.description}
+                    onChange={(e) => setNewLink({ ...newLink, description: e.target.value })} />
+                  <div className="flex items-center gap-2">
+                    <Input type="file" accept="image/*"
+                      onChange={async (e) => {
+                        const f = e.target.files?.[0]; if (!f) return;
+                        const url = await uploadAsset(f, "link");
+                        if (url) setNewLink((p) => ({ ...p, image_url: url }));
+                      }} />
+                    {newLink.image_url && <img src={newLink.image_url} alt="" className="h-10 w-10 rounded object-cover border" />}
+                  </div>
                 </div>
+                <Button type="submit"><Plus className="mr-1 h-4 w-4" />Ongeza</Button>
               </form>
               <div className="space-y-2">
                 {links.length === 0 && <p className="text-sm text-muted-foreground">Hakuna viungo bado.</p>}
                 {links.map((l) => (
-                  <div key={l.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3">
-                    <div className="min-w-0">
-                      <p className={`font-medium truncate ${l.active ? "" : "line-through text-muted-foreground"}`}>{l.label}</p>
-                      <a href={l.url} target="_blank" rel="noreferrer noopener" className="text-xs text-primary hover:underline break-all">{l.url}</a>
+                  <div key={l.id} className="rounded-lg border border-border bg-card px-4 py-3">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div className="flex min-w-0 items-center gap-3">
+                        {l.image_url
+                          ? <img src={l.image_url} alt="" className="h-11 w-11 rounded-lg border object-cover" />
+                          : <span className="grid h-11 w-11 place-items-center rounded-lg bg-primary/10 text-primary text-xs font-bold">{(l.label ?? "?").slice(0, 2).toUpperCase()}</span>}
+                        <div className="min-w-0">
+                          <p className={`font-medium truncate ${l.active ? "" : "line-through text-muted-foreground"}`}>{l.label}</p>
+                          <a href={l.url} target="_blank" rel="noreferrer noopener" className="text-xs text-primary hover:underline break-all">{l.url}</a>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Switch checked={l.active} onCheckedChange={(v) => toggleLink(l.id, v)} />
+                        <Button size="icon" variant="ghost" onClick={() => deleteLink(l.id)}>
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Switch checked={l.active} onCheckedChange={(v) => toggleLink(l.id, v)} />
-                      <Button size="icon" variant="ghost" onClick={() => deleteLink(l.id)}>
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
+                    <div className="mt-3 grid gap-3 md:grid-cols-2">
+                      <div className="space-y-1"><Label className="text-xs">Maelezo</Label>
+                        <Input defaultValue={l.description ?? ""} onBlur={(e) => updateLinkField(l.id, "description", e.target.value || null)} /></div>
+                      <div className="space-y-1"><Label className="text-xs">Badilisha picha</Label>
+                        <Input type="file" accept="image/*"
+                          onChange={async (e) => {
+                            const f = e.target.files?.[0]; if (!f) return;
+                            const url = await uploadAsset(f, "link");
+                            if (url) { await updateLinkField(l.id, "image_url", url); toast.success("Picha imebadilishwa"); }
+                          }} /></div>
                     </div>
                   </div>
                 ))}
