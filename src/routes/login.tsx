@@ -55,43 +55,25 @@ function LoginPage() {
 
   return (
     <div className="mx-auto max-w-md px-4 py-16">
-      <div className="rounded-xl border border-border bg-card p-6 shadow-[var(--shadow-elegant)]">
+      <div className="panel-3d rounded-2xl p-6">
         <h1 className="text-2xl font-bold text-center">MUMSO Ingia</h1>
-        <p className="text-sm text-muted-foreground text-center mt-1">Kwa viongozi na wasimamizi.</p>
-        <Tabs defaultValue="signin" className="mt-6">
-          <TabsList className="grid grid-cols-2 w-full">
-            <TabsTrigger value="signin">Ingia</TabsTrigger>
-            <TabsTrigger value="signup">Jisajili</TabsTrigger>
-          </TabsList>
-          <TabsContent value="signin">
-            <form onSubmit={signIn} className="space-y-4 mt-4">
-              <div className="space-y-2"><Label>Email au REG Namba</Label><Input value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="admin@mfano.com au MUM/BA/2023/001" /></div>
-              <div className="space-y-2"><Label>Nenosiri</Label><Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required /></div>
-              <Button type="submit" className="w-full" disabled={loading}>{loading ? "..." : "Ingia"}</Button>
-              <p className="mt-2 flex flex-col items-center gap-2 text-center text-sm text-muted-foreground">
-                <span className="inline-flex items-center gap-2">
-                  <ShieldCheck className="h-4 w-4 text-primary" /> Viongozi wanathibitishwa na Menejimenti (Admin).
-                </span>
-                <Link to="/jisajili-kiongozi" className="font-semibold text-primary underline underline-offset-4">
-                  Jisajili kama Kiongozi
-                </Link>
-                <Link to="/fuatilia" className="text-primary underline underline-offset-4">
-                  Fuatilia Huduma yako
-                </Link>
-              </p>
-
-
-            </form>
-          </TabsContent>
-          <TabsContent value="signup">
-            <form onSubmit={signUp} className="space-y-4 mt-4">
-              <div className="space-y-2"><Label>Jina Kamili</Label><Input value={fullName} onChange={(e) => setFullName(e.target.value)} required /></div>
-              <div className="space-y-2"><Label>Email</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></div>
-              <div className="space-y-2"><Label>Nenosiri</Label><Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} /></div>
-              <Button type="submit" className="w-full" disabled={loading}>{loading ? "..." : "Jisajili"}</Button>
-            </form>
-          </TabsContent>
-        </Tabs>
+        <p className="text-sm text-muted-foreground text-center mt-1">Kwa viongozi na Menejimenti (Admin) pekee.</p>
+        <form onSubmit={signIn} className="space-y-4 mt-6">
+          <div className="space-y-2"><Label>Email au REG Namba</Label><Input value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="admin@mfano.com au MUM/BA/2023/001" /></div>
+          <div className="space-y-2"><Label>Nenosiri</Label><Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required /></div>
+          <Button type="submit" className="w-full btn-3d" disabled={loading}>{loading ? "..." : "Ingia"}</Button>
+          <p className="mt-2 flex flex-col items-center gap-2 text-center text-sm text-muted-foreground">
+            <span className="inline-flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4 text-primary" /> Akaunti zinathibitishwa na Menejimenti (Admin) — hakuna uthibitisho wa barua pepe.
+            </span>
+            <Link to="/jisajili-kiongozi" className="font-semibold text-primary underline underline-offset-4">
+              Jisajili kama Kiongozi
+            </Link>
+            <Link to="/fuatilia" className="text-primary underline underline-offset-4">
+              Fuatilia Huduma yako
+            </Link>
+          </p>
+        </form>
       </div>
     </div>
   );

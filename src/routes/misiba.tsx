@@ -96,26 +96,6 @@ function MisibaPage() {
         </Dialog>
       </div>
 
-      <div className="mt-10 space-y-4">
-        {list.length === 0 && <p className="text-center text-muted-foreground py-12">Hakuna taarifa za misiba kwa sasa.</p>}
-        {list.map((d) => (
-          <article key={d.id} className="rounded-xl border border-border bg-card p-6 shadow-[var(--shadow-card)]">
-            <div className="flex items-start gap-4">
-              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-destructive/10 text-destructive">
-                <HeartCrack className="h-6 w-6" />
-              </span>
-              <div className="flex-1">
-                <h3 className="font-semibold text-foreground">Marehemu {d.deceased_name}</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {d.relationship} wa <strong>{d.student_name}</strong> ({d.registration_number})
-                </p>
-                <p className="text-sm text-muted-foreground">Tarehe: {new Date(d.death_date).toLocaleDateString("sw-TZ")} • {d.location}</p>
-                {d.description && <p className="mt-3 text-sm text-foreground/80">{d.description}</p>}
-              </div>
-            </div>
-          </article>
-        ))}
-      </div>
     </div>
   );
 }
