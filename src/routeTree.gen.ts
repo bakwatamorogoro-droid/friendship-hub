@@ -9,72 +9,27 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as PublicRouteImport } from './routes/public'
-import { Route as MisibaRouteImport } from './routes/misiba'
-import { Route as MikopoRouteImport } from './routes/mikopo'
-import { Route as MatangazoRouteImport } from './routes/matangazo'
-import { Route as MahafaRouteImport } from './routes/mahafa'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as JisajiliKiongoziRouteImport } from './routes/jisajili-kiongozi'
-import { Route as FuatiliaRouteImport } from './routes/fuatilia'
-import { Route as ChangamotoRouteImport } from './routes/changamoto'
-import { Route as AdminRouteImport } from './routes/admin'
-import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ViongoziIndexRouteImport } from './routes/viongozi.index'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as ChangamotoRouteImport } from './routes/changamoto'
+import { Route as FuatiliaRouteImport } from './routes/fuatilia'
+import { Route as JisajiliKiongoziRouteImport } from './routes/jisajili-kiongozi'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as MahafaRouteImport } from './routes/mahafa'
+import { Route as MatangazoRouteImport } from './routes/matangazo'
+import { Route as MikopoRouteImport } from './routes/mikopo'
+import { Route as MisibaRouteImport } from './routes/misiba'
+import { Route as PublicRouteImport } from './routes/public'
 import { Route as HudumaIndexRouteImport } from './routes/huduma.index'
-import { Route as ViongoziSlugRouteImport } from './routes/viongozi.$slug'
 import { Route as HudumaSlugRouteImport } from './routes/huduma.$slug'
+import { Route as ViongoziIndexRouteImport } from './routes/viongozi.index'
+import { Route as ViongoziSlugRouteImport } from './routes/viongozi.$slug'
 import { Route as ApiPublicBootstrapAdminRouteImport } from './routes/api/public/bootstrap-admin'
 
-const PublicRoute = PublicRouteImport.update({
-  id: '/public',
-  path: '/public',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MisibaRoute = MisibaRouteImport.update({
-  id: '/misiba',
-  path: '/misiba',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MikopoRoute = MikopoRouteImport.update({
-  id: '/mikopo',
-  path: '/mikopo',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MatangazoRoute = MatangazoRouteImport.update({
-  id: '/matangazo',
-  path: '/matangazo',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MahafaRoute = MahafaRouteImport.update({
-  id: '/mahafa',
-  path: '/mahafa',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const JisajiliKiongoziRoute = JisajiliKiongoziRouteImport.update({
-  id: '/jisajili-kiongozi',
-  path: '/jisajili-kiongozi',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FuatiliaRoute = FuatiliaRouteImport.update({
-  id: '/fuatilia',
-  path: '/fuatilia',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ChangamotoRoute = ChangamotoRouteImport.update({
-  id: '/changamoto',
-  path: '/changamoto',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -82,14 +37,54 @@ const AboutRoute = AboutRouteImport.update({
   path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ViongoziIndexRoute = ViongoziIndexRouteImport.update({
-  id: '/viongozi/',
-  path: '/viongozi/',
+const ChangamotoRoute = ChangamotoRouteImport.update({
+  id: '/changamoto',
+  path: '/changamoto',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FuatiliaRoute = FuatiliaRouteImport.update({
+  id: '/fuatilia',
+  path: '/fuatilia',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JisajiliKiongoziRoute = JisajiliKiongoziRouteImport.update({
+  id: '/jisajili-kiongozi',
+  path: '/jisajili-kiongozi',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MahafaRoute = MahafaRouteImport.update({
+  id: '/mahafa',
+  path: '/mahafa',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MatangazoRoute = MatangazoRouteImport.update({
+  id: '/matangazo',
+  path: '/matangazo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MikopoRoute = MikopoRouteImport.update({
+  id: '/mikopo',
+  path: '/mikopo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MisibaRoute = MisibaRouteImport.update({
+  id: '/misiba',
+  path: '/misiba',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PublicRoute = PublicRouteImport.update({
+  id: '/public',
+  path: '/public',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HudumaIndexRoute = HudumaIndexRouteImport.update({
@@ -97,14 +92,19 @@ const HudumaIndexRoute = HudumaIndexRouteImport.update({
   path: '/huduma/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ViongoziSlugRoute = ViongoziSlugRouteImport.update({
-  id: '/viongozi/$slug',
-  path: '/viongozi/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const HudumaSlugRoute = HudumaSlugRouteImport.update({
   id: '/huduma/$slug',
   path: '/huduma/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ViongoziIndexRoute = ViongoziIndexRouteImport.update({
+  id: '/viongozi/',
+  path: '/viongozi/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ViongoziSlugRoute = ViongoziSlugRouteImport.update({
+  id: '/viongozi/$slug',
+  path: '/viongozi/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicBootstrapAdminRoute = ApiPublicBootstrapAdminRouteImport.update({
@@ -253,74 +253,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/public': {
-      id: '/public'
-      path: '/public'
-      fullPath: '/public'
-      preLoaderRoute: typeof PublicRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/misiba': {
-      id: '/misiba'
-      path: '/misiba'
-      fullPath: '/misiba'
-      preLoaderRoute: typeof MisibaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mikopo': {
-      id: '/mikopo'
-      path: '/mikopo'
-      fullPath: '/mikopo'
-      preLoaderRoute: typeof MikopoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/matangazo': {
-      id: '/matangazo'
-      path: '/matangazo'
-      fullPath: '/matangazo'
-      preLoaderRoute: typeof MatangazoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mahafa': {
-      id: '/mahafa'
-      path: '/mahafa'
-      fullPath: '/mahafa'
-      preLoaderRoute: typeof MahafaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/jisajili-kiongozi': {
-      id: '/jisajili-kiongozi'
-      path: '/jisajili-kiongozi'
-      fullPath: '/jisajili-kiongozi'
-      preLoaderRoute: typeof JisajiliKiongoziRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/fuatilia': {
-      id: '/fuatilia'
-      path: '/fuatilia'
-      fullPath: '/fuatilia'
-      preLoaderRoute: typeof FuatiliaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/changamoto': {
-      id: '/changamoto'
-      path: '/changamoto'
-      fullPath: '/changamoto'
-      preLoaderRoute: typeof ChangamotoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -330,18 +267,74 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/viongozi/': {
-      id: '/viongozi/'
-      path: '/viongozi'
-      fullPath: '/viongozi/'
-      preLoaderRoute: typeof ViongoziIndexRouteImport
+    '/changamoto': {
+      id: '/changamoto'
+      path: '/changamoto'
+      fullPath: '/changamoto'
+      preLoaderRoute: typeof ChangamotoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fuatilia': {
+      id: '/fuatilia'
+      path: '/fuatilia'
+      fullPath: '/fuatilia'
+      preLoaderRoute: typeof FuatiliaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/jisajili-kiongozi': {
+      id: '/jisajili-kiongozi'
+      path: '/jisajili-kiongozi'
+      fullPath: '/jisajili-kiongozi'
+      preLoaderRoute: typeof JisajiliKiongoziRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mahafa': {
+      id: '/mahafa'
+      path: '/mahafa'
+      fullPath: '/mahafa'
+      preLoaderRoute: typeof MahafaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/matangazo': {
+      id: '/matangazo'
+      path: '/matangazo'
+      fullPath: '/matangazo'
+      preLoaderRoute: typeof MatangazoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mikopo': {
+      id: '/mikopo'
+      path: '/mikopo'
+      fullPath: '/mikopo'
+      preLoaderRoute: typeof MikopoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/misiba': {
+      id: '/misiba'
+      path: '/misiba'
+      fullPath: '/misiba'
+      preLoaderRoute: typeof MisibaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/public': {
+      id: '/public'
+      path: '/public'
+      fullPath: '/public'
+      preLoaderRoute: typeof PublicRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/huduma/': {
@@ -351,18 +344,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HudumaIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/viongozi/$slug': {
-      id: '/viongozi/$slug'
-      path: '/viongozi/$slug'
-      fullPath: '/viongozi/$slug'
-      preLoaderRoute: typeof ViongoziSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/huduma/$slug': {
       id: '/huduma/$slug'
       path: '/huduma/$slug'
       fullPath: '/huduma/$slug'
       preLoaderRoute: typeof HudumaSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/viongozi/': {
+      id: '/viongozi/'
+      path: '/viongozi'
+      fullPath: '/viongozi/'
+      preLoaderRoute: typeof ViongoziIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/viongozi/$slug': {
+      id: '/viongozi/$slug'
+      path: '/viongozi/$slug'
+      fullPath: '/viongozi/$slug'
+      preLoaderRoute: typeof ViongoziSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/bootstrap-admin': {
