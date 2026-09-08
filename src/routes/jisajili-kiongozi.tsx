@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { z } from "zod";
-import { toast } from "sonner";
 import { ShieldCheck, UserPlus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { showStatus } from "@/lib/status";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -46,7 +46,7 @@ function LeaderSignupPage() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const parsed = schema.safeParse(form);
-    if (!parsed.success) { toast.error(parsed.error.issues[0]?.message ?? "Jaza taarifa zote"); return; }
+    if (!parsed.success) { showStatus("error", parsed.error.issues[0]?.message ?? "Jaza taarifa zote"); return; }
     setLoading(true);
     const { error } = await (supabase.from("leader_applications") as any).insert({
       full_name: parsed.data.full_name,
@@ -57,7 +57,7 @@ function LeaderSignupPage() {
       department_id: deptId || null,
     });
     setLoading(false);
-    if (error) { toast.error("Hitilafu: " + error.message); return; }
+    if (error) { showStatus("error", "Hitilafu: " + error.message); return; }
     setDone(true);
     setForm({ full_name: "", registration_number: "", position: "", phone: "", password: "" });
     setDeptId("");

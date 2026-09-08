@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
-import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { showStatus } from "@/lib/status";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -44,12 +44,12 @@ function ChangamotoPage() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const parsed = schema.safeParse(form);
-    if (!parsed.success) { toast.error("Tafadhali jaza taarifa zote kwa usahihi."); return; }
+    if (!parsed.success) { showStatus("error", "Tafadhali jaza taarifa zote kwa usahihi."); return; }
     setLoading(true);
     const { error } = await supabase.from("challenges").insert(parsed.data);
     setLoading(false);
-    if (error) { toast.error("Hitilafu: " + error.message); return; }
-    toast.success("Ombi lako la huduma limepokelewa. Asante!");
+    if (error) { showStatus("error", "Hitilafu: " + error.message); return; }
+    showStatus("success", "Ombi lako la huduma limepokelewa. Asante!");
     setForm({ full_name: "", registration_number: "", course: "", phone: "", challenge_type: "", description: "" });
   };
 
