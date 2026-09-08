@@ -113,6 +113,9 @@ function AdminPage() {
     setGrads(gr.data ?? []);
     setDeptSubs((ds as any)?.data ?? []);
     setLeaderApps((la as any)?.data ?? []);
+    const { data: an } = await (supabase.from("announcements") as any)
+      .select("*").order("created_at", { ascending: false });
+    setAnns((an as any) ?? []);
     const { data: lk } = await (supabase.from("official_links") as any)
       .select("*").order("sort_order", { ascending: true });
     setLinks((lk as any) ?? []);
