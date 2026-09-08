@@ -53,6 +53,7 @@ function DepartmentPage() {
   const deptCats = useDepartmentCategories(dept?.id);
   const legacyCats = useFormCategories(/mkopo|mikopo|fedha|loan/i.test(slug) ? "mikopo" : "huduma");
   const cats = deptCats.length > 0 ? deptCats : legacyCats;
+  const dl = useDepartmentDeadline(dept?.id);
 
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
@@ -132,7 +133,6 @@ function DepartmentPage() {
     );
   }
 
-  const dl = useDepartmentDeadline(dept?.id);
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
