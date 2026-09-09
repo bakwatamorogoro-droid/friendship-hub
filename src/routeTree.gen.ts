@@ -26,7 +26,6 @@ import { Route as HudumaSlugRouteImport } from './routes/huduma.$slug'
 import { Route as MatangazoIdRouteImport } from './routes/matangazo.$id'
 import { Route as ViongoziIndexRouteImport } from './routes/viongozi.index'
 import { Route as ViongoziSlugRouteImport } from './routes/viongozi.$slug'
-import { Route as ApiPublicBootstrapAdminRouteImport } from './routes/api/public/bootstrap-admin'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -113,11 +112,6 @@ const ViongoziSlugRoute = ViongoziSlugRouteImport.update({
   path: '/viongozi/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicBootstrapAdminRoute = ApiPublicBootstrapAdminRouteImport.update({
-  id: '/api/public/bootstrap-admin',
-  path: '/api/public/bootstrap-admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -137,7 +131,6 @@ export interface FileRoutesByFullPath {
   '/viongozi/$slug': typeof ViongoziSlugRoute
   '/huduma/': typeof HudumaIndexRoute
   '/viongozi/': typeof ViongoziIndexRoute
-  '/api/public/bootstrap-admin': typeof ApiPublicBootstrapAdminRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -157,7 +150,6 @@ export interface FileRoutesByTo {
   '/viongozi/$slug': typeof ViongoziSlugRoute
   '/huduma': typeof HudumaIndexRoute
   '/viongozi': typeof ViongoziIndexRoute
-  '/api/public/bootstrap-admin': typeof ApiPublicBootstrapAdminRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -178,7 +170,6 @@ export interface FileRoutesById {
   '/viongozi/$slug': typeof ViongoziSlugRoute
   '/huduma/': typeof HudumaIndexRoute
   '/viongozi/': typeof ViongoziIndexRoute
-  '/api/public/bootstrap-admin': typeof ApiPublicBootstrapAdminRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -200,7 +191,6 @@ export interface FileRouteTypes {
     | '/viongozi/$slug'
     | '/huduma/'
     | '/viongozi/'
-    | '/api/public/bootstrap-admin'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -220,7 +210,6 @@ export interface FileRouteTypes {
     | '/viongozi/$slug'
     | '/huduma'
     | '/viongozi'
-    | '/api/public/bootstrap-admin'
   id:
     | '__root__'
     | '/'
@@ -240,7 +229,6 @@ export interface FileRouteTypes {
     | '/viongozi/$slug'
     | '/huduma/'
     | '/viongozi/'
-    | '/api/public/bootstrap-admin'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -260,7 +248,6 @@ export interface RootRouteChildren {
   ViongoziSlugRoute: typeof ViongoziSlugRoute
   HudumaIndexRoute: typeof HudumaIndexRoute
   ViongoziIndexRoute: typeof ViongoziIndexRoute
-  ApiPublicBootstrapAdminRoute: typeof ApiPublicBootstrapAdminRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -384,13 +371,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ViongoziSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/bootstrap-admin': {
-      id: '/api/public/bootstrap-admin'
-      path: '/api/public/bootstrap-admin'
-      fullPath: '/api/public/bootstrap-admin'
-      preLoaderRoute: typeof ApiPublicBootstrapAdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -423,7 +403,6 @@ const rootRouteChildren: RootRouteChildren = {
   ViongoziSlugRoute: ViongoziSlugRoute,
   HudumaIndexRoute: HudumaIndexRoute,
   ViongoziIndexRoute: ViongoziIndexRoute,
-  ApiPublicBootstrapAdminRoute: ApiPublicBootstrapAdminRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
