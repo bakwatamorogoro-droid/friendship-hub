@@ -15,6 +15,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { MumAiWidget } from "@/components/MumAiWidget";
 import { Toaster } from "@/components/ui/sonner";
+import { StatusHost } from "@/lib/status";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveStorageUrl } from "@/lib/storage-url";
 import { LanguageProvider } from "@/lib/i18n";
@@ -92,7 +93,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.ico", sizes: "any" },
+      { rel: "icon", type: "image/png", href: "/favicon.png" },
     ],
   }),
   shellComponent: RootShell,
@@ -157,6 +158,7 @@ function RootComponent() {
           {!formOnly && <Footer />}
           {!formOnly && <MumAiWidget />}
           <Toaster />
+          <StatusHost />
         </div>
       </LanguageProvider>
     </QueryClientProvider>

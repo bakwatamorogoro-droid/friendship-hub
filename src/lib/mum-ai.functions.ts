@@ -52,6 +52,40 @@ export const askMumAI = createServerFn({ method: "POST" })
     const apiKey = process.env.LOVABLE_API_KEY;
     if (!apiKey) throw new Error("AI haijawekwa.");
 
+    // Maarifa ya mfumo (jedwali la ai_knowledge + huduma, idara, viongozi, matangazo)
+    let knowledge = "";
+    try {
+      const { createClient } = await import("@supabase/supabase-js");
+      const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
+      const sb = createClient(process.env["SUPABASE_URL"]!, key, {
+        auth: { persistSession: false, autoRefreshToken: false },
+        global: {
+          fetch: (input: any, init: any) => {
+            const h = new Headers(init?.headers);
+            if (key.startsWith("sb_") && h.get("Authorization") === `Bearer ${key}`) h.delete("Authorization");
+            h.set("apikey", key);
+            return fetch(input, { ...init, headers: h });
+          },
+        },
+      });
+      const [kn, deps, leaders, anns, svcs] = await Promise.all([
+        (sb.from("ai_knowledge") as any).select("title,content,kind").eq("published", true).limit(80),
+        (sb.from("departments") as any).select("name,slug,description,leader_name,leader_contact,deadline_at").eq("active", true).limit(60),
+        (sb.from("leaders") as any).select("full_name,position,short_message,phone,email").eq("published", true).limit(60),
+        (sb.from("announcements") as any).select("title,excerpt,content,created_at").eq("published", true).order("created_at", { ascending: false }).limit(15),
+        (sb.from("service_status") as any).select("key,label,enabled,deadline_at,deadline_note").limit(30),
+      ]);
+      const parts: string[] = [];
+      if (kn.data?.length) parts.push("MAARIFA YA MUMSO:\n" + kn.data.map((r: any) => `- [${r.kind}] ${r.title}: ${r.content}`).join("\n"));
+      if (deps.data?.length) parts.push("IDARA / HUDUMA ZILIZOPO:\n" + deps.data.map((r: any) => `- ${r.name} (/huduma/${r.slug}): ${r.description ?? ""} | Kiongozi: ${r.leader_name ?? "-"} ${r.leader_contact ?? ""} | Mwisho: ${r.deadline_at ?? "hakuna"}`).join("\n"));
+      if (svcs.data?.length) parts.push("HALI YA HUDUMA:\n" + svcs.data.map((r: any) => `- ${r.label} (${r.key}): ${r.enabled ? "inafanya kazi" : "imefungwa"} | Mwisho: ${r.deadline_at ?? "hakuna"} ${r.deadline_note ?? ""}`).join("\n"));
+      if (leaders.data?.length) parts.push("VIONGOZI WA MUMSO (wa sasa):\n" + leaders.data.map((r: any) => `- ${r.position}: ${r.full_name} ${r.phone ?? ""} ${r.email ?? ""} ${r.short_message ?? ""}`).join("\n"));
+      if (anns.data?.length) parts.push("MATANGAZO YA HIVI KARIBUNI:\n" + anns.data.map((r: any) => `- (${String(r.created_at).slice(0, 10)}) ${r.title}: ${r.excerpt ?? String(r.content ?? "").slice(0, 300)}`).join("\n"));
+      knowledge = parts.join("\n\n");
+    } catch (e) {
+      console.error("knowledge load failed", e);
+    }
+
     const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -61,7 +95,7 @@ export const askMumAI = createServerFn({ method: "POST" })
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: SYSTEM_PROMPT },
+          { role: "system", content: knowledge ? `${SYSTEM_PROMPT}\n\n=== TAARIFA HALISI KUTOKA MFUMO WA MUMSO (tumia hizi kwanza) ===\n${knowledge}` : SYSTEM_PROMPT },
           ...data.messages.slice(-10),
         ],
         tools: [{ google_search: {} }],
