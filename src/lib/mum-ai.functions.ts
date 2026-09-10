@@ -49,8 +49,8 @@ If the user asks about a specific current leader whose name you don't know with 
 export const askMumAI = createServerFn({ method: "POST" })
   .inputValidator((d: { messages: Array<{ role: "user" | "assistant"; content: string }> }) => d)
   .handler(async ({ data }) => {
-    const apiKey = process.env.LOVABLE_API_KEY;
-    if (!apiKey) throw new Error("AI haijawekwa.");
+    const apiKey = process.env["LOVABLE_API_KEY"];
+    if (!apiKey) throw new Error("AI haipatikani: ufunguo wa AI haujawekwa kwenye seva.");
 
     // Maarifa ya mfumo (jedwali la ai_knowledge + huduma, idara, viongozi, matangazo)
     let knowledge = "";
@@ -93,12 +93,11 @@ export const askMumAI = createServerFn({ method: "POST" })
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-3.8-flash",
         messages: [
           { role: "system", content: knowledge ? `${SYSTEM_PROMPT}\n\n=== TAARIFA HALISI KUTOKA MFUMO WA MUMSO (tumia hizi kwanza) ===\n${knowledge}` : SYSTEM_PROMPT },
           ...data.messages.slice(-10),
         ],
-        tools: [{ google_search: {} }],
       }),
     });
 
