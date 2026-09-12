@@ -85,10 +85,20 @@ function TrackPage() {
   const onSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (loading) return;
+    const q = query.trim();
+    if (q.length < 4) {
+      showStatus({
+        type: "error",
+        title: "Taarifa pungufu",
+        message: "Tafadhali weka namba ya simu au namba ya usajili kamili (angalau herufi/namba 4).",
+      });
+      return;
+    }
     setLoading(true);
     setEditing(null);
+
     try {
-      const found = await runSearch(query.trim());
+      const found = await runSearch(q);
       if (found.length === 0) {
         showStatus({
           type: "error",
