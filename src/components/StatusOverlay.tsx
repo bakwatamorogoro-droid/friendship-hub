@@ -2,7 +2,9 @@ import { useEffect } from "react";
 import { Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export type StatusState = { type: "success" | "error"; message: string } | null;
+export type StatusState =
+  | { type: "success" | "error"; message: string; title?: string; autoCloseMs?: number }
+  | null;
 
 /** Ujumbe wa kisasa wa mafanikio (✓) au hitilafu (✕) wenye animation. */
 export function StatusOverlay({
