@@ -44,7 +44,7 @@ export function StatusOverlay({
           {ok ? <Check className="status-mark h-12 w-12" /> : <X className="status-mark h-12 w-12" />}
         </div>
         <h2 className={`mt-5 text-2xl font-black ${ok ? "text-primary" : "text-destructive"}`}>
-          {ok ? "Imefanikiwa!" : "Imeshindikana"}
+          {status.title ?? (ok ? "Imefanikiwa!" : "Imeshindikana")}
         </h2>
         <p className="mt-2 text-base text-muted-foreground">{status.message}</p>
         <Button className="btn-3d mt-6 w-full" size="lg" onClick={onClose}>

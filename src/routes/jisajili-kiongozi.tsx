@@ -94,11 +94,14 @@ function LeaderSignupPage() {
             <Input value={form.registration_number} onChange={(e) => setForm({ ...form, registration_number: e.target.value })} placeholder="MUM2021-04-07625" required /></div>
           <div className="space-y-2"><Label>Nafasi ya Uongozi *</Label>
             <Input value={form.position} onChange={(e) => setForm({ ...form, position: e.target.value })} placeholder="Mfano: Katibu Mkuu" required /></div>
-          <div className="space-y-2"><Label>Idara / Wizara</Label>
+          <div className="space-y-2"><Label>Wizara / Idara Yako *</Label>
             <Select value={deptId} onValueChange={setDeptId}>
-              <SelectTrigger><SelectValue placeholder="Chagua idara (si lazima)" /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder="Chagua wizara yako" /></SelectTrigger>
               <SelectContent>{depts.map((d) => <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>)}</SelectContent>
-            </Select></div>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              Baada ya kuidhinishwa na menejimenti, utaingia moja kwa moja kwenye paneli ya wizara hii na kuona changamoto na taarifa za wanafunzi wa wizara yako.
+            </p></div>
           <div className="space-y-2"><Label>Namba ya Simu *</Label>
             <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} required /></div>
           <div className="space-y-2"><Label>Nenosiri Unalotaka *</Label>

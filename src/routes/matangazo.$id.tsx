@@ -57,7 +57,7 @@ function AnnouncementPage() {
         <article className="mt-6">
           <div className="panel-3d overflow-hidden rounded-3xl border border-border bg-card">
             {a.image_url ? (
-              <img src={a.image_url} alt={a.title} className="max-h-[520px] w-full object-cover" />
+              <img src={a.image_url} alt={a.title} className="mx-auto max-h-[520px] w-full bg-secondary/40 object-contain" />
             ) : (
               <div className="grid h-56 w-full place-items-center bg-gradient-to-br from-primary to-accent/60 text-primary-foreground">
                 <Megaphone className="h-14 w-14 opacity-80" />
