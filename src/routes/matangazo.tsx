@@ -66,13 +66,15 @@ function MatangazoPage() {
             params={{ id: a.id }}
             className={`group digital-card flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition hover:-translate-y-1 hover:shadow-[var(--shadow-elegant)] ${i === 0 ? "sm:col-span-2" : ""}`}
           >
-            <div className={`relative w-full overflow-hidden bg-primary/10 ${i === 0 ? "h-56 sm:h-72" : "h-44"}`}>
+            <div className="relative mx-auto grid aspect-square w-full max-w-[300px] place-items-center overflow-hidden bg-secondary/40 p-2">
               {a.image_url ? (
                 <img
                   src={a.image_url}
                   alt={a.title}
                   loading="lazy"
-                  className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+                  width={300}
+                  height={300}
+                  className="max-h-[300px] max-w-[300px] h-full w-full object-contain transition duration-700 group-hover:scale-[1.03]"
                 />
               ) : (
                 <div className="grid h-full w-full place-items-center bg-gradient-to-br from-primary to-accent/60 text-primary-foreground">
