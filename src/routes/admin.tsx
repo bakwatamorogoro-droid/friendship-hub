@@ -541,10 +541,10 @@ function AdminPage() {
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} orientation="vertical" className="mt-6 flex flex-col lg:flex-row gap-6 items-start">
-        <TabsList className="lift-menu flex lg:flex-col h-auto w-full lg:w-64 shrink-0 items-stretch justify-start gap-1.5 rounded-2xl p-2.5 overflow-x-auto lg:overflow-visible lg:sticky lg:top-24">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6 flex flex-col gap-6 items-stretch">
+        <TabsList className="lift-menu sticky top-2 z-30 flex h-auto w-full flex-wrap items-stretch justify-start gap-1.5 rounded-2xl p-2.5">
           <TabsTrigger value="deptsubs" className={menuCls}>Huduma za Wanafunzi ({deptSubs.length})</TabsTrigger>
-          {isAdmin && <TabsTrigger value="challenges" className={menuCls}>Maombi ya Huduma ({challenges.length})</TabsTrigger>}
+          <TabsTrigger value="challenges" className={menuCls}>Changamoto ({challenges.length})</TabsTrigger>
           {isAdmin && <TabsTrigger value="loans" className={menuCls}>Mikopo ({loans.length})</TabsTrigger>}
           {isAdmin && <TabsTrigger value="deaths" className={menuCls}>Misiba ({deaths.length})</TabsTrigger>}
           <TabsTrigger value="announce" className={menuCls}>Tangaza</TabsTrigger>
