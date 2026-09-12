@@ -47,6 +47,7 @@ function LeaderSignupPage() {
     e.preventDefault();
     const parsed = schema.safeParse(form);
     if (!parsed.success) { showStatus("error", parsed.error.issues[0]?.message ?? "Jaza taarifa zote"); return; }
+    if (!deptId) { showStatus("error", "Chagua wizara/idara yako"); return; }
     setLoading(true);
     const { error } = await (supabase.from("leader_applications") as any).insert({
       full_name: parsed.data.full_name,

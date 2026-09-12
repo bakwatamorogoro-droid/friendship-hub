@@ -87,8 +87,10 @@ function AdminPage() {
   const loadAll = async (leaderDeptId: string | null = myDeptId) => {
     const deptSubsQuery = (supabase.from("department_submissions") as any).select("*").order("created_at", { ascending: false });
     if (leaderDeptId) deptSubsQuery.eq("department_id", leaderDeptId);
+    const challengesQuery = (supabase.from("challenges") as any).select("*").order("created_at", { ascending: false });
+    if (leaderDeptId) challengesQuery.eq("department_id", leaderDeptId);
     const [c, l, d, h, st, sv, ct, dp, gr, ds, la] = await Promise.all([
-      supabase.from("challenges").select("*").order("created_at", { ascending: false }),
+      challengesQuery,
       supabase.from("loan_requests").select("*").order("created_at", { ascending: false }),
       supabase.from("deaths").select("*").order("created_at", { ascending: false }),
       supabase.from("hero_images").select("*").order("sort_order", { ascending: true }),
