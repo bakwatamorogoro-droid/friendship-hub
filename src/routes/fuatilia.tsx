@@ -98,7 +98,7 @@ function TrackPage() {
     setEditing(null);
 
     try {
-      const found = await runSearch(query.trim());
+      const found = await runSearch(q);
       if (found.length === 0) {
         showStatus({
           type: "error",
