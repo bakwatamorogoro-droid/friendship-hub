@@ -159,6 +159,29 @@ export const trackRequests = createServerFn({ method: "POST" })
       });
     }
 
+    for (const r of (deaths.data ?? []) as any[]) {
+      items.push({
+        id: r.id,
+        kind: "misiba",
+        kindLabel: "Taarifa ya Msiba",
+        title: r.deceased_name ? `Msiba: ${r.deceased_name}` : "Taarifa ya msiba",
+        status: "reviewing",
+        adminNote: null,
+        createdAt: r.created_at,
+        updatedAt: null,
+        fields: [
+          field("deceased_name", "Jina la marehemu", r.deceased_name),
+          field("relationship", "Uhusiano", r.relationship),
+          field("student_name", "Jina la mwanafunzi", r.student_name),
+          field("registration_number", "Namba ya usajili", r.registration_number),
+          field("phone", "Namba ya simu", r.phone),
+          field("death_date", "Tarehe ya msiba", r.death_date),
+          field("location", "Mahali", r.location),
+          field("description", "Maelezo", r.description, true),
+        ],
+      });
+    }
+
     items.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
     void reg;
     return { items };
