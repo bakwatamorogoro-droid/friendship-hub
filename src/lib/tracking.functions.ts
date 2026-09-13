@@ -78,13 +78,14 @@ export const trackRequests = createServerFn({ method: "POST" })
       return q.order("created_at", { ascending: false }).limit(50);
     };
 
-    const [loans, challenges, dept] = await Promise.all([
+    const [loans, challenges, dept, deaths] = await Promise.all([
       pick("loan_requests"),
       pick("challenges"),
       pick("department_submissions", "*, departments(name)"),
+      pick("deaths"),
     ]);
 
-    const firstError = loans.error || challenges.error || dept.error;
+    const firstError = loans.error || challenges.error || dept.error || deaths.error;
     if (firstError) throw new Error("Imeshindikana kupata taarifa: " + firstError.message);
 
     const items: TrackedRequest[] = [];
