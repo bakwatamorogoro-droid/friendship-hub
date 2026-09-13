@@ -180,6 +180,7 @@ function TrackPage() {
           <Label htmlFor="track-query">Namba ya simu au namba ya usajili *</Label>
           <Input
             id="track-query"
+            name="track-query"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             required
