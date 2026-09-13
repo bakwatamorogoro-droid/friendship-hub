@@ -192,7 +192,7 @@ export const updateRequest = createServerFn({ method: "POST" })
     z
       .object({
         id: z.string().uuid(),
-        kind: z.enum(["mikopo", "changamoto", "idara"]),
+        kind: z.enum(["mikopo", "changamoto", "idara", "misiba"]),
         query: z.string().trim().min(4).max(40),
         values: z.record(z.string(), z.string().max(4000)),
       })
@@ -205,7 +205,7 @@ export const updateRequest = createServerFn({ method: "POST" })
 
     const { data: row, error } = await db
       .from(table)
-      .select("id, phone, registration_number, status")
+      .select(HAS_STATUS.has(table) ? "id, phone, registration_number, status" : "id, phone, registration_number")
       .eq("id", data.id)
       .maybeSingle();
     if (error) throw new Error(error.message);
@@ -240,7 +240,7 @@ export const deleteRequest = createServerFn({ method: "POST" })
     z
       .object({
         id: z.string().uuid(),
-        kind: z.enum(["mikopo", "changamoto", "idara"]),
+        kind: z.enum(["mikopo", "changamoto", "idara", "misiba"]),
         query: z.string().trim().min(4).max(40),
       })
       .parse(d),
@@ -252,7 +252,7 @@ export const deleteRequest = createServerFn({ method: "POST" })
 
     const { data: row, error } = await db
       .from(table)
-      .select("id, phone, registration_number, status")
+      .select(HAS_STATUS.has(table) ? "id, phone, registration_number, status" : "id, phone, registration_number")
       .eq("id", data.id)
       .maybeSingle();
     if (error) throw new Error(error.message);
