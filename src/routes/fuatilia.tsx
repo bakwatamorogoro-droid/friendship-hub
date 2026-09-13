@@ -82,10 +82,14 @@ function TrackPage() {
     return res.items;
   };
 
-  const onSearch = async (e: React.FormEvent) => {
+  const onSearch = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (loading) return;
-    const q = query.trim();
+    const form = e.currentTarget;
+    const raw =
+      (new FormData(form).get("track-query") as string | null)?.trim() || query.trim();
+    const q = raw;
+    if (q !== query) setQuery(q);
     if (q.length < 4) {
       showStatus({
         type: "error",
@@ -176,6 +180,7 @@ function TrackPage() {
           <Label htmlFor="track-query">Namba ya simu au namba ya usajili *</Label>
           <Input
             id="track-query"
+            name="track-query"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             required

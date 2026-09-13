@@ -3,9 +3,11 @@ import { z } from "zod";
 
 export type TrackField = { key: string; label: string; value: string; long?: boolean };
 
+export type TrackKind = "mikopo" | "changamoto" | "idara" | "misiba";
+
 export type TrackedRequest = {
   id: string;
-  kind: "mikopo" | "changamoto" | "idara";
+  kind: TrackKind;
   kindLabel: string;
   title: string;
   status: string;
@@ -23,7 +25,11 @@ const TABLES = {
   mikopo: "loan_requests",
   changamoto: "challenges",
   idara: "department_submissions",
+  misiba: "deaths",
 } as const;
+
+/** Jedwali lenye safu ya status / admin_note. */
+const HAS_STATUS = new Set(["loan_requests", "challenges", "department_submissions"]);
 
 const EDITABLE = new Set([
   "full_name",
@@ -39,6 +45,11 @@ const EDITABLE = new Set([
   "challenge_type",
   "category",
   "description",
+  "deceased_name",
+  "relationship",
+  "student_name",
+  "death_date",
+  "location",
 ]);
 
 const field = (key: string, label: string, value: unknown, long = false): TrackField => ({
@@ -67,13 +78,14 @@ export const trackRequests = createServerFn({ method: "POST" })
       return q.order("created_at", { ascending: false }).limit(50);
     };
 
-    const [loans, challenges, dept] = await Promise.all([
+    const [loans, challenges, dept, deaths] = await Promise.all([
       pick("loan_requests"),
       pick("challenges"),
       pick("department_submissions", "*, departments(name)"),
+      pick("deaths"),
     ]);
 
-    const firstError = loans.error || challenges.error || dept.error;
+    const firstError = loans.error || challenges.error || dept.error || deaths.error;
     if (firstError) throw new Error("Imeshindikana kupata taarifa: " + firstError.message);
 
     const items: TrackedRequest[] = [];
@@ -147,6 +159,29 @@ export const trackRequests = createServerFn({ method: "POST" })
       });
     }
 
+    for (const r of (deaths.data ?? []) as any[]) {
+      items.push({
+        id: r.id,
+        kind: "misiba",
+        kindLabel: "Taarifa ya Msiba",
+        title: r.deceased_name ? `Msiba: ${r.deceased_name}` : "Taarifa ya msiba",
+        status: "reviewing",
+        adminNote: null,
+        createdAt: r.created_at,
+        updatedAt: null,
+        fields: [
+          field("deceased_name", "Jina la marehemu", r.deceased_name),
+          field("relationship", "Uhusiano", r.relationship),
+          field("student_name", "Jina la mwanafunzi", r.student_name),
+          field("registration_number", "Namba ya usajili", r.registration_number),
+          field("phone", "Namba ya simu", r.phone),
+          field("death_date", "Tarehe ya msiba", r.death_date),
+          field("location", "Mahali", r.location),
+          field("description", "Maelezo", r.description, true),
+        ],
+      });
+    }
+
     items.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
     void reg;
     return { items };
@@ -157,7 +192,7 @@ export const updateRequest = createServerFn({ method: "POST" })
     z
       .object({
         id: z.string().uuid(),
-        kind: z.enum(["mikopo", "changamoto", "idara"]),
+        kind: z.enum(["mikopo", "changamoto", "idara", "misiba"]),
         query: z.string().trim().min(4).max(40),
         values: z.record(z.string(), z.string().max(4000)),
       })
@@ -170,7 +205,7 @@ export const updateRequest = createServerFn({ method: "POST" })
 
     const { data: row, error } = await db
       .from(table)
-      .select("id, phone, registration_number, status")
+      .select(HAS_STATUS.has(table) ? "id, phone, registration_number, status" : "id, phone, registration_number")
       .eq("id", data.id)
       .maybeSingle();
     if (error) throw new Error(error.message);
@@ -194,7 +229,7 @@ export const updateRequest = createServerFn({ method: "POST" })
 
     const { error: upErr } = await db
       .from(table)
-      .update({ ...patch, status: "pending", admin_note: null })
+      .update(HAS_STATUS.has(table) ? { ...patch, status: "pending", admin_note: null } : patch)
       .eq("id", data.id);
     if (upErr) throw new Error(upErr.message);
     return { ok: true as const };
@@ -205,7 +240,7 @@ export const deleteRequest = createServerFn({ method: "POST" })
     z
       .object({
         id: z.string().uuid(),
-        kind: z.enum(["mikopo", "changamoto", "idara"]),
+        kind: z.enum(["mikopo", "changamoto", "idara", "misiba"]),
         query: z.string().trim().min(4).max(40),
       })
       .parse(d),
@@ -217,7 +252,7 @@ export const deleteRequest = createServerFn({ method: "POST" })
 
     const { data: row, error } = await db
       .from(table)
-      .select("id, phone, registration_number, status")
+      .select(HAS_STATUS.has(table) ? "id, phone, registration_number, status" : "id, phone, registration_number")
       .eq("id", data.id)
       .maybeSingle();
     if (error) throw new Error(error.message);
