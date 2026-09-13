@@ -229,7 +229,7 @@ export const updateRequest = createServerFn({ method: "POST" })
 
     const { error: upErr } = await db
       .from(table)
-      .update({ ...patch, status: "pending", admin_note: null })
+      .update(HAS_STATUS.has(table) ? { ...patch, status: "pending", admin_note: null } : patch)
       .eq("id", data.id);
     if (upErr) throw new Error(upErr.message);
     return { ok: true as const };
