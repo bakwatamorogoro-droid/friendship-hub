@@ -3,9 +3,11 @@ import { z } from "zod";
 
 export type TrackField = { key: string; label: string; value: string; long?: boolean };
 
+export type TrackKind = "mikopo" | "changamoto" | "idara" | "misiba";
+
 export type TrackedRequest = {
   id: string;
-  kind: "mikopo" | "changamoto" | "idara";
+  kind: TrackKind;
   kindLabel: string;
   title: string;
   status: string;
@@ -23,7 +25,11 @@ const TABLES = {
   mikopo: "loan_requests",
   changamoto: "challenges",
   idara: "department_submissions",
+  misiba: "deaths",
 } as const;
+
+/** Jedwali lenye safu ya status / admin_note. */
+const HAS_STATUS = new Set(["loan_requests", "challenges", "department_submissions"]);
 
 const EDITABLE = new Set([
   "full_name",
@@ -39,6 +45,11 @@ const EDITABLE = new Set([
   "challenge_type",
   "category",
   "description",
+  "deceased_name",
+  "relationship",
+  "student_name",
+  "death_date",
+  "location",
 ]);
 
 const field = (key: string, label: string, value: unknown, long = false): TrackField => ({
