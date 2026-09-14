@@ -94,14 +94,14 @@ export const askMumAI = createServerFn({ method: "POST" })
       console.error("knowledge load failed", e);
     }
 
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const res = await fetch(aiUrl, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3.8-flash",
+        model: aiModel,
         messages: [
           { role: "system", content: knowledge ? `${SYSTEM_PROMPT}\n\n=== TAARIFA HALISI KUTOKA MFUMO WA MUMSO (tumia hizi kwanza) ===\n${knowledge}` : SYSTEM_PROMPT },
           ...data.messages.slice(-10),
