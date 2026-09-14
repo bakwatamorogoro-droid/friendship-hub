@@ -90,14 +90,15 @@ function TrackPage() {
       (new FormData(form).get("track-query") as string | null)?.trim() || query.trim();
     const q = raw;
     if (q !== query) setQuery(q);
-    if (q.length < 4) {
+    if (q.length < 3) {
       showStatus({
         type: "error",
         title: "Taarifa pungufu",
-        message: "Tafadhali weka namba ya simu au namba ya usajili kamili (angalau herufi/namba 4).",
+        message: "Weka namba ya simu au namba ya usajili uliyotumia kwenye fomu.",
       });
       return;
     }
+
     setLoading(true);
     setEditing(null);
 
@@ -184,7 +185,8 @@ function TrackPage() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             required
-            minLength={4}
+            minLength={3}
+
             placeholder="0712 345 678 au MUM/BCS/2024/001"
           />
         </div>
