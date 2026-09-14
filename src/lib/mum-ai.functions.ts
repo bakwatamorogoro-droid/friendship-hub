@@ -49,8 +49,16 @@ If the user asks about a specific current leader whose name you don't know with 
 export const askMumAI = createServerFn({ method: "POST" })
   .inputValidator((d: { messages: Array<{ role: "user" | "assistant"; content: string }> }) => d)
   .handler(async ({ data }) => {
-    const apiKey = process.env["LOVABLE_API_KEY"];
-    if (!apiKey) throw new Error("AI haipatikani: ufunguo wa AI haujawekwa kwenye seva.");
+    const lovableKey = process.env["LOVABLE_API_KEY"];
+    const geminiKey = process.env["GEMINI_API_KEY"];
+    if (!lovableKey && !geminiKey)
+      throw new Error("AI haipatikani: ufunguo wa AI haujawekwa kwenye seva (LOVABLE_API_KEY au GEMINI_API_KEY).");
+    // Kwenye Lovable: gateway ya Lovable. Kwenye seva nyingine (GitHub/self-host): Gemini moja kwa moja.
+    const aiUrl = lovableKey
+      ? "https://ai.gateway.lovable.dev/v1/chat/completions"
+      : "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
+    const aiModel = lovableKey ? "google/gemini-3.8-flash" : "gemini-2.5-flash";
+    const apiKey = lovableKey ?? geminiKey!;
 
     // Maarifa ya mfumo (jedwali la ai_knowledge + huduma, idara, viongozi, matangazo)
     let knowledge = "";
