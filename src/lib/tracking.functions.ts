@@ -61,7 +61,7 @@ const field = (key: string, label: string, value: unknown, long = false): TrackF
 
 export const trackRequests = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
-    z.object({ query: z.string().trim().min(4).max(40) }).parse(d),
+    z.object({ query: z.string().trim().min(3).max(60) }).parse(d),
   )
   .handler(async ({ data }): Promise<{ items: TrackedRequest[] }> => {
     const raw = data.query.trim();
@@ -193,7 +193,7 @@ export const updateRequest = createServerFn({ method: "POST" })
       .object({
         id: z.string().uuid(),
         kind: z.enum(["mikopo", "changamoto", "idara", "misiba"]),
-        query: z.string().trim().min(4).max(40),
+        query: z.string().trim().min(3).max(60),
         values: z.record(z.string(), z.string().max(4000)),
       })
       .parse(d),
@@ -241,7 +241,7 @@ export const deleteRequest = createServerFn({ method: "POST" })
       .object({
         id: z.string().uuid(),
         kind: z.enum(["mikopo", "changamoto", "idara", "misiba"]),
-        query: z.string().trim().min(4).max(40),
+        query: z.string().trim().min(3).max(60),
       })
       .parse(d),
   )
