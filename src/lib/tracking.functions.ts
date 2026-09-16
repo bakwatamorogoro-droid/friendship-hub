@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 
 export type TrackField = { key: string; label: string; value: string; long?: boolean };
@@ -17,40 +18,41 @@ export type TrackedRequest = {
   fields: TrackField[];
 };
 
-const digits = (v: string) => v.replace(/[^0-9]/g, "");
-const phoneTail = (v: string) => digits(v).slice(-9);
-const regKey = (v: string) => v.replace(/[^a-z0-9]/gi, "").toLowerCase();
+/**
+ * Ufuatiliaji hautumii ufunguo wa siri wa seva (SERVICE ROLE).
+ * Unatumia ufunguo wa umma (publishable) na kazi salama za database
+ * (track_lookup / track_update / track_delete), hivyo unafanya kazi
+ * kwenye Lovable, GitHub na Vercel bila mipangilio ya ziada.
+ */
+function publicDb() {
+  const url =
+    process.env["SUPABASE_URL"] ||
+    process.env["VITE_SUPABASE_URL"] ||
+    import.meta.env["VITE_SUPABASE_URL"];
+  const key =
+    process.env["SUPABASE_PUBLISHABLE_KEY"] ||
+    process.env["VITE_SUPABASE_PUBLISHABLE_KEY"] ||
+    process.env["SUPABASE_ANON_KEY"] ||
+    import.meta.env["VITE_SUPABASE_PUBLISHABLE_KEY"];
 
-const TABLES = {
-  mikopo: "loan_requests",
-  changamoto: "challenges",
-  idara: "department_submissions",
-  misiba: "deaths",
-} as const;
+  if (!url || !key) {
+    throw new Error(
+      "Mipangilio ya backend haipo. Weka VITE_SUPABASE_URL na VITE_SUPABASE_PUBLISHABLE_KEY kwenye seva yako.",
+    );
+  }
 
-/** Jedwali lenye safu ya status / admin_note. */
-const HAS_STATUS = new Set(["loan_requests", "challenges", "department_submissions"]);
-
-const EDITABLE = new Set([
-  "full_name",
-  "form_four_index",
-  "registration_number",
-  "course",
-  "year_of_study",
-  "gender",
-  "phone",
-  "email",
-  "problem_type",
-  "problem_description",
-  "challenge_type",
-  "category",
-  "description",
-  "deceased_name",
-  "relationship",
-  "student_name",
-  "death_date",
-  "location",
-]);
+  return createClient(url, key, {
+    auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
+    global: {
+      fetch: (input: any, init: any) => {
+        const headers = new Headers(init?.headers ?? undefined);
+        if (headers.get("Authorization") === `Bearer ${key}`) headers.delete("Authorization");
+        headers.set("apikey", key);
+        return fetch(input, { ...init, headers });
+      },
+    },
+  });
+}
 
 const field = (key: string, label: string, value: unknown, long = false): TrackField => ({
   key,
@@ -64,33 +66,14 @@ export const trackRequests = createServerFn({ method: "POST" })
     z.object({ query: z.string().trim().min(3).max(60) }).parse(d),
   )
   .handler(async ({ data }): Promise<{ items: TrackedRequest[] }> => {
-    const raw = data.query.trim();
-    const tail = phoneTail(raw);
-    const reg = regKey(raw);
-    const byPhone = tail.length >= 7;
+    const db = publicDb();
+    const { data: res, error } = await db.rpc("track_lookup" as any, { p_query: data.query.trim() } as any);
+    if (error) throw new Error("Imeshindikana kupata taarifa: " + error.message);
 
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const db = supabaseAdmin as any;
-
-    const pick = (table: string, extra = "*") => {
-      let q = db.from(table).select(extra);
-      q = byPhone ? q.ilike("phone", `%${tail}`) : q.ilike("registration_number", `%${raw.replace(/\s+/g, "")}%`);
-      return q.order("created_at", { ascending: false }).limit(50);
-    };
-
-    const [loans, challenges, dept, deaths] = await Promise.all([
-      pick("loan_requests"),
-      pick("challenges"),
-      pick("department_submissions", "*, departments(name)"),
-      pick("deaths"),
-    ]);
-
-    const firstError = loans.error || challenges.error || dept.error || deaths.error;
-    if (firstError) throw new Error("Imeshindikana kupata taarifa: " + firstError.message);
-
+    const groups = (res ?? {}) as Record<string, any[]>;
     const items: TrackedRequest[] = [];
 
-    for (const r of (loans.data ?? []) as any[]) {
+    for (const r of groups["mikopo"] ?? []) {
       items.push({
         id: r.id,
         kind: "mikopo",
@@ -114,7 +97,7 @@ export const trackRequests = createServerFn({ method: "POST" })
       });
     }
 
-    for (const r of (challenges.data ?? []) as any[]) {
+    for (const r of groups["changamoto"] ?? []) {
       items.push({
         id: r.id,
         kind: "changamoto",
@@ -135,11 +118,11 @@ export const trackRequests = createServerFn({ method: "POST" })
       });
     }
 
-    for (const r of (dept.data ?? []) as any[]) {
+    for (const r of groups["idara"] ?? []) {
       items.push({
         id: r.id,
         kind: "idara",
-        kindLabel: r.departments?.name ? `Huduma: ${r.departments.name}` : "Huduma ya Idara",
+        kindLabel: r.department_name ? `Huduma: ${r.department_name}` : "Huduma ya Idara",
         title: r.category || "Ombi la huduma",
         status: r.status || "pending",
         adminNote: r.admin_note ?? null,
@@ -159,7 +142,7 @@ export const trackRequests = createServerFn({ method: "POST" })
       });
     }
 
-    for (const r of (deaths.data ?? []) as any[]) {
+    for (const r of groups["misiba"] ?? []) {
       items.push({
         id: r.id,
         kind: "misiba",
@@ -183,7 +166,6 @@ export const trackRequests = createServerFn({ method: "POST" })
     }
 
     items.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
-    void reg;
     return { items };
   });
 
@@ -199,39 +181,14 @@ export const updateRequest = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data }) => {
-    const table = TABLES[data.kind];
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const db = supabaseAdmin as any;
-
-    const { data: row, error } = await db
-      .from(table)
-      .select(HAS_STATUS.has(table) ? "id, phone, registration_number, status" : "id, phone, registration_number")
-      .eq("id", data.id)
-      .maybeSingle();
+    const db = publicDb();
+    const { error } = await db.rpc("track_update" as any, {
+      p_id: data.id,
+      p_kind: data.kind,
+      p_query: data.query.trim(),
+      p_values: data.values,
+    } as any);
     if (error) throw new Error(error.message);
-    if (!row) throw new Error("Ombi hili halipatikani.");
-
-    const tail = phoneTail(data.query);
-    const matches =
-      (tail.length >= 7 && phoneTail(row.phone ?? "") === tail) ||
-      (regKey(row.registration_number ?? "") !== "" && regKey(row.registration_number ?? "") === regKey(data.query));
-    if (!matches) throw new Error("Taarifa hizi hazilingani na ombi lako.");
-
-    if (row.status === "approved" || row.status === "rejected") {
-      throw new Error("Ombi hili limekamilika, haliwezi kubadilishwa.");
-    }
-
-    const patch: Record<string, string> = {};
-    for (const [k, v] of Object.entries(data.values)) {
-      if (EDITABLE.has(k) && v.trim()) patch[k] = v.trim();
-    }
-    if (Object.keys(patch).length === 0) throw new Error("Hakuna taarifa mpya iliyowekwa.");
-
-    const { error: upErr } = await db
-      .from(table)
-      .update(HAS_STATUS.has(table) ? { ...patch, status: "pending", admin_note: null } : patch)
-      .eq("id", data.id);
-    if (upErr) throw new Error(upErr.message);
     return { ok: true as const };
   });
 
@@ -246,26 +203,12 @@ export const deleteRequest = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data }) => {
-    const table = TABLES[data.kind];
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const db = supabaseAdmin as any;
-
-    const { data: row, error } = await db
-      .from(table)
-      .select(HAS_STATUS.has(table) ? "id, phone, registration_number, status" : "id, phone, registration_number")
-      .eq("id", data.id)
-      .maybeSingle();
+    const db = publicDb();
+    const { error } = await db.rpc("track_delete" as any, {
+      p_id: data.id,
+      p_kind: data.kind,
+      p_query: data.query.trim(),
+    } as any);
     if (error) throw new Error(error.message);
-    if (!row) throw new Error("Ombi hili halipatikani.");
-
-    const tail = phoneTail(data.query);
-    const matches =
-      (tail.length >= 7 && phoneTail(row.phone ?? "") === tail) ||
-      (regKey(row.registration_number ?? "") !== "" && regKey(row.registration_number ?? "") === regKey(data.query));
-    if (!matches) throw new Error("Taarifa hizi hazilingani na ombi lako.");
-    if (row.status === "approved") throw new Error("Ombi lililokamilika haliwezi kufutwa.");
-
-    const { error: delErr } = await db.from(table).delete().eq("id", data.id);
-    if (delErr) throw new Error(delErr.message);
     return { ok: true as const };
   });
