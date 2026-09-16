@@ -729,6 +729,18 @@ export type Database = {
         }
         Returns: boolean
       }
+      track_delete: {
+        Args: { p_id: string; p_kind: string; p_query: string }
+        Returns: Json
+      }
+      track_lookup: { Args: { p_query: string }; Returns: Json }
+      track_norm_phone: { Args: { v: string }; Returns: string }
+      track_norm_reg: { Args: { v: string }; Returns: string }
+      track_table_for_kind: { Args: { p_kind: string }; Returns: string }
+      track_update: {
+        Args: { p_id: string; p_kind: string; p_query: string; p_values: Json }
+        Returns: Json
+      }
     }
     Enums: {
       app_role: "admin" | "leader" | "student"
