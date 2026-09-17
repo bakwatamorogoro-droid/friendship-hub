@@ -116,7 +116,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-const FORM_ONLY_PATHS = ["/misiba", "/mikopo", "/changamoto"];
+const FORM_ONLY_PATHS = ["/misiba", "/mikopo", "/changamoto", "/matokeo"];
 
 function isFormOnlyPath(pathname: string) {
   if (FORM_ONLY_PATHS.includes(pathname)) return true;
@@ -128,6 +128,7 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const formOnly = isFormOnlyPath(pathname);
+  const isResults = pathname === "/matokeo";
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -139,12 +140,12 @@ function RootComponent() {
           <MaintenanceGate />
           {formOnly ? (
             <div className="border-b border-border bg-background/90 px-4 py-3 backdrop-blur">
-              <div className="mx-auto flex max-w-3xl items-center justify-between">
+              <div className="mx-auto flex max-w-5xl items-center justify-between">
                 <Link
-                  to="/huduma"
+                  to={isResults ? "/fuatilia" : "/huduma"}
                   className="inline-flex items-center gap-2 rounded-lg border border-border bg-secondary px-3 py-1.5 text-sm font-semibold text-foreground/80 transition hover:border-primary hover:text-primary"
                 >
-                  ← Rudi kwa Huduma
+                  {isResults ? "← Rudi Kufuatilia" : "← Rudi kwa Huduma"}
                 </Link>
                 <span className="text-sm font-bold uppercase tracking-wide text-primary">MUMSO</span>
               </div>
