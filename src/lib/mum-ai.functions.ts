@@ -64,8 +64,15 @@ export const askMumAI = createServerFn({ method: "POST" })
     let knowledge = "";
     try {
       const { createClient } = await import("@supabase/supabase-js");
-      const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
-      const sb = createClient(process.env["SUPABASE_URL"]!, key, {
+      // Ufunguo wa umma pekee (kama sehemu ya kufuatilia) — hakuna ufunguo wa siri wa seva.
+      const key = (process.env["SUPABASE_PUBLISHABLE_KEY"] ||
+        process.env["VITE_SUPABASE_PUBLISHABLE_KEY"] ||
+        process.env["SUPABASE_ANON_KEY"] ||
+        import.meta.env["VITE_SUPABASE_PUBLISHABLE_KEY"]) as string;
+      const url = (process.env["SUPABASE_URL"] ||
+        process.env["VITE_SUPABASE_URL"] ||
+        import.meta.env["VITE_SUPABASE_URL"]) as string;
+      const sb = createClient(url, key, {
         auth: { persistSession: false, autoRefreshToken: false },
         global: {
           fetch: (input: any, init: any) => {

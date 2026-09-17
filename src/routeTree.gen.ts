@@ -18,6 +18,7 @@ import { Route as JisajiliKiongoziRouteImport } from './routes/jisajili-kiongozi
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as MahafaRouteImport } from './routes/mahafa'
 import { Route as MatangazoRouteImport } from './routes/matangazo'
+import { Route as MatokeoRouteImport } from './routes/matokeo'
 import { Route as MikopoRouteImport } from './routes/mikopo'
 import { Route as MisibaRouteImport } from './routes/misiba'
 import { Route as PublicRouteImport } from './routes/public'
@@ -72,6 +73,11 @@ const MatangazoRoute = MatangazoRouteImport.update({
   path: '/matangazo',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MatokeoRoute = MatokeoRouteImport.update({
+  id: '/matokeo',
+  path: '/matokeo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MikopoRoute = MikopoRouteImport.update({
   id: '/mikopo',
   path: '/mikopo',
@@ -123,6 +129,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/mahafa': typeof MahafaRoute
   '/matangazo': typeof MatangazoRouteWithChildren
+  '/matokeo': typeof MatokeoRoute
   '/mikopo': typeof MikopoRoute
   '/misiba': typeof MisibaRoute
   '/public': typeof PublicRoute
@@ -142,6 +149,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/mahafa': typeof MahafaRoute
   '/matangazo': typeof MatangazoRouteWithChildren
+  '/matokeo': typeof MatokeoRoute
   '/mikopo': typeof MikopoRoute
   '/misiba': typeof MisibaRoute
   '/public': typeof PublicRoute
@@ -162,6 +170,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/mahafa': typeof MahafaRoute
   '/matangazo': typeof MatangazoRouteWithChildren
+  '/matokeo': typeof MatokeoRoute
   '/mikopo': typeof MikopoRoute
   '/misiba': typeof MisibaRoute
   '/public': typeof PublicRoute
@@ -183,6 +192,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/mahafa'
     | '/matangazo'
+    | '/matokeo'
     | '/mikopo'
     | '/misiba'
     | '/public'
@@ -202,6 +212,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/mahafa'
     | '/matangazo'
+    | '/matokeo'
     | '/mikopo'
     | '/misiba'
     | '/public'
@@ -221,6 +232,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/mahafa'
     | '/matangazo'
+    | '/matokeo'
     | '/mikopo'
     | '/misiba'
     | '/public'
@@ -241,6 +253,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   MahafaRoute: typeof MahafaRoute
   MatangazoRoute: typeof MatangazoRouteWithChildren
+  MatokeoRoute: typeof MatokeoRoute
   MikopoRoute: typeof MikopoRoute
   MisibaRoute: typeof MisibaRoute
   PublicRoute: typeof PublicRoute
@@ -313,6 +326,13 @@ declare module '@tanstack/react-router' {
       path: '/matangazo'
       fullPath: '/matangazo'
       preLoaderRoute: typeof MatangazoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/matokeo': {
+      id: '/matokeo'
+      path: '/matokeo'
+      fullPath: '/matokeo'
+      preLoaderRoute: typeof MatokeoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mikopo': {
@@ -396,6 +416,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   MahafaRoute: MahafaRoute,
   MatangazoRoute: MatangazoRouteWithChildren,
+  MatokeoRoute: MatokeoRoute,
   MikopoRoute: MikopoRoute,
   MisibaRoute: MisibaRoute,
   PublicRoute: PublicRoute,
