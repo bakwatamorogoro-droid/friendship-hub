@@ -46,7 +46,7 @@ export function StatusOverlay({
         <h2 className={`mt-5 text-2xl font-black ${ok ? "text-primary" : "text-destructive"}`}>
           {status.title ?? (ok ? "Imefanikiwa!" : "Imeshindikana")}
         </h2>
-        <p className="mt-2 text-base text-muted-foreground">{status.message}</p>
+        <p className="mt-2 whitespace-pre-line text-base text-muted-foreground">{status.message}</p>
         <Button className="btn-3d mt-6 w-full" size="lg" onClick={onClose}>
           {ok ? "Nimeelewa" : "Jaribu Tena"}
         </Button>
