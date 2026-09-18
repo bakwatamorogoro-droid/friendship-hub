@@ -3,6 +3,7 @@ import { useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { showStatus } from "@/lib/status";
+import { newTrackCode, trackCodeMessage } from "@/lib/track-code";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -50,10 +51,11 @@ function MisibaPage() {
     const parsed = schema.safeParse(form);
     if (!parsed.success) { showStatus("error", "Tafadhali jaza taarifa zote kwa usahihi."); return; }
     setLoading(true);
-    const { error } = await supabase.from("deaths").insert(parsed.data);
+    const code = newTrackCode();
+    const { error } = await (supabase.from("deaths") as any).insert({ ...parsed.data, track_code: code });
     setLoading(false);
     if (error) { showStatus("error", "Hitilafu: " + error.message); return; }
-    showStatus("success", "Taarifa imepokelewa. Tunakupa pole.");
+    showStatus({ type: "success", title: "Taarifa imepokelewa", message: trackCodeMessage(code, "Taarifa imepokelewa. Tunakupa pole.") });
     setForm(empty);
   };
 

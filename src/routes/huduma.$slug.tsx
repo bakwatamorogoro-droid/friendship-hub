@@ -3,6 +3,7 @@ import { useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { showStatus } from "@/lib/status";
+import { newTrackCode, trackCodeMessage } from "@/lib/track-code";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -103,7 +104,9 @@ function DepartmentPage() {
       attachment_name = file.name;
     }
 
+    const code = newTrackCode();
     const { error } = await (supabase.from("department_submissions") as any).insert({
+      track_code: code,
       department_id: dept.id,
       full_name: parsed.data.full_name,
       registration_number: parsed.data.registration_number,
@@ -117,7 +120,7 @@ function DepartmentPage() {
     });
     setLoading(false);
     if (error) { showStatus("error", "Hitilafu: " + error.message); return; }
-    showStatus("success", `Ombi lako limepokelewa na ${dept.name}.`);
+    showStatus({ type: "success", title: "Ombi limepokelewa", message: trackCodeMessage(code, `Ombi lako limepokelewa na ${dept.name}.`) });
     setForm({ full_name: "", registration_number: "", phone: "", gender: "", course: "", category: "", description: "" });
     setFile(null);
   };
