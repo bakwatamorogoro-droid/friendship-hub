@@ -57,7 +57,7 @@ export const askMumAI = createServerFn({ method: "POST" })
     const aiUrl = lovableKey
       ? "https://ai.gateway.lovable.dev/v1/chat/completions"
       : "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
-    const aiModel = lovableKey ? "google/gemini-3.8-flash" : "gemini-2.5-flash";
+    const aiModel = lovableKey ? "google/gemini-3.8-flash" : "gemini-3.6-flash";
     const apiKey = lovableKey ?? geminiKey!;
 
     // Maarifa ya mfumo (jedwali la ai_knowledge + huduma, idara, viongozi, matangazo)
