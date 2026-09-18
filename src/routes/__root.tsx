@@ -14,6 +14,7 @@ import appCss from "../styles.css?url";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { MumAiWidget } from "@/components/MumAiWidget";
+import { useServiceEnabled } from "@/lib/use-site-settings";
 import { Toaster } from "@/components/ui/sonner";
 import { StatusHost } from "@/lib/status";
 import { supabase } from "@/integrations/supabase/client";
@@ -157,13 +158,19 @@ function RootComponent() {
             <RouteFade />
           </main>
           {!formOnly && <Footer />}
-          {!formOnly && <MumAiWidget />}
+          {!formOnly && <AiWidgetGate />}
           <Toaster />
           <StatusHost />
         </div>
       </LanguageProvider>
     </QueryClientProvider>
   );
+}
+
+function AiWidgetGate() {
+  const services = useServiceEnabled();
+  if (services["ai"] === false) return null;
+  return <MumAiWidget />;
 }
 
 function ThemeInjector() {

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { showStatus } from "@/lib/status";
+import { newTrackCode, trackCodeMessage } from "@/lib/track-code";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -51,10 +52,11 @@ function MikopoPage() {
     const parsed = schema.safeParse(form);
     if (!parsed.success) { showStatus("error", parsed.error.issues[0]?.message ?? "Tafadhali jaza taarifa zote kwa usahihi."); return; }
     setLoading(true);
-    const { error } = await supabase.from("loan_requests").insert({ ...parsed.data, email: "" });
+    const code = newTrackCode();
+    const { error } = await (supabase.from("loan_requests") as any).insert({ ...parsed.data, email: "", track_code: code });
     setLoading(false);
     if (error) { showStatus("error", "Hitilafu: " + error.message); return; }
-    showStatus("success", "Ombi lako limepokelewa. Tutawasiliana nawe.");
+    showStatus({ type: "success", title: "Ombi limepokelewa", message: trackCodeMessage(code, "Ombi lako la mkopo limepokelewa. Tutawasiliana nawe.") });
     setForm({ full_name: "", form_four_index: "", registration_number: "", course: "", year_of_study: "", phone: "", problem_type: "", problem_description: "" });
   };
 

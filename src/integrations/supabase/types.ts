@@ -93,6 +93,7 @@ export type Database = {
           phone: string
           registration_number: string
           status: string
+          track_code: string | null
           updated_at: string
         }
         Insert: {
@@ -107,6 +108,7 @@ export type Database = {
           phone: string
           registration_number: string
           status?: string
+          track_code?: string | null
           updated_at?: string
         }
         Update: {
@@ -121,6 +123,7 @@ export type Database = {
           phone?: string
           registration_number?: string
           status?: string
+          track_code?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -145,6 +148,7 @@ export type Database = {
           registration_number: string
           relationship: string
           student_name: string
+          track_code: string | null
         }
         Insert: {
           created_at?: string
@@ -157,6 +161,7 @@ export type Database = {
           registration_number: string
           relationship: string
           student_name: string
+          track_code?: string | null
         }
         Update: {
           created_at?: string
@@ -169,6 +174,7 @@ export type Database = {
           registration_number?: string
           relationship?: string
           student_name?: string
+          track_code?: string | null
         }
         Relationships: []
       }
@@ -189,6 +195,7 @@ export type Database = {
           phone: string
           registration_number: string
           status: string
+          track_code: string | null
           updated_at: string
           year_of_study: string | null
         }
@@ -208,6 +215,7 @@ export type Database = {
           phone: string
           registration_number: string
           status?: string
+          track_code?: string | null
           updated_at?: string
           year_of_study?: string | null
         }
@@ -227,6 +235,7 @@ export type Database = {
           phone?: string
           registration_number?: string
           status?: string
+          track_code?: string | null
           updated_at?: string
           year_of_study?: string | null
         }
@@ -501,6 +510,7 @@ export type Database = {
           problem_type: string
           registration_number: string
           status: string
+          track_code: string | null
           updated_at: string
           year_of_study: string
         }
@@ -517,6 +527,7 @@ export type Database = {
           problem_type: string
           registration_number: string
           status?: string
+          track_code?: string | null
           updated_at?: string
           year_of_study: string
         }
@@ -533,6 +544,7 @@ export type Database = {
           problem_type?: string
           registration_number?: string
           status?: string
+          track_code?: string | null
           updated_at?: string
           year_of_study?: string
         }
@@ -729,6 +741,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      track_code_of: { Args: { p_query: string }; Returns: string }
       track_delete: {
         Args: { p_id: string; p_kind: string; p_query: string }
         Returns: Json
@@ -736,6 +749,10 @@ export type Database = {
       track_lookup: { Args: { p_query: string }; Returns: Json }
       track_norm_phone: { Args: { v: string }; Returns: string }
       track_norm_reg: { Args: { v: string }; Returns: string }
+      track_recover_code: {
+        Args: { p_last_name: string; p_phone: string }
+        Returns: Json
+      }
       track_table_for_kind: { Args: { p_kind: string }; Returns: string }
       track_update: {
         Args: { p_id: string; p_kind: string; p_query: string; p_values: Json }
