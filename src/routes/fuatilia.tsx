@@ -33,6 +33,45 @@ function TrackPage() {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
+  const recover = useServerFn(recoverCodes);
+  const [showRecover, setShowRecover] = useState(false);
+  const [rPhone, setRPhone] = useState("");
+  const [rLast, setRLast] = useState("");
+  const [rLoading, setRLoading] = useState(false);
+  const [found, setFound] = useState<RecoveredCode[] | null>(null);
+
+  const onRecover = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (rLoading) return;
+    const form = e.currentTarget;
+    const fd = new FormData(form);
+    const phone = ((fd.get("r-phone") as string | null) ?? rPhone).trim();
+    const lastName = ((fd.get("r-last") as string | null) ?? rLast).trim();
+    if (phone.replace(/\D/g, "").length < 7 || lastName.length < 2) {
+      showStatus({
+        type: "error",
+        title: "Taarifa pungufu",
+        message: "Weka namba yako ya simu na jina lako la mwisho kama ulivyojaza kwenye fomu.",
+      });
+      return;
+    }
+    setRLoading(true);
+    try {
+      const res = await recover({ data: { phone, lastName } });
+      setFound(res.items);
+      if (!res.items.length) {
+        showStatus({
+          type: "error",
+          title: "Hakuna namba",
+          message: "Hatukupata ombi lenye namba hii ya simu na jina hili la mwisho.",
+        });
+      }
+    } catch (err: any) {
+      showStatus({ type: "error", title: "Hitilafu", message: err?.message ?? "Imeshindikana." });
+    } finally {
+      setRLoading(false);
+    }
+  };
 
   const onSearch = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
