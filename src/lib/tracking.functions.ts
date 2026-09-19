@@ -169,6 +169,34 @@ export const trackRequests = createServerFn({ method: "POST" })
     return { items };
   });
 
+export type RecoveredCode = {
+  kind: TrackKind;
+  kindLabel: string;
+  code: string | null;
+  name: string | null;
+  created_at: string;
+};
+
+/** Nimesahau namba: namba ya simu + jina la mwisho -> namba za kufuatilia. */
+export const recoverCodes = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        phone: z.string().trim().min(7).max(25),
+        lastName: z.string().trim().min(2).max(60),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data }): Promise<{ items: RecoveredCode[] }> => {
+    const db = publicDb();
+    const { data: res, error } = await db.rpc("track_recover_code" as any, {
+      p_phone: data.phone.trim(),
+      p_last_name: data.lastName.trim(),
+    } as any);
+    if (error) throw new Error("Imeshindikana: " + error.message);
+    return { items: ((res ?? []) as RecoveredCode[]) };
+  });
+
 export const updateRequest = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
     z
