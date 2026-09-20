@@ -102,18 +102,57 @@ export const askMumAI = createServerFn({ method: "POST" })
       console.error("knowledge load failed", e);
     }
 
-    const res = await fetch(aiUrl, {
+    const today = new Date().toISOString().slice(0, 10);
+    const system =
+      `${SYSTEM_PROMPT}\n\nTAREHE YA LEO: ${today}. Unaweza kutafuta Google kwa taarifa za muda halisi.` +
+      (knowledge
+        ? `\n\n=== TAARIFA HALISI KUTOKA MFUMO WA MUMSO (tumia hizi kwanza) ===\n${knowledge}`
+        : "");
+
+    const history = data.messages.slice(-10);
+
+    // 1) Gemini native + Google Search (taarifa za kweli za muda halisi)
+    if (geminiKey) {
+      try {
+        const res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent`,
+          {
+            method: "POST",
+            headers: { "x-goog-api-key": geminiKey, "Content-Type": "application/json" },
+            body: JSON.stringify({
+              system_instruction: { parts: [{ text: system }] },
+              contents: history.map((m) => ({
+                role: m.role === "assistant" ? "model" : "user",
+                parts: [{ text: m.content }],
+              })),
+              tools: [{ google_search: {} }],
+            }),
+          },
+        );
+        if (res.ok) {
+          const json: any = await res.json();
+          const parts = json.candidates?.[0]?.content?.parts ?? [];
+          const text = parts
+            .map((p: any) => p?.text ?? "")
+            .join("")
+            .trim();
+          if (text) return { reply: text };
+        } else {
+          console.error("gemini error", res.status, (await res.text()).slice(0, 300));
+        }
+      } catch (e) {
+        console.error("gemini call failed", e);
+      }
+    }
+
+    // 2) Lovable AI gateway (fallback)
+    if (!lovableKey) throw new Error("AI haipatikani kwa muda. Jaribu tena baadaye.");
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
+      headers: { Authorization: `Bearer ${lovableKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: aiModel,
-        messages: [
-          { role: "system", content: knowledge ? `${SYSTEM_PROMPT}\n\n=== TAARIFA HALISI KUTOKA MFUMO WA MUMSO (tumia hizi kwanza) ===\n${knowledge}` : SYSTEM_PROMPT },
-          ...data.messages.slice(-10),
-        ],
+        model: "google/gemini-3.8-flash",
+        messages: [{ role: "system", content: system }, ...history],
       }),
     });
 
