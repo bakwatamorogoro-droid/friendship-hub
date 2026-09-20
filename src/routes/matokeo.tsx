@@ -22,9 +22,10 @@ import { showStatus } from "@/lib/status";
 import { trackRequests, updateRequest, deleteRequest, type TrackedRequest } from "@/lib/tracking.functions";
 
 export const Route = createFileRoute("/matokeo")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    q: typeof search["q"] === "string" ? (search["q"] as string) : "",
-  }),
+  validateSearch: (search: Record<string, unknown>) => {
+    const raw = search["q"];
+    return { q: raw == null ? "" : String(raw).trim() };
+  },
   head: () => ({
     meta: [
       { title: "Matokeo ya Ufuatiliaji — MUMSO" },
