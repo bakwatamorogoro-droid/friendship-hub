@@ -173,26 +173,5 @@ export const askMumAI = createServerFn({ method: "POST" })
       }
     }
 
-    // 2) Lovable AI gateway (fallback)
-    if (!lovableKey) throw new Error("AI haipatikani kwa muda. Jaribu tena baadaye.");
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${lovableKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "google/gemini-3.8-flash",
-        messages: [{ role: "system", content: system }, ...history],
-      }),
-    });
-
-    if (!res.ok) {
-      const text = await res.text();
-      console.error("AI error", res.status, text);
-      if (res.status === 429) throw new Error("Maombi mengi sana / Too many requests. Jaribu tena baadaye.");
-      if (res.status === 402) throw new Error("Akiba ya AI imeisha / AI credits exhausted. Wasiliana na admin.");
-      throw new Error(`AI: ${text.slice(0, 180)}`);
-    }
-
-    const json = await res.json();
-    const reply = json.choices?.[0]?.message?.content ?? "Samahani, sijaweza kujibu.";
-    return { reply };
+    throw new Error("AI haipatikani kwa muda. Jaribu tena baadaye.");
   });
