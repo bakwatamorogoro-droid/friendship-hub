@@ -111,7 +111,35 @@ export const askMumAI = createServerFn({ method: "POST" })
 
     const history = data.messages.slice(-10);
 
-    // 1) Gemini native + Google Search (taarifa za kweli za muda halisi)
+    // 1) Lovable gateway + Google Search (kipaumbele kwenye Lovable)
+    if (lovableKey) {
+      try {
+        const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${lovableKey}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: "google/gemini-3.8-flash",
+            messages: [{ role: "system", content: system }, ...history],
+            tools: [{ type: "google_search" }],
+          }),
+        });
+        if (res.ok) {
+          const json: any = await res.json();
+          const text = (json.choices?.[0]?.message?.content ?? "").trim();
+          if (text) return { reply: text };
+        } else {
+          const t = await res.text();
+          console.error("gateway error", res.status, t.slice(0, 300));
+          if (res.status === 429) throw new Error("Maombi mengi sana / Too many requests. Jaribu tena baadaye.");
+          if (res.status === 402) throw new Error("Akiba ya AI imeisha / AI credits exhausted. Wasiliana na admin.");
+        }
+      } catch (e: any) {
+        if (e?.message?.includes("Maombi") || e?.message?.includes("Akiba")) throw e;
+        console.error("gateway call failed", e);
+      }
+    }
+
+    // 2) Gemini native + Google Search (seva yako mwenyewe / fallback)
     if (geminiKey) {
       try {
         const res = await fetch(
