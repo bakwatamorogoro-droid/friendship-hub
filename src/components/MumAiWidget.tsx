@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Sparkles, Send, Loader2, X } from "lucide-react";
+import { Send, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { askMumAI } from "@/lib/mum-ai.functions";
+import logoAsset from "@/assets/mumso-ai-logo.jpeg.asset.json";
 
 export function MumAiWidget() {
   const ask = useServerFn(askMumAI);
@@ -47,7 +48,12 @@ export function MumAiWidget() {
         <div className="w-[min(92vw,22rem)] overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-elegant)]">
           <div className="flex items-center justify-between gap-2 bg-primary px-4 py-3 text-primary-foreground">
             <span className="flex items-center gap-2 text-sm font-semibold">
-              <Sparkles className="h-4 w-4" /> MUMSO AI
+              <img
+                src={logoAsset.url}
+                alt="MUMSO"
+                className="h-7 w-7 rounded-full bg-primary-foreground object-cover ring-2 ring-primary-foreground/60"
+              />
+              MUMSO AI
             </span>
             <button onClick={() => setOpen(false)} aria-label="Funga" className="rounded-full p-1 hover:bg-primary-foreground/15">
               <X className="h-4 w-4" />
@@ -85,9 +91,10 @@ export function MumAiWidget() {
       <button
         onClick={() => setOpen((v) => !v)}
         aria-label="Fungua MUMSO AI"
-        className="group flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[var(--shadow-elegant)] ring-4 ring-accent/30 transition-transform hover:scale-105"
+        className="group flex items-center gap-2 rounded-full bg-primary py-1.5 pl-1.5 pr-4 text-primary-foreground shadow-[var(--shadow-elegant)] ring-4 ring-accent/30 transition-transform hover:scale-105"
       >
-        <Sparkles className="h-6 w-6" />
+        <img src={logoAsset.url} alt="MUMSO AI" className="h-11 w-11 rounded-full bg-primary-foreground object-cover" />
+        <span className="text-sm font-bold">MUMSO AI</span>
       </button>
     </div>
   );

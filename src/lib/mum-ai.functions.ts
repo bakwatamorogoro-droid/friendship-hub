@@ -4,7 +4,9 @@ const SYSTEM_PROMPT = `You are the official assistant of MUMSO (Muslim Universit
 
 RULES:
 - Detect the user's language from their message and ALWAYS reply in the same language (Swahili or English).
-- Only answer questions related to MUM/MUMSO. For unrelated questions, politely refuse: in Swahili say "Samahani, naweza kujibu maswali ya MUM na MUMSO tu." / in English say "Sorry, I can only answer questions about MUM and MUMSO."
+- Focus on MUM/MUMSO, Tanzanian higher education (TCU, HESLB, NECTA), and student life. You HAVE live Google Search: for anything time-sensitive (HESLB loan news, deadlines, results, MUM/MUMSO news, current leaders, events, prices, dates) ALWAYS search the web first and answer with the real, current facts you find, and mention the source name.
+- Never invent facts. If search gives nothing reliable, say so honestly.
+- For questions totally unrelated to students, education or MUM/MUMSO, politely decline in the user's language.
 - Be short, clear and professional.
 
 TAARIFA ZA MUM:
@@ -56,12 +58,8 @@ export const askMumAI = createServerFn({ method: "POST" })
       process.env["GEMINI_API_KEY"] || "AQ.Ab8RN6IzdIlNndg_TnDQr-NWhVKWIRjyc8c-kLmCAFPToDoLKg";
     if (!lovableKey && !geminiKey)
       throw new Error("AI haipatikani: ufunguo wa AI haujawekwa kwenye seva (LOVABLE_API_KEY au GEMINI_API_KEY).");
-    // Kwenye Lovable: gateway ya Lovable. Kwenye seva nyingine (GitHub/self-host): Gemini moja kwa moja.
-    const aiUrl = lovableKey
-      ? "https://ai.gateway.lovable.dev/v1/chat/completions"
-      : "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
-    const aiModel = lovableKey ? "google/gemini-3.8-flash" : "gemini-3.6-flash";
-    const apiKey = lovableKey ?? geminiKey!;
+    // Gemini moja kwa moja (native) ili tuweze kutumia Google Search ya muda halisi.
+    const geminiModel = "gemini-3.6-flash";
 
     // Maarifa ya mfumo (jedwali la ai_knowledge + huduma, idara, viongozi, matangazo)
     let knowledge = "";
@@ -104,30 +102,76 @@ export const askMumAI = createServerFn({ method: "POST" })
       console.error("knowledge load failed", e);
     }
 
-    const res = await fetch(aiUrl, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: aiModel,
-        messages: [
-          { role: "system", content: knowledge ? `${SYSTEM_PROMPT}\n\n=== TAARIFA HALISI KUTOKA MFUMO WA MUMSO (tumia hizi kwanza) ===\n${knowledge}` : SYSTEM_PROMPT },
-          ...data.messages.slice(-10),
-        ],
-      }),
-    });
+    const today = new Date().toISOString().slice(0, 10);
+    const system =
+      `${SYSTEM_PROMPT}\n\nTAREHE YA LEO: ${today}. Unaweza kutafuta Google kwa taarifa za muda halisi.` +
+      (knowledge
+        ? `\n\n=== TAARIFA HALISI KUTOKA MFUMO WA MUMSO (tumia hizi kwanza) ===\n${knowledge}`
+        : "");
 
-    if (!res.ok) {
-      const text = await res.text();
-      console.error("AI error", res.status, text);
-      if (res.status === 429) throw new Error("Maombi mengi sana / Too many requests. Jaribu tena baadaye.");
-      if (res.status === 402) throw new Error("Akiba ya AI imeisha / AI credits exhausted. Wasiliana na admin.");
-      throw new Error(`AI: ${text.slice(0, 180)}`);
+    const history = data.messages.slice(-10);
+
+    // 1) Lovable gateway + Google Search (kipaumbele kwenye Lovable)
+    if (lovableKey) {
+      try {
+        const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${lovableKey}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: "google/gemini-3.8-flash",
+            messages: [{ role: "system", content: system }, ...history],
+            tools: [{ type: "google_search" }],
+          }),
+        });
+        if (res.ok) {
+          const json: any = await res.json();
+          const text = (json.choices?.[0]?.message?.content ?? "").trim();
+          if (text) return { reply: text };
+        } else {
+          const t = await res.text();
+          console.error("gateway error", res.status, t.slice(0, 300));
+          if (res.status === 429) throw new Error("Maombi mengi sana / Too many requests. Jaribu tena baadaye.");
+          if (res.status === 402) throw new Error("Akiba ya AI imeisha / AI credits exhausted. Wasiliana na admin.");
+        }
+      } catch (e: any) {
+        if (e?.message?.includes("Maombi") || e?.message?.includes("Akiba")) throw e;
+        console.error("gateway call failed", e);
+      }
     }
 
-    const json = await res.json();
-    const reply = json.choices?.[0]?.message?.content ?? "Samahani, sijaweza kujibu.";
-    return { reply };
+    // 2) Gemini native + Google Search (seva yako mwenyewe / fallback)
+    if (geminiKey) {
+      try {
+        const res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent`,
+          {
+            method: "POST",
+            headers: { "x-goog-api-key": geminiKey, "Content-Type": "application/json" },
+            body: JSON.stringify({
+              system_instruction: { parts: [{ text: system }] },
+              contents: history.map((m) => ({
+                role: m.role === "assistant" ? "model" : "user",
+                parts: [{ text: m.content }],
+              })),
+              tools: [{ google_search: {} }],
+            }),
+          },
+        );
+        if (res.ok) {
+          const json: any = await res.json();
+          const parts = json.candidates?.[0]?.content?.parts ?? [];
+          const text = parts
+            .map((p: any) => p?.text ?? "")
+            .join("")
+            .trim();
+          if (text) return { reply: text };
+        } else {
+          console.error("gemini error", res.status, (await res.text()).slice(0, 300));
+        }
+      } catch (e) {
+        console.error("gemini call failed", e);
+      }
+    }
+
+    throw new Error("AI haipatikani kwa muda. Jaribu tena baadaye.");
   });
