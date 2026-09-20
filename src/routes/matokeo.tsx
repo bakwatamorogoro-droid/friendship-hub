@@ -12,6 +12,7 @@ import {
   Loader2,
   Pencil,
   Trash2,
+  MessageSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -252,6 +253,35 @@ function ResultsPage() {
                   <p className="mt-1 whitespace-pre-wrap text-sm text-foreground/85">
                     {it.adminNote || "Tafadhali pitia taarifa zako na urekebishe zilizokosewa."}
                   </p>
+                </div>
+              )}
+
+              {!needsFix && (
+                <div
+                  className={`mt-5 rounded-xl border p-4 ${
+                    idx >= 3
+                      ? "border-primary/40 bg-primary/10"
+                      : rejected
+                        ? "border-destructive/40 bg-destructive/10"
+                        : "border-border bg-secondary/40"
+                  }`}
+                >
+                  <p className="flex items-center gap-2 text-sm font-bold">
+                    <MessageSquare className="h-4 w-4" />
+                    {idx >= 3 ? "Maelekezo ya uongozi (ombi limekamilika)" : "Maoni / maelekezo ya uongozi"}
+                  </p>
+                  <p className="mt-1 whitespace-pre-wrap text-sm text-foreground/85">
+                    {it.adminNote?.trim()
+                      ? it.adminNote
+                      : idx >= 3
+                        ? "Ombi lako limekamilika. Uongozi haujaacha maelekezo ya ziada — wasiliana na ofisi ya MUMSO kwa msaada zaidi."
+                        : "Uongozi haujaacha maoni bado. Maelekezo yatatokea hapa mara ombi lako litakapopitiwa."}
+                  </p>
+                  {it.updatedAt && (
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      Imehuishwa: {new Date(it.updatedAt).toLocaleString("sw-TZ")}
+                    </p>
+                  )}
                 </div>
               )}
 
