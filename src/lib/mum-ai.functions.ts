@@ -4,7 +4,9 @@ const SYSTEM_PROMPT = `You are the official assistant of MUMSO (Muslim Universit
 
 RULES:
 - Detect the user's language from their message and ALWAYS reply in the same language (Swahili or English).
-- Only answer questions related to MUM/MUMSO. For unrelated questions, politely refuse: in Swahili say "Samahani, naweza kujibu maswali ya MUM na MUMSO tu." / in English say "Sorry, I can only answer questions about MUM and MUMSO."
+- Focus on MUM/MUMSO, Tanzanian higher education (TCU, HESLB, NECTA), and student life. You HAVE live Google Search: for anything time-sensitive (HESLB loan news, deadlines, results, MUM/MUMSO news, current leaders, events, prices, dates) ALWAYS search the web first and answer with the real, current facts you find, and mention the source name.
+- Never invent facts. If search gives nothing reliable, say so honestly.
+- For questions totally unrelated to students, education or MUM/MUMSO, politely decline in the user's language.
 - Be short, clear and professional.
 
 TAARIFA ZA MUM:
@@ -56,12 +58,8 @@ export const askMumAI = createServerFn({ method: "POST" })
       process.env["GEMINI_API_KEY"] || "AQ.Ab8RN6IzdIlNndg_TnDQr-NWhVKWIRjyc8c-kLmCAFPToDoLKg";
     if (!lovableKey && !geminiKey)
       throw new Error("AI haipatikani: ufunguo wa AI haujawekwa kwenye seva (LOVABLE_API_KEY au GEMINI_API_KEY).");
-    // Kwenye Lovable: gateway ya Lovable. Kwenye seva nyingine (GitHub/self-host): Gemini moja kwa moja.
-    const aiUrl = lovableKey
-      ? "https://ai.gateway.lovable.dev/v1/chat/completions"
-      : "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
-    const aiModel = lovableKey ? "google/gemini-3.8-flash" : "gemini-3.6-flash";
-    const apiKey = lovableKey ?? geminiKey!;
+    // Gemini moja kwa moja (native) ili tuweze kutumia Google Search ya muda halisi.
+    const geminiModel = "gemini-3.6-flash";
 
     // Maarifa ya mfumo (jedwali la ai_knowledge + huduma, idara, viongozi, matangazo)
     let knowledge = "";
