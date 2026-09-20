@@ -99,13 +99,13 @@ function TrackPage() {
           <Search className="h-8 w-8" /> Fuatilia Ombi Lako
         </h1>
         <p className="relative z-10 mt-2 text-base text-primary-foreground/85 md:text-lg">
-          Weka namba ya simu <span className="font-semibold">au</span> namba ya usajili uliyotumia kwenye fomu.
+          Weka namba yako ya kufuatilia ya tarakimu sita uliyopewa baada ya kutuma ombi.
         </p>
       </div>
 
       <form onSubmit={onSearch} className="digital-card mt-8 flex flex-col gap-3 p-6 sm:flex-row sm:items-end">
         <div className="flex-1 space-y-2">
-          <Label htmlFor="track-query">Namba ya simu au namba ya usajili *</Label>
+          <Label htmlFor="track-query">Namba ya kufuatilia *</Label>
           <Input
             id="track-query"
             name="track-query"
@@ -113,7 +113,8 @@ function TrackPage() {
             onChange={(e) => setQuery(e.target.value)}
             required
             minLength={3}
-            placeholder="0712 345 678 au MUM/BCS/2024/001"
+            inputMode="numeric"
+            placeholder="Mf. 123456"
           />
         </div>
         <Button type="submit" disabled={loading} className="sm:w-40">

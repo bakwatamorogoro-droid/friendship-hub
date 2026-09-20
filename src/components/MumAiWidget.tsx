@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Sparkles, Send, Loader2, X } from "lucide-react";
+import { Send, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { askMumAI } from "@/lib/mum-ai.functions";
+import logoAsset from "@/assets/mumso-ai-logo.jpeg.asset.json";
 
 export function MumAiWidget() {
   const ask = useServerFn(askMumAI);
