@@ -52,10 +52,8 @@ export const askMumAI = createServerFn({ method: "POST" })
   .inputValidator((d: { messages: Array<{ role: "user" | "assistant"; content: string }> }) => d)
   .handler(async ({ data }) => {
     const lovableKey = process.env["LOVABLE_API_KEY"];
-    // Ufunguo wa Gemini umewekwa moja kwa moja ili AI ifanye kazi kwenye seva yoyote
-    // (GitHub/Vercel) bila mipangilio ya ziada. Ukitaka kuubadilisha, weka GEMINI_API_KEY.
-    const geminiKey =
-      process.env["GEMINI_API_KEY"] || "AQ.Ab8RN6IzdIlNndg_TnDQr-NWhVKWIRjyc8c-kLmCAFPToDoLKg";
+    // GitHub/Vercel husoma GEMINI_API_KEY kutoka mazingira salama ya seva.
+    const geminiKey = process.env["GEMINI_API_KEY"];
     if (!lovableKey && !geminiKey)
       throw new Error("AI haipatikani: ufunguo wa AI haujawekwa kwenye seva (LOVABLE_API_KEY au GEMINI_API_KEY).");
     // Gemini moja kwa moja (native) ili tuweze kutumia Google Search ya muda halisi.
