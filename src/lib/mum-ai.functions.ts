@@ -167,6 +167,8 @@ export const askMumAI = createServerFn({ method: "POST" })
 
     const history = data.messages.slice(-10);
 
+    let pendingError: Error | null = null;
+
     // 1) Gemini moja kwa moja + Google Search. Hii ndiyo njia kuu kwa GitHub/Vercel.
     if (geminiKey) {
       try {
@@ -198,32 +200,29 @@ export const askMumAI = createServerFn({ method: "POST" })
               .join("")
               .trim();
             if (text) return { reply: text };
-            throw new Error("AI haikutoa jibu. Tafadhali uliza tena.");
+            break;
           }
 
           const detail = await res.text();
           console.error("gemini error", res.status, detail.slice(0, 300));
-          if (res.status !== 429 && res.status < 500) {
-            throw new Error(
-              res.status === 401 || res.status === 403
-                ? "Ufunguo wa AI haujakubaliwa na Google. Menejimenti iangalie GEMINI_API_KEY kwenye seva."
-                : `AI imeshindwa kupokea ombi (${res.status}). Tafadhali jaribu tena baadae.`,
-            );
-          }
+          if (res.status !== 429 && res.status < 500) break;
         }
-        throw new Error(
+        pendingError = new Error(
           lastStatus === 429
             ? "Maombi mengi sana kwa sasa. Tafadhali subiri kidogo ujaribu tena."
-            : "Huduma ya AI ina msongamano kwa sasa. Tafadhali jaribu tena baadae.",
+            : lastStatus === 401 || lastStatus === 403
+              ? "Ufunguo wa AI haujakubaliwa na Google. Menejimenti iangalie GEMINI_API_KEY kwenye seva."
+              : "Huduma ya AI ina msongamano kwa sasa. Tafadhali jaribu tena baadae.",
         );
       } catch (error) {
-        if (error instanceof Error) throw error;
-        throw new Error("AI haipatikani kwa muda. Tafadhali jaribu tena baadae.");
+        console.error("gemini request failed", error);
+        pendingError = new Error("AI haipatikani kwa muda. Tafadhali jaribu tena baadae.");
       }
     }
 
-    // 2) Lovable AI ni njia ya pili pale GEMINI_API_KEY haijawekwa.
+    // 2) Lovable AI ni njia ya pili (pia pale Gemini imekwama au imezidiwa).
     if (lovableKey) {
+
       try {
         const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
