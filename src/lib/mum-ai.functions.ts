@@ -167,67 +167,89 @@ export const askMumAI = createServerFn({ method: "POST" })
 
     const history = data.messages.slice(-10);
 
-    // 1) Lovable gateway + Google Search (kipaumbele kwenye Lovable)
+    // 1) Gemini moja kwa moja + Google Search. Hii ndiyo njia kuu kwa GitHub/Vercel.
+    if (geminiKey) {
+      try {
+        let lastStatus = 0;
+        for (let attempt = 0; attempt < 2; attempt += 1) {
+          if (attempt > 0) await new Promise((resolve) => setTimeout(resolve, 900));
+          const res = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent`,
+            {
+              method: "POST",
+              headers: { "x-goog-api-key": geminiKey, "Content-Type": "application/json" },
+              body: JSON.stringify({
+                system_instruction: { parts: [{ text: system }] },
+                contents: history.map((m) => ({
+                  role: m.role === "assistant" ? "model" : "user",
+                  parts: [{ text: m.content }],
+                })),
+                tools: [{ google_search: {} }],
+              }),
+            },
+          );
+          lastStatus = res.status;
+          if (res.ok) {
+            const json = (await res.json()) as {
+              candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+            };
+            const text = (json.candidates?.[0]?.content?.parts ?? [])
+              .map((part) => part.text ?? "")
+              .join("")
+              .trim();
+            if (text) return { reply: text };
+            throw new Error("AI haikutoa jibu. Tafadhali uliza tena.");
+          }
+
+          const detail = await res.text();
+          console.error("gemini error", res.status, detail.slice(0, 300));
+          if (res.status !== 429 && res.status < 500) {
+            throw new Error(
+              res.status === 401 || res.status === 403
+                ? "Ufunguo wa AI haujakubaliwa na Google. Menejimenti iangalie GEMINI_API_KEY kwenye seva."
+                : `AI imeshindwa kupokea ombi (${res.status}). Tafadhali jaribu tena baadae.`,
+            );
+          }
+        }
+        throw new Error(
+          lastStatus === 429
+            ? "Maombi mengi sana kwa sasa. Tafadhali subiri kidogo ujaribu tena."
+            : "Huduma ya AI ina msongamano kwa sasa. Tafadhali jaribu tena baadae.",
+        );
+      } catch (error) {
+        if (error instanceof Error) throw error;
+        throw new Error("AI haipatikani kwa muda. Tafadhali jaribu tena baadae.");
+      }
+    }
+
+    // 2) Lovable AI ni njia ya pili pale GEMINI_API_KEY haijawekwa.
     if (lovableKey) {
       try {
         const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
-          headers: { Authorization: `Bearer ${lovableKey}`, "Content-Type": "application/json" },
+          headers: {
+            "Lovable-API-Key": lovableKey,
+            "X-Lovable-AIG-SDK": "fetch",
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify({
             model: "google/gemini-3.8-flash",
             messages: [{ role: "system", content: system }, ...history],
-            tools: [{ type: "google_search" }],
           }),
         });
         if (res.ok) {
-          const json: any = await res.json();
+          const json = (await res.json()) as {
+            choices?: Array<{ message?: { content?: string } }>;
+          };
           const text = (json.choices?.[0]?.message?.content ?? "").trim();
           if (text) return { reply: text };
-        } else {
-          const t = await res.text();
-          console.error("gateway error", res.status, t.slice(0, 300));
-          if (res.status === 429)
-            throw new Error("Maombi mengi sana / Too many requests. Jaribu tena baadaye.");
-          if (res.status === 402)
-            throw new Error("Akiba ya AI imeisha / AI credits exhausted. Wasiliana na admin.");
         }
-      } catch (e: any) {
-        if (e?.message?.includes("Maombi") || e?.message?.includes("Akiba")) throw e;
-        console.error("gateway call failed", e);
-      }
-    }
-
-    // 2) Gemini native + Google Search (seva yako mwenyewe / fallback)
-    if (geminiKey) {
-      try {
-        const res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent`,
-          {
-            method: "POST",
-            headers: { "x-goog-api-key": geminiKey, "Content-Type": "application/json" },
-            body: JSON.stringify({
-              system_instruction: { parts: [{ text: system }] },
-              contents: history.map((m) => ({
-                role: m.role === "assistant" ? "model" : "user",
-                parts: [{ text: m.content }],
-              })),
-              tools: [{ google_search: {} }],
-            }),
-          },
-        );
-        if (res.ok) {
-          const json: any = await res.json();
-          const parts = json.candidates?.[0]?.content?.parts ?? [];
-          const text = parts
-            .map((p: any) => p?.text ?? "")
-            .join("")
-            .trim();
-          if (text) return { reply: text };
-        } else {
-          console.error("gemini error", res.status, (await res.text()).slice(0, 300));
-        }
-      } catch (e) {
-        console.error("gemini call failed", e);
+        const detail = await res.text();
+        console.error("lovable gateway error", res.status, detail.slice(0, 300));
+        throw new Error(`AI imeshindwa kupokea ombi (${res.status}). Tafadhali jaribu tena baadae.`);
+      } catch (error) {
+        if (error instanceof Error) throw error;
+        throw new Error("AI haipatikani kwa muda. Tafadhali jaribu tena baadae.");
       }
     }
 
