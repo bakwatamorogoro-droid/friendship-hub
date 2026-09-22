@@ -245,12 +245,13 @@ export const askMumAI = createServerFn({ method: "POST" })
         }
         const detail = await res.text();
         console.error("lovable gateway error", res.status, detail.slice(0, 300));
-        throw new Error(`AI imeshindwa kupokea ombi (${res.status}). Tafadhali jaribu tena baadae.`);
       } catch (error) {
-        if (error instanceof Error) throw error;
-        throw new Error("AI haipatikani kwa muda. Tafadhali jaribu tena baadae.");
+        console.error("lovable gateway failed", error);
       }
     }
 
-    throw new Error("AI haipatikani kwa muda. Jaribu tena baadaye.");
+    throw (
+      pendingError ?? new Error("AI haipatikani kwa muda. Tafadhali jaribu tena baadaye.")
+    );
+
   });
