@@ -170,7 +170,47 @@ export const askMumAI = createServerFn({ method: "POST" })
 
     const history = data.messages.slice(-10);
 
-    // Gemini moja kwa moja + Google Search. Hii ndiyo njia kuu kwa GitHub/Vercel na Lovable.
+    let pendingError: Error | null = null;
+
+    // NJIA KUU: Lovable AI (imeunganishwa moja kwa moja, haihitaji ufunguo wa Google).
+    if (lovableKey) {
+      try {
+        const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Lovable-API-Key": lovableKey,
+            "X-Lovable-AIG-SDK": "fetch",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "google/gemini-3.8-flash",
+            messages: [{ role: "system", content: system }, ...history],
+          }),
+        });
+        if (res.ok) {
+          const json = (await res.json()) as {
+            choices?: Array<{ message?: { content?: string } }>;
+          };
+          const text = (json.choices?.[0]?.message?.content ?? "").trim();
+          if (text) return { reply: text };
+        } else {
+          const detail = await res.text();
+          console.error("lovable gateway error", res.status, detail.slice(0, 300));
+          pendingError = new Error(
+            res.status === 429
+              ? "Maombi mengi sana kwa sasa. Tafadhali subiri kidogo ujaribu tena."
+              : res.status === 402
+                ? "Salio la AI la Lovable limeisha. Menejimenti iongeze credits."
+                : "Lovable AI haijafanikiwa kupokea ombi. Tafadhali jaribu tena baadaye.",
+          );
+        }
+      } catch (error) {
+        console.error("lovable gateway failed", error);
+        pendingError = error instanceof Error ? error : null;
+      }
+    }
+
+    // NJIA YA PILI: Gemini moja kwa moja + Google Search (pale ufunguo wa Google upo).
     if (geminiKey) {
       try {
         let lastStatus = 0;
@@ -216,60 +256,27 @@ export const askMumAI = createServerFn({ method: "POST" })
           if (res.status !== 429 && res.status < 500) break;
         }
         if (lastStatus === 429) {
-          throw new Error(
-            lastMessage || "Maombi mengi sana kwa sasa. Tafadhali subiri kidogo ujaribu tena.",
-          );
+          pendingError =
+            pendingError ??
+            new Error(
+              lastMessage || "Maombi mengi sana kwa sasa. Tafadhali subiri kidogo ujaribu tena.",
+            );
+        } else if (lastStatus === 401 || lastStatus === 403) {
+          pendingError =
+            pendingError ??
+            new Error(lastMessage || "Ufunguo wa Google (GEMINI_API_KEY) haujakubaliwa.");
+        } else {
+          pendingError =
+            pendingError ??
+            new Error(
+              lastMessage || "Huduma ya AI ina msongamano kwa sasa. Tafadhali jaribu tena baadaye.",
+            );
         }
-        if (lastStatus === 401 || lastStatus === 403) {
-          throw new Error(
-            lastMessage ||
-              "Ufunguo wa AI haujakubaliwa. Hakikisha GEMINI_API_KEY ya Vercel ni sahihi, kisha fanya deployment mpya.",
-          );
-        }
-        throw new Error(
-          lastMessage || "Huduma ya AI ina msongamano kwa sasa. Tafadhali jaribu tena baadaye.",
-        );
       } catch (error) {
         console.error("gemini request failed", error);
-        if (error instanceof Error) throw error;
-        throw new Error("AI haipatikani kwa muda. Tafadhali jaribu tena baadaye.");
+        pendingError = pendingError ?? (error instanceof Error ? error : null);
       }
     }
 
-    // Lovable AI hutumika ndani ya Lovable tu pale GEMINI_API_KEY haijawekwa.
-    if (lovableKey) {
-      try {
-        const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            "Lovable-API-Key": lovableKey,
-            "X-Lovable-AIG-SDK": "fetch",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: "google/gemini-3.8-flash",
-            messages: [{ role: "system", content: system }, ...history],
-          }),
-        });
-        if (res.ok) {
-          const json = (await res.json()) as {
-            choices?: Array<{ message?: { content?: string } }>;
-          };
-          const text = (json.choices?.[0]?.message?.content ?? "").trim();
-          if (text) return { reply: text };
-        }
-        const detail = await res.text();
-        console.error("lovable gateway error", res.status, detail.slice(0, 300));
-        throw new Error(
-          res.status === 429
-            ? "Maombi mengi sana kwa sasa. Tafadhali subiri kidogo ujaribu tena."
-            : "Lovable AI haijafanikiwa kupokea ombi. Tafadhali jaribu tena baadaye.",
-        );
-      } catch (error) {
-        console.error("lovable gateway failed", error);
-        if (error instanceof Error) throw error;
-      }
-    }
-
-    throw new Error("AI haipatikani kwa muda. Tafadhali jaribu tena baadaye.");
+    throw pendingError ?? new Error("AI haipatikani kwa muda. Tafadhali jaribu tena baadaye.");
   });
