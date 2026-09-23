@@ -52,11 +52,14 @@ export const askMumAI = createServerFn({ method: "POST" })
   .inputValidator((d: { messages: Array<{ role: "user" | "assistant"; content: string }> }) => d)
   .handler(async ({ data }) => {
     const lovableKey = process.env["LOVABLE_API_KEY"];
-    // GitHub/Vercel husoma GEMINI_API_KEY kutoka mazingira salama ya seva.
-    const geminiKey = process.env["GEMINI_API_KEY"];
+    // Majina haya yote hutumiwa na hosting tofauti. Yanasomwa upande wa seva pekee.
+    const geminiKey =
+      process.env["GEMINI_API_KEY"] ??
+      process.env["GOOGLE_API_KEY"] ??
+      process.env["GOOGLE_GENERATIVE_AI_API_KEY"];
     if (!lovableKey && !geminiKey)
       throw new Error(
-        "AI haipatikani: ufunguo wa AI haujawekwa kwenye seva (LOVABLE_API_KEY au GEMINI_API_KEY).",
+        "AI haijaunganishwa kwenye seva hii. Weka GEMINI_API_KEY kwenye Environment Variables za Vercel, kisha fanya deployment mpya.",
       );
     // Gemini moja kwa moja (native) ili tuweze kutumia Google Search ya muda halisi.
     const geminiModel = "gemini-3.6-flash";
@@ -167,12 +170,11 @@ export const askMumAI = createServerFn({ method: "POST" })
 
     const history = data.messages.slice(-10);
 
-    let pendingError: Error | null = null;
-
-    // 1) Gemini moja kwa moja + Google Search. Hii ndiyo njia kuu kwa GitHub/Vercel.
+    // Gemini moja kwa moja + Google Search. Hii ndiyo njia kuu kwa GitHub/Vercel na Lovable.
     if (geminiKey) {
       try {
         let lastStatus = 0;
+        let lastMessage = "";
         for (let attempt = 0; attempt < 2; attempt += 1) {
           if (attempt > 0) await new Promise((resolve) => setTimeout(resolve, 900));
           const res = await fetch(
@@ -204,25 +206,38 @@ export const askMumAI = createServerFn({ method: "POST" })
           }
 
           const detail = await res.text();
+          try {
+            const parsed = JSON.parse(detail) as { error?: { message?: string } };
+            lastMessage = parsed.error?.message?.trim() ?? "";
+          } catch {
+            lastMessage = "";
+          }
           console.error("gemini error", res.status, detail.slice(0, 300));
           if (res.status !== 429 && res.status < 500) break;
         }
-        pendingError = new Error(
-          lastStatus === 429
-            ? "Maombi mengi sana kwa sasa. Tafadhali subiri kidogo ujaribu tena."
-            : lastStatus === 401 || lastStatus === 403
-              ? "Ufunguo wa AI haujakubaliwa na Google. Menejimenti iangalie GEMINI_API_KEY kwenye seva."
-              : "Huduma ya AI ina msongamano kwa sasa. Tafadhali jaribu tena baadae.",
+        if (lastStatus === 429) {
+          throw new Error(
+            lastMessage || "Maombi mengi sana kwa sasa. Tafadhali subiri kidogo ujaribu tena.",
+          );
+        }
+        if (lastStatus === 401 || lastStatus === 403) {
+          throw new Error(
+            lastMessage ||
+              "Ufunguo wa AI haujakubaliwa. Hakikisha GEMINI_API_KEY ya Vercel ni sahihi, kisha fanya deployment mpya.",
+          );
+        }
+        throw new Error(
+          lastMessage || "Huduma ya AI ina msongamano kwa sasa. Tafadhali jaribu tena baadaye.",
         );
       } catch (error) {
         console.error("gemini request failed", error);
-        pendingError = new Error("AI haipatikani kwa muda. Tafadhali jaribu tena baadae.");
+        if (error instanceof Error) throw error;
+        throw new Error("AI haipatikani kwa muda. Tafadhali jaribu tena baadaye.");
       }
     }
 
-    // 2) Lovable AI ni njia ya pili (pia pale Gemini imekwama au imezidiwa).
+    // Lovable AI hutumika ndani ya Lovable tu pale GEMINI_API_KEY haijawekwa.
     if (lovableKey) {
-
       try {
         const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
@@ -245,13 +260,16 @@ export const askMumAI = createServerFn({ method: "POST" })
         }
         const detail = await res.text();
         console.error("lovable gateway error", res.status, detail.slice(0, 300));
+        throw new Error(
+          res.status === 429
+            ? "Maombi mengi sana kwa sasa. Tafadhali subiri kidogo ujaribu tena."
+            : "Lovable AI haijafanikiwa kupokea ombi. Tafadhali jaribu tena baadaye.",
+        );
       } catch (error) {
         console.error("lovable gateway failed", error);
+        if (error instanceof Error) throw error;
       }
     }
 
-    throw (
-      pendingError ?? new Error("AI haipatikani kwa muda. Tafadhali jaribu tena baadaye.")
-    );
-
+    throw new Error("AI haipatikani kwa muda. Tafadhali jaribu tena baadaye.");
   });
