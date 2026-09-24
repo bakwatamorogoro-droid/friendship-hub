@@ -52,13 +52,18 @@ export const askMumAI = createServerFn({ method: "POST" })
   .inputValidator((d: { messages: Array<{ role: "user" | "assistant"; content: string }> }) => d)
   .handler(async ({ data }) => {
     const lovableKey = process.env["LOVABLE_API_KEY"];
-    // Majina haya yote hutumiwa na hosting tofauti. Yanasomwa upande wa seva pekee.
-    // Ufunguo wa moja kwa moja (kwa ombi la mmiliki) — unatumika seva ikikosa env var.
+    // Ufunguo unasomwa kutoka Environment Variables za seva pekee (k.m. Vercel). Hauwekwi kwenye code.
     const geminiKey =
       process.env["GEMINI_API_KEY"] ||
       process.env["GOOGLE_API_KEY"] ||
       process.env["GOOGLE_GENERATIVE_AI_API_KEY"] ||
-      "AQ.Ab8RN6IzdIlNndg_TnDQr-NWhVKWIRjyc8c-kLmCAFPToDoLKg";
+      undefined;
+    if (!lovableKey && !geminiKey) {
+      console.error("MUMSO AI: GEMINI_API_KEY haijawekwa kwenye seva.");
+      throw new Error(
+        "MUMSO AI haijaunganishwa kwa sasa. Menejimenti iweke GEMINI_API_KEY kwenye Environment Variables za Vercel, kisha ifanye deployment mpya.",
+      );
+    }
     // Gemini moja kwa moja (native) ili tuweze kutumia Google Search ya muda halisi.
     const geminiModel = "gemini-3.6-flash";
 
