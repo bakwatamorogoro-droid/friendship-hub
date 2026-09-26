@@ -244,28 +244,74 @@ function RouteFade() {
 
 function MaintenanceGate() {
   const location = useRouterState({ select: (s) => s.location.pathname });
-  const [status, setStatus] = useState<{ enabled: boolean; message: string | null } | null>(null);
+  const [now, setNow] = useState(() => Date.now());
+  const [status, setStatus] = useState<{
+    enabled: boolean;
+    message: string | null;
+    endsAt: string | null;
+  } | null>(null);
   useEffect(() => {
     supabase.from("site_settings")
-      .select("system_enabled,maintenance_message").limit(1).maybeSingle()
+      .select("system_enabled,maintenance_message,maintenance_ends_at").limit(1).maybeSingle()
       .then(({ data }) => setStatus({
         enabled: (data as any)?.system_enabled ?? true,
         message: (data as any)?.maintenance_message ?? null,
+        endsAt: (data as any)?.maintenance_ends_at ?? null,
       }));
+  }, []);
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
   }, []);
   if (!status || status.enabled) return null;
   if (location.startsWith("/admin") || location.startsWith("/login")) return null;
+  const endTime = status.endsAt ? new Date(status.endsAt).getTime() : null;
+  const remaining = endTime ? Math.max(0, endTime - now) : null;
+  const days = remaining === null ? "--" : Math.floor(remaining / 86_400_000);
+  const hours = remaining === null ? "--" : Math.floor((remaining % 86_400_000) / 3_600_000);
+  const minutes = remaining === null ? "--" : Math.floor((remaining % 3_600_000) / 60_000);
+  const seconds = remaining === null ? "--" : Math.floor((remaining % 60_000) / 1000);
+  const currentDate = new Intl.DateTimeFormat("sw-TZ", {
+    weekday: "long", day: "numeric", month: "long", year: "numeric",
+  }).format(now);
+  const currentTime = new Intl.DateTimeFormat("sw-TZ", {
+    hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
+    timeZone: "Africa/Dar_es_Salaam",
+  }).format(now);
   return (
-    <div className="fixed inset-0 z-[95] flex items-center justify-center bg-background/95 backdrop-blur-md px-4">
-      <div className="max-w-md text-center rounded-2xl border border-border bg-card p-8 shadow-[var(--shadow-elegant)]">
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
+    <div className="maintenance-screen fixed inset-0 z-[95] flex items-center justify-center overflow-hidden bg-background px-4 py-8">
+      <div className="maintenance-wave maintenance-wave-one" aria-hidden="true" />
+      <div className="maintenance-wave maintenance-wave-two" aria-hidden="true" />
+      <div className="maintenance-wave maintenance-wave-three" aria-hidden="true" />
+      <main className="maintenance-panel relative z-10 w-full max-w-2xl text-center">
+        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary ring-1 ring-primary/20">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
         </div>
-        <h1 className="text-xl font-semibold text-foreground">Mfumo Umefungwa kwa Muda</h1>
-        <p className="mt-3 text-sm text-muted-foreground">
+        <p className="text-xs font-semibold uppercase text-primary">MUMSO • Taarifa ya Mfumo</p>
+        <h1 className="mt-2 text-2xl font-bold text-foreground md:text-3xl">Mfumo Umefungwa kwa Muda</h1>
+        <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-muted-foreground md:text-base">
           {status.message ?? "Huduma za MUMSO zimefungwa kwa muda kwa matengenezo. Tafadhali jaribu tena baadaye."}
         </p>
-      </div>
+        <div className="mt-7 grid grid-cols-4 gap-2 md:gap-3" aria-label="Muda uliobaki">
+          {[
+            [days, "Siku"], [hours, "Saa"], [minutes, "Dakika"], [seconds, "Sekunde"],
+          ].map(([value, label]) => (
+            <div key={label} className="maintenance-time-block">
+              <strong className="block text-2xl font-bold text-foreground md:text-4xl">{value}</strong>
+              <span className="mt-1 block text-[10px] font-semibold uppercase text-muted-foreground md:text-xs">{label}</span>
+            </div>
+          ))}
+        </div>
+        <div className="mt-6 border-t border-border/70 pt-5">
+          <p className="text-sm font-semibold capitalize text-foreground">{currentDate}</p>
+          <p className="mt-1 font-mono text-xl font-bold text-primary">{currentTime} EAT</p>
+          {endTime && (
+            <p className="mt-2 text-xs text-muted-foreground">
+              Mfumo unatarajiwa kufunguliwa {new Date(endTime).toLocaleString("sw-TZ", { dateStyle: "medium", timeStyle: "short", timeZone: "Africa/Dar_es_Salaam" })}
+            </p>
+          )}
+        </div>
+      </main>
     </div>
   );
 }
