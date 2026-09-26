@@ -646,6 +646,7 @@ export type Database = {
           email: string | null
           id: string
           logo_url: string | null
+          maintenance_ends_at: string | null
           maintenance_message: string | null
           mum_logo_url: string | null
           phone: string | null
@@ -664,6 +665,7 @@ export type Database = {
           email?: string | null
           id?: string
           logo_url?: string | null
+          maintenance_ends_at?: string | null
           maintenance_message?: string | null
           mum_logo_url?: string | null
           phone?: string | null
@@ -682,6 +684,7 @@ export type Database = {
           email?: string | null
           id?: string
           logo_url?: string | null
+          maintenance_ends_at?: string | null
           maintenance_message?: string | null
           mum_logo_url?: string | null
           phone?: string | null
