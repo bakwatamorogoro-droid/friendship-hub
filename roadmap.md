@@ -3,6 +3,7 @@
 - [x] MUMSO AI: logo ya kawaida ya GitHub/Vercel, mwonekano wa moja kwa moja, na funguo salama za seva (Vercel inahitaji GEMINI_API_KEY yake)
 - [ ] SW/EN: kubadilisha maandishi YOTE ya mfumo (sasa ni kurasa kuu tu)
 - [ ] AI ipate data kubwa zaidi (jedwali ai_knowledge)
+- [ ] Mfumo ukifungwa: tarehe, saa, dakika, siku zilizobaki na animation ya mawimbi
 
 ## Imekamilika (12 Sep 2026)
 - Faili ya zamani ya ufuatiliaji imefutwa; /fuatilia imejaribiwa kwa ombi halisi na inafanya kazi

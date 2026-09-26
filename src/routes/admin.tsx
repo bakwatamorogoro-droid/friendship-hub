@@ -988,6 +988,25 @@ function AdminPage() {
                     setSettings({ ...settings, maintenance_message: e.target.value });
                   }} placeholder="Mf. Tunafanya matengenezo, tafadhali jaribu tena baadaye." />
               </div>
+              <div className="space-y-1">
+                <Label htmlFor="maintenance-ends-at" className="text-xs">Tarehe na saa ya mfumo kufunguliwa tena</Label>
+                <Input
+                  id="maintenance-ends-at"
+                  type="datetime-local"
+                  value={settings?.maintenance_ends_at ? new Date(settings.maintenance_ends_at).toISOString().slice(0, 16) : ""}
+                  onChange={async (e) => {
+                    if (!settings?.id) return;
+                    const value = e.target.value ? new Date(e.target.value).toISOString() : null;
+                    const { error } = await (supabase.from("site_settings") as any)
+                      .update({ maintenance_ends_at: value })
+                      .eq("id", settings.id);
+                    if (error) { toast.error(error.message); return; }
+                    setSettings({ ...settings, maintenance_ends_at: value });
+                    toast.success(value ? "Muda wa kufunguliwa umehifadhiwa" : "Muda umeondolewa");
+                  }}
+                />
+                <p className="text-xs text-muted-foreground">Kaunta ya siku, saa, dakika na sekunde itaonekana mfumo ukiwa umefungwa.</p>
+              </div>
             </div>
             <h2 className="font-semibold text-lg flex items-center gap-2"><Power className="h-5 w-5 text-primary" />Washa / Zima Huduma</h2>
             <p className="text-sm text-muted-foreground">Huduma zilizozimwa hazitakubali maombi mapya kutoka kwa wanafunzi.</p>

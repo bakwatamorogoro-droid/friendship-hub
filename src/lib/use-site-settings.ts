@@ -9,6 +9,7 @@ export type SiteSettings = {
   address: string | null;
   system_enabled: boolean | null;
   maintenance_message: string | null;
+  maintenance_ends_at: string | null;
   theme_primary: string | null;
   theme_accent: string | null;
   theme_background: string | null;
@@ -22,7 +23,7 @@ export function useSiteSettings() {
   const [s, setS] = useState<SiteSettings | null>(null);
   useEffect(() => {
     (supabase.from("site_settings") as any)
-      .select("logo_url,mum_logo_url,phone,email,address,system_enabled,maintenance_message,theme_primary,theme_accent,theme_background,president_name,president_title,president_message,president_photo_url")
+      .select("logo_url,mum_logo_url,phone,email,address,system_enabled,maintenance_message,maintenance_ends_at,theme_primary,theme_accent,theme_background,president_name,president_title,president_message,president_photo_url")
       .limit(1).maybeSingle()
       .then(({ data }: any) => setS((data as SiteSettings) ?? null));
   }, []);
