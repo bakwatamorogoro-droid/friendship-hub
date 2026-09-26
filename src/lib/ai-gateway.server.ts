@@ -4,7 +4,11 @@ import { streamText, type ModelMessage } from "ai";
 const GATEWAY_BASE_URL = "https://ai.gateway.lovable.dev/v1";
 const MODEL = "openai/gpt-6-astra";
 
-export async function askLovableAi(apiKey: string, messages: ModelMessage[]) {
+export async function askLovableAi(
+  apiKey: string,
+  instructions: string,
+  messages: ModelMessage[],
+) {
   const lovable = createOpenAI({
     baseURL: GATEWAY_BASE_URL,
     apiKey,
@@ -16,6 +20,7 @@ export async function askLovableAi(apiKey: string, messages: ModelMessage[]) {
 
   const result = streamText({
     model: lovable.responses(MODEL),
+    instructions,
     messages,
     providerOptions: {
       openai: {

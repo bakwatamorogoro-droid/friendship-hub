@@ -179,10 +179,7 @@ export const askMumAI = createServerFn({ method: "POST" })
     if (lovableKey) {
       try {
         const { askLovableAi } = await import("./ai-gateway.server");
-        const text = await askLovableAi(lovableKey, [
-          { role: "system", content: system },
-          ...history,
-        ]);
+        const text = await askLovableAi(lovableKey, system, history);
         return { reply: text };
       } catch (error) {
         console.error("lovable gateway failed", error);
