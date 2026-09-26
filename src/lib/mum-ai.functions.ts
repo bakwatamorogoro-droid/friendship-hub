@@ -175,41 +175,25 @@ export const askMumAI = createServerFn({ method: "POST" })
 
     let pendingError: Error | null = null;
 
-    // NJIA KUU: Lovable AI (imeunganishwa moja kwa moja, haihitaji ufunguo wa Google).
+    // NJIA KUU: Lovable AI iliyounganishwa na mradi. Ufunguo unabaki kwenye seva.
     if (lovableKey) {
       try {
-        const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            "Lovable-API-Key": lovableKey,
-            "X-Lovable-AIG-SDK": "fetch",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: "google/gemini-3.8-flash",
-            messages: [{ role: "system", content: system }, ...history],
-          }),
-        });
-        if (res.ok) {
-          const json = (await res.json()) as {
-            choices?: Array<{ message?: { content?: string } }>;
-          };
-          const text = (json.choices?.[0]?.message?.content ?? "").trim();
-          if (text) return { reply: text };
-        } else {
-          const detail = await res.text();
-          console.error("lovable gateway error", res.status, detail.slice(0, 300));
-          pendingError = new Error(
-            res.status === 429
-              ? "Maombi mengi sana kwa sasa. Tafadhali subiri kidogo ujaribu tena."
-              : res.status === 402
-                ? "Salio la AI la Lovable limeisha. Menejimenti iongeze credits."
-                : "Lovable AI haijafanikiwa kupokea ombi. Tafadhali jaribu tena baadaye.",
-          );
-        }
+        const { askLovableAi } = await import("./ai-gateway.server");
+        const text = await askLovableAi(lovableKey, [
+          { role: "system", content: system },
+          ...history,
+        ]);
+        return { reply: text };
       } catch (error) {
         console.error("lovable gateway failed", error);
-        pendingError = error instanceof Error ? error : null;
+        const message = error instanceof Error ? error.message : "";
+        pendingError = new Error(
+          message.includes("402")
+            ? "Salio la Lovable AI limeisha. Menejimenti iongeze credits."
+            : message.includes("429")
+              ? "Maombi mengi sana kwa sasa. Tafadhali subiri kidogo ujaribu tena."
+              : message || "Lovable AI haijafanikiwa kupokea ombi. Tafadhali jaribu tena baadaye.",
+        );
       }
     }
 
