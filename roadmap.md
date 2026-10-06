@@ -1,6 +1,9 @@
 # Roadmap
 
 - [x] MUMSO AI: logo ya kawaida ya GitHub/Vercel, mwonekano wa moja kwa moja, na funguo salama za seva (Vercel inahitaji GEMINI_API_KEY yake)
+- [x] Usajili wa mwanafunzi (/jisajili): majina, simu, REG (ya kipekee), mwaka, kozi — jedwali students
+- [x] Usajili wa kiongozi mpya: kozi, mwaka wa masomo, cheo ni dropdown yenye vyeo vilivyowekwa
+- [x] Muonekano wa kisasa: radius kubwa, gradient mpya ya hero, kivuli kipya
 - [ ] SW/EN: kubadilisha maandishi YOTE ya mfumo (sasa ni kurasa kuu tu)
 - [ ] AI ipate data kubwa zaidi (jedwali ai_knowledge)
 - [ ] Mfumo ukifungwa: tarehe, saa, dakika, siku zilizobaki na animation ya mawimbi
