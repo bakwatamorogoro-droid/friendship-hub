@@ -23,10 +23,26 @@ export const Route = createFileRoute("/jisajili-kiongozi")({
   component: LeaderSignupPage,
 });
 
+const POSITIONS = [
+  "Rais",
+  "Makamu wa Rais",
+  "Katibu Mkuu",
+  "Naibu Katibu Mkuu",
+  "Mweka Hazina",
+  "Waziri wa Idara",
+  "Naibu Waziri wa Idara",
+  "Katibu wa Idara",
+  "Mjumbe wa Kamati Kuu",
+];
+
+const YEARS = ["Mwaka wa 1", "Mwaka wa 2", "Mwaka wa 3", "Mwaka wa 4", "Mwaka wa 5"];
+
 const schema = z.object({
   full_name: z.string().trim().min(4, "Andika jina kamili").max(120),
   registration_number: z.string().trim().min(4, "Andika REG namba yako").max(60),
-  position: z.string().trim().min(2, "Andika nafasi yako ya uongozi").max(120),
+  course: z.string().trim().min(2, "Andika kozi unayosomea").max(120),
+  year_of_study: z.string().min(1, "Chagua mwaka wa masomo"),
+  position: z.string().min(1, "Chagua cheo chako"),
   phone: z.string().trim().regex(/^[+0-9\s-]{7,20}$/, "Namba ya simu si sahihi"),
   password: z.string().min(6, "Nenosiri liwe herufi 6 au zaidi").max(72),
 });
@@ -36,7 +52,10 @@ function LeaderSignupPage() {
   const [deptId, setDeptId] = useState("");
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
-  const [form, setForm] = useState({ full_name: "", registration_number: "", position: "", phone: "", password: "" });
+  const [form, setForm] = useState({
+    full_name: "", registration_number: "", course: "", year_of_study: "",
+    position: "", phone: "", password: "",
+  });
 
   useEffect(() => {
     supabase.from("departments").select("id,name").eq("active", true).order("sort_order")
@@ -52,6 +71,8 @@ function LeaderSignupPage() {
     const { error } = await (supabase.from("leader_applications") as any).insert({
       full_name: parsed.data.full_name,
       registration_number: parsed.data.registration_number,
+      course: parsed.data.course,
+      year_of_study: parsed.data.year_of_study,
       position: parsed.data.position,
       phone: parsed.data.phone,
       password_hash: parsed.data.password,
@@ -60,7 +81,7 @@ function LeaderSignupPage() {
     setLoading(false);
     if (error) { showStatus("error", "Hitilafu: " + error.message); return; }
     setDone(true);
-    setForm({ full_name: "", registration_number: "", position: "", phone: "", password: "" });
+    setForm({ full_name: "", registration_number: "", course: "", year_of_study: "", position: "", phone: "", password: "" });
     setDeptId("");
   };
 
@@ -91,10 +112,24 @@ function LeaderSignupPage() {
         <form onSubmit={submit} className="digital-card mt-8 space-y-5 p-6">
           <div className="space-y-2"><Label>Jina Kamili *</Label>
             <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} required /></div>
-          <div className="space-y-2"><Label>REG Namba ya Chuo *</Label>
-            <Input value={form.registration_number} onChange={(e) => setForm({ ...form, registration_number: e.target.value })} placeholder="MUM2021-04-07625" required /></div>
-          <div className="space-y-2"><Label>Nafasi ya Uongozi *</Label>
-            <Input value={form.position} onChange={(e) => setForm({ ...form, position: e.target.value })} placeholder="Mfano: Katibu Mkuu" required /></div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2"><Label>REG Namba ya Chuo *</Label>
+              <Input value={form.registration_number} onChange={(e) => setForm({ ...form, registration_number: e.target.value })} placeholder="MUM2021-04-07625" required /></div>
+            <div className="space-y-2"><Label>Namba ya Simu *</Label>
+              <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+255 7XX XXX XXX" required /></div>
+            <div className="space-y-2"><Label>Kozi Unayosomea *</Label>
+              <Input value={form.course} onChange={(e) => setForm({ ...form, course: e.target.value })} placeholder="Mf. LLB / BBA / BEd" required /></div>
+            <div className="space-y-2"><Label>Mwaka wa Masomo *</Label>
+              <Select value={form.year_of_study} onValueChange={(v) => setForm({ ...form, year_of_study: v })}>
+                <SelectTrigger><SelectValue placeholder="Chagua mwaka" /></SelectTrigger>
+                <SelectContent>{YEARS.map((y) => <SelectItem key={y} value={y}>{y}</SelectItem>)}</SelectContent>
+              </Select></div>
+          </div>
+          <div className="space-y-2"><Label>Cheo cha Uongozi *</Label>
+            <Select value={form.position} onValueChange={(v) => setForm({ ...form, position: v })}>
+              <SelectTrigger><SelectValue placeholder="Chagua cheo chako" /></SelectTrigger>
+              <SelectContent>{POSITIONS.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
+            </Select></div>
           <div className="space-y-2"><Label>Wizara / Idara Yako *</Label>
             <Select value={deptId} onValueChange={setDeptId}>
               <SelectTrigger><SelectValue placeholder="Chagua wizara yako" /></SelectTrigger>
@@ -103,8 +138,6 @@ function LeaderSignupPage() {
             <p className="text-xs text-muted-foreground">
               Baada ya kuidhinishwa na menejimenti, utaingia moja kwa moja kwenye paneli ya wizara hii na kuona changamoto na taarifa za wanafunzi wa wizara yako.
             </p></div>
-          <div className="space-y-2"><Label>Namba ya Simu *</Label>
-            <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} required /></div>
           <div className="space-y-2"><Label>Nenosiri Unalotaka *</Label>
             <Input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} minLength={6} required /></div>
           <Button type="submit" className="w-full" disabled={loading}>{loading ? "Inatuma..." : "Tuma Ombi la Usajili"}</Button>

@@ -18,6 +18,7 @@ const nav = [
   { to: "/matangazo", key: "nav.news" },
   { to: "/mahafa", key: "nav.grad" },
   { to: "/fuatilia", key: "nav.track" },
+  { to: "/jisajili", key: "nav.register" },
 ] as const;
 
 

@@ -14,6 +14,7 @@ const dict: Record<string, { sw: string; en: string }> = {
   "nav.leaders": { sw: "Uongozi", en: "Leadership" },
   "nav.dashboard": { sw: "Dashboard", en: "Dashboard" },
   "nav.track": { sw: "Fuatilia Huduma", en: "Track Request" },
+  "nav.register": { sw: "Jisajili", en: "Register" },
   "nav.leader_signup": { sw: "Jisajili Kiongozi", en: "Leader Registration" },
 
 

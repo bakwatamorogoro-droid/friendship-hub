@@ -401,6 +401,7 @@ export type Database = {
       leader_applications: {
         Row: {
           approved_user_id: string | null
+          course: string | null
           created_at: string
           department_id: string | null
           full_name: string
@@ -411,9 +412,11 @@ export type Database = {
           registration_number: string
           status: string
           updated_at: string
+          year_of_study: string | null
         }
         Insert: {
           approved_user_id?: string | null
+          course?: string | null
           created_at?: string
           department_id?: string | null
           full_name: string
@@ -424,9 +427,11 @@ export type Database = {
           registration_number: string
           status?: string
           updated_at?: string
+          year_of_study?: string | null
         }
         Update: {
           approved_user_id?: string | null
+          course?: string | null
           created_at?: string
           department_id?: string | null
           full_name?: string
@@ -437,6 +442,7 @@ export type Database = {
           registration_number?: string
           status?: string
           updated_at?: string
+          year_of_study?: string | null
         }
         Relationships: [
           {
@@ -697,6 +703,39 @@ export type Database = {
           theme_background?: string | null
           theme_primary?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      students: {
+        Row: {
+          course: string
+          created_at: string
+          full_name: string
+          id: string
+          phone: string
+          registration_number: string
+          updated_at: string
+          year_of_study: string
+        }
+        Insert: {
+          course: string
+          created_at?: string
+          full_name: string
+          id?: string
+          phone: string
+          registration_number: string
+          updated_at?: string
+          year_of_study: string
+        }
+        Update: {
+          course?: string
+          created_at?: string
+          full_name?: string
+          id?: string
+          phone?: string
+          registration_number?: string
+          updated_at?: string
+          year_of_study?: string
         }
         Relationships: []
       }

@@ -14,6 +14,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ChangamotoRouteImport } from './routes/changamoto'
 import { Route as FuatiliaRouteImport } from './routes/fuatilia'
+import { Route as JisajiliRouteImport } from './routes/jisajili'
 import { Route as JisajiliKiongoziRouteImport } from './routes/jisajili-kiongozi'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as MahafaRouteImport } from './routes/mahafa'
@@ -51,6 +52,11 @@ const ChangamotoRoute = ChangamotoRouteImport.update({
 const FuatiliaRoute = FuatiliaRouteImport.update({
   id: '/fuatilia',
   path: '/fuatilia',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JisajiliRoute = JisajiliRouteImport.update({
+  id: '/jisajili',
+  path: '/jisajili',
   getParentRoute: () => rootRouteImport,
 } as any)
 const JisajiliKiongoziRoute = JisajiliKiongoziRouteImport.update({
@@ -125,6 +131,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/changamoto': typeof ChangamotoRoute
   '/fuatilia': typeof FuatiliaRoute
+  '/jisajili': typeof JisajiliRoute
   '/jisajili-kiongozi': typeof JisajiliKiongoziRoute
   '/login': typeof LoginRoute
   '/mahafa': typeof MahafaRoute
@@ -145,6 +152,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/changamoto': typeof ChangamotoRoute
   '/fuatilia': typeof FuatiliaRoute
+  '/jisajili': typeof JisajiliRoute
   '/jisajili-kiongozi': typeof JisajiliKiongoziRoute
   '/login': typeof LoginRoute
   '/mahafa': typeof MahafaRoute
@@ -166,6 +174,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/changamoto': typeof ChangamotoRoute
   '/fuatilia': typeof FuatiliaRoute
+  '/jisajili': typeof JisajiliRoute
   '/jisajili-kiongozi': typeof JisajiliKiongoziRoute
   '/login': typeof LoginRoute
   '/mahafa': typeof MahafaRoute
@@ -188,6 +197,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/changamoto'
     | '/fuatilia'
+    | '/jisajili'
     | '/jisajili-kiongozi'
     | '/login'
     | '/mahafa'
@@ -208,6 +218,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/changamoto'
     | '/fuatilia'
+    | '/jisajili'
     | '/jisajili-kiongozi'
     | '/login'
     | '/mahafa'
@@ -228,6 +239,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/changamoto'
     | '/fuatilia'
+    | '/jisajili'
     | '/jisajili-kiongozi'
     | '/login'
     | '/mahafa'
@@ -249,6 +261,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   ChangamotoRoute: typeof ChangamotoRoute
   FuatiliaRoute: typeof FuatiliaRoute
+  JisajiliRoute: typeof JisajiliRoute
   JisajiliKiongoziRoute: typeof JisajiliKiongoziRoute
   LoginRoute: typeof LoginRoute
   MahafaRoute: typeof MahafaRoute
@@ -298,6 +311,13 @@ declare module '@tanstack/react-router' {
       path: '/fuatilia'
       fullPath: '/fuatilia'
       preLoaderRoute: typeof FuatiliaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/jisajili': {
+      id: '/jisajili'
+      path: '/jisajili'
+      fullPath: '/jisajili'
+      preLoaderRoute: typeof JisajiliRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/jisajili-kiongozi': {
@@ -412,6 +432,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   ChangamotoRoute: ChangamotoRoute,
   FuatiliaRoute: FuatiliaRoute,
+  JisajiliRoute: JisajiliRoute,
   JisajiliKiongoziRoute: JisajiliKiongoziRoute,
   LoginRoute: LoginRoute,
   MahafaRoute: MahafaRoute,

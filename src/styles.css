@@ -66,30 +66,30 @@
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(0.99 0.005 90);
-  --foreground: oklch(0.18 0.04 150);
+  --radius: 0.875rem;
+  --background: oklch(0.985 0.006 95);
+  --foreground: oklch(0.17 0.045 155);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.04 150);
+  --card-foreground: oklch(0.17 0.045 155);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.04 150);
-  --primary: oklch(0.38 0.12 155);
+  --popover-foreground: oklch(0.17 0.045 155);
+  --primary: oklch(0.4 0.13 158);
   --primary-foreground: oklch(0.99 0.005 90);
-  --secondary: oklch(0.95 0.03 90);
+  --secondary: oklch(0.955 0.03 95);
   --secondary-foreground: oklch(0.25 0.06 150);
-  --muted: oklch(0.96 0.01 100);
-  --muted-foreground: oklch(0.5 0.03 150);
-  --accent: oklch(0.75 0.15 75);
+  --muted: oklch(0.965 0.012 100);
+  --muted-foreground: oklch(0.48 0.03 155);
+  --accent: oklch(0.77 0.15 78);
   --accent-foreground: oklch(0.2 0.05 80);
   --destructive: oklch(0.55 0.22 25);
   --destructive-foreground: oklch(0.99 0 0);
-  --border: oklch(0.9 0.015 100);
-  --input: oklch(0.92 0.015 100);
-  --ring: oklch(0.38 0.12 155);
-  --gradient-hero: linear-gradient(135deg, oklch(0.38 0.12 155), oklch(0.28 0.1 165));
-  --gradient-accent: linear-gradient(135deg, oklch(0.75 0.15 75), oklch(0.68 0.18 60));
-  --shadow-elegant: 0 10px 40px -10px oklch(0.38 0.12 155 / 0.25);
-  --shadow-card: 0 2px 12px -4px oklch(0.18 0.04 150 / 0.08);
+  --border: oklch(0.91 0.015 100);
+  --input: oklch(0.93 0.015 100);
+  --ring: oklch(0.4 0.13 158);
+  --gradient-hero: linear-gradient(120deg, oklch(0.42 0.14 158) 0%, oklch(0.32 0.11 175) 55%, oklch(0.38 0.14 220) 100%);
+  --gradient-accent: linear-gradient(135deg, oklch(0.78 0.16 80), oklch(0.68 0.18 55));
+  --shadow-elegant: 0 18px 50px -14px oklch(0.4 0.13 158 / 0.28);
+  --shadow-card: 0 4px 20px -6px oklch(0.17 0.045 155 / 0.1);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -270,12 +270,13 @@
   font-weight: 500;
 }
 .digital-page-hero {
-  background: linear-gradient(135deg, var(--primary), oklch(0.28 0.1 165));
+  background: var(--gradient-hero);
   color: var(--primary-foreground);
-  border-radius: 1.25rem;
-  padding: 2rem;
+  border-radius: 1.5rem;
+  padding: 2.25rem;
   position: relative;
   overflow: hidden;
+  box-shadow: var(--shadow-elegant);
   animation: digital-in 0.5s ease-out both;
 }
 .digital-page-hero::after {
