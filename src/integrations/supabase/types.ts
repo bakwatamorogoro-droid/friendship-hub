@@ -783,6 +783,15 @@ export type Database = {
         }
         Returns: boolean
       }
+      student_lookup: {
+        Args: { _reg: string }
+        Returns: {
+          course: string
+          full_name: string
+          phone: string
+          year_of_study: string
+        }[]
+      }
       track_code_of: { Args: { p_query: string }; Returns: string }
       track_delete: {
         Args: { p_id: string; p_kind: string; p_query: string }
