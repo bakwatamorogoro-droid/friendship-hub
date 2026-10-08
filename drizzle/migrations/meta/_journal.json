@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1791451544497,
+      "tag": "0000_student_lookup_rpc",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791451814925,
+      "tag": "0001_grant_departments_read",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791451877177,
+      "tag": "0002_grant_has_role_execute",
+      "breakpoints": true
+    }
+  ]
+}
