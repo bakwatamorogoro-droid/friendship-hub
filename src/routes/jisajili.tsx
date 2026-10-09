@@ -1,7 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
 import { GraduationCap, ShieldCheck } from "lucide-react";
+import { rememberStudentReg } from "@/lib/student-registration";
 import { supabase } from "@/integrations/supabase/client";
 import { showStatus } from "@/lib/status";
 import { Button } from "@/components/ui/button";
@@ -28,7 +29,7 @@ const YEARS = ["Mwaka wa 1", "Mwaka wa 2", "Mwaka wa 3", "Mwaka wa 4", "Mwaka wa
 const schema = z.object({
   full_name: z.string().trim().min(4, "Andika majina yako kamili").max(120),
   phone: z.string().trim().regex(/^[+0-9\s-]{7,20}$/, "Namba ya simu si sahihi"),
-  registration_number: z.string().trim().min(4, "Andika REG namba yako").max(60),
+  registration_number: z.string().trim().toUpperCase().regex(/^[A-Z0-9][A-Z0-9/._ -]{3,59}$/, "Andika REG namba sahihi ya chuo"),
   year_of_study: z.string().min(1, "Chagua mwaka wa masomo"),
   course: z.string().trim().min(2, "Andika kozi yako").max(120),
 });
@@ -53,6 +54,7 @@ function StudentSignupPage() {
         : "Hitilafu: " + error.message);
       return;
     }
+    rememberStudentReg(parsed.data.registration_number);
     setDone(true);
     setForm({ full_name: "", phone: "", registration_number: "", year_of_study: "", course: "" });
   };
@@ -75,10 +77,10 @@ function StudentSignupPage() {
           <p className="mt-2 text-muted-foreground">
             Taarifa zako zimepokelewa na MUMSO. Asante!
           </p>
-          <Button className="mt-5" variant="outline" onClick={() => setDone(false)}>Sajili Mwanafunzi Mwingine</Button>
+          <div className="mt-5 flex flex-wrap justify-center gap-3"><Button asChild><Link to="/huduma">Omba Huduma</Link></Button><Button variant="outline" onClick={() => setDone(false)}>Sajili Mwanafunzi Mwingine</Button></div>
         </div>
       ) : (
-        <form onSubmit={submit} className="digital-card mt-8 space-y-5 p-6">
+        <form onSubmit={submit} className="mt-8 space-y-5">
           <div className="space-y-2"><Label>Majina Kamili *</Label>
             <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} placeholder="Mf. Juma Ally Hassan" required /></div>
           <div className="grid gap-4 md:grid-cols-2">

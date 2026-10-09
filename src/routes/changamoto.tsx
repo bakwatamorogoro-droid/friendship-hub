@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useRegisteredStudent } from "@/lib/student-registration";
+import { StudentIdentity } from "@/components/StudentIdentity";
 import { z } from "zod";
 import { BadgeCheck, Search, UserRound } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,6 +23,8 @@ export const Route = createFileRoute("/changamoto")({
       { name: "description", content: "Andika REG namba yako, taarifa zako zitatoka moja kwa moja — kisha tuma changamoto yako kwa wizara husika." },
       { property: "og:title", content: "Huduma — MUMSO" },
       { property: "og:description", content: "Tuma changamoto yako moja kwa moja kwa wizara husika ya MUMSO." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: ChangamotoPage,
@@ -39,8 +43,8 @@ const schema = z.object({
 function ChangamotoPage() {
   const types = useFormCategories("huduma");
   const [loading, setLoading] = useState(false);
-  const [searching, setSearching] = useState(false);
-  const [student, setStudent] = useState<Student | null>(null);
+  const identity = useRegisteredStudent();
+  const student = identity.student;
   const [departments, setDepartments] = useState<Dept[]>([]);
   const [form, setForm] = useState({
     registration_number: "", challenge_type: "", department_id: "", description: "",
@@ -54,32 +58,16 @@ function ChangamotoPage() {
       .then(({ data }: any) => setDepartments((data as Dept[]) ?? []));
   }, []);
 
-  const lookup = async (reg: string) => {
-    const clean = reg.trim();
-    if (clean.length < 4) { setStudent(null); return; }
-    setSearching(true);
-    const { data, error } = await (supabase.rpc as any)("student_lookup", { _reg: clean });
-    setSearching(false);
-    const row = Array.isArray(data) ? data[0] : data;
-    if (error || !row) {
-      setStudent(null);
-      if (!error) showStatus("error", "REG namba hii haijajisajiliwa. Jisajili kwanza kwenye ukurasa wa Jisajili.");
-      return;
-    }
-    setStudent(row as Student);
-    showStatus("success", `Karibu ${row.full_name} — taarifa zako zimepatikana.`);
-  };
-
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!student) { showStatus("error", "Andika REG namba yako kwanza ili taarifa zako zitoke."); return; }
-    const parsed = schema.safeParse(form);
+    const parsed = schema.safeParse({ ...form, registration_number: student.registration_number });
     if (!parsed.success) { showStatus("error", "Tafadhali jaza changamoto yako kwa usahihi."); return; }
     setLoading(true);
     const code = newTrackCode();
     const { error } = await (supabase.from("challenges") as any).insert({
       full_name: student.full_name,
-      registration_number: form.registration_number.trim(),
+      registration_number: student.registration_number,
       course: student.course,
       phone: student.phone,
       challenge_type: parsed.data.challenge_type,
@@ -91,7 +79,6 @@ function ChangamotoPage() {
     if (error) { showStatus("error", "Hitilafu: " + error.message); return; }
     showStatus({ type: "success", title: "Ombi limepokelewa", message: trackCodeMessage(code, "Ombi lako limefikia wizara husika. Asante!") });
     setForm({ registration_number: "", challenge_type: "", department_id: "", description: "" });
-    setStudent(null);
   };
 
   const dl = useServiceDeadline("changamoto");
@@ -106,36 +93,8 @@ function ChangamotoPage() {
       </div>
       <Countdown deadline={dl?.deadline_at} note={dl?.deadline_note} className="mt-6" />
 
-      <form onSubmit={submit} className="digital-card mt-8 p-6 space-y-5">
-        <div className="space-y-2 digital-field">
-          <Label>REG Namba ya Chuo</Label>
-          <div className="flex gap-2">
-            <Input
-              value={form.registration_number}
-              onChange={(e) => { setForm({ ...form, registration_number: e.target.value }); setStudent(null); }}
-              onBlur={(e) => lookup(e.target.value)}
-              placeholder="Mf. MUM2021-04-07625"
-              required
-            />
-            <Button type="button" variant="outline" onClick={() => lookup(form.registration_number)} disabled={searching}>
-              <Search className="h-4 w-4" /> {searching ? "Inatafuta..." : "Tafuta"}
-            </Button>
-          </div>
-        </div>
-
-        {student && (
-          <div className="rounded-xl border border-primary/30 bg-primary/5 p-4">
-            <div className="flex items-center gap-2 font-semibold text-primary">
-              <BadgeCheck className="h-5 w-5" /> Mwanafunzi amepatikana
-            </div>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2 text-sm">
-              <div className="flex items-center gap-2"><UserRound className="h-4 w-4 text-muted-foreground" /> <span><b>{student.full_name}</b></span></div>
-              <div><span className="text-muted-foreground">Simu:</span> {student.phone}</div>
-              <div><span className="text-muted-foreground">Kozi:</span> {student.course}</div>
-              <div><span className="text-muted-foreground">Mwaka:</span> {student.year_of_study}</div>
-            </div>
-          </div>
-        )}
+      <form onSubmit={submit} className="mt-8 space-y-5">
+        <StudentIdentity identity={identity} />
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2 digital-field">

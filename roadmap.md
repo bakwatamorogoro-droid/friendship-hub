@@ -1,5 +1,9 @@
 # Roadmap
 
+- [ ] REG iliyosajiliwa: taarifa automatic katika huduma zote na kumbukumbu ya kikao
+- [ ] Kurasa zote za fomu bila menyu/footer/AI
+- [ ] Takwimu halisi za wageni wa kila siku na animation
+
 - [x] MUMSO AI: logo ya kawaida ya GitHub/Vercel, mwonekano wa moja kwa moja, na funguo salama za seva (Vercel inahitaji GEMINI_API_KEY yake)
 - [x] Usajili wa mwanafunzi (/jisajili): majina, simu, REG (ya kipekee), mwaka, kozi — jedwali students
 - [x] Usajili wa kiongozi mpya: kozi, mwaka wa masomo, cheo ni dropdown yenye vyeo vilivyowekwa
