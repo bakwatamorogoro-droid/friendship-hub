@@ -7,10 +7,19 @@ import { supabase } from "@/integrations/supabase/client";
 import { resolveStorageUrl, useResolvedUrl } from "@/lib/storage-url";
 import { useServiceEnabled, useSiteSettings, useOfficialLinks } from "@/lib/use-site-settings";
 import { useI18n } from "@/lib/i18n";
+import { DailyVisitors } from "@/components/DailyVisitors";
 import { LeadershipSection } from "@/components/LeadershipSection";
 
 
 export const Route = createFileRoute("/")({
+  head: () => ({ meta: [
+    { title: "MUMSO — Huduma na Taarifa za Wanafunzi" },
+    { name: "description", content: "Usajili, huduma za wanafunzi, mikopo na matangazo ya MUMSO." },
+    { property: "og:title", content: "MUMSO — Huduma na Taarifa za Wanafunzi" },
+    { property: "og:description", content: "Ungana na viongozi wako na pata huduma na taarifa za MUMSO." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary_large_image" },
+  ] }),
   component: Index,
 });
 
@@ -201,26 +210,7 @@ function Index() {
 
 
 
-      <section className="mx-auto max-w-7xl px-4 pb-16">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {[
-            { icon: Users, value: "5,000+", label: "Wanafunzi wanaotumia mfumo" },
-            { icon: CheckCircle2, value: "1,200+", label: "Mikopo iliyoshughulikiwa" },
-            { icon: Megaphone, value: "120+", label: "Matangazo" },
-            { icon: HandHeart, value: "350+", label: "Huduma zinazoendelea" },
-          ].map((s) => (
-            <div key={s.label} className="rounded-2xl border border-border bg-card p-5 flex items-center gap-4 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-elegant)] transition">
-              <span className="h-12 w-12 grid place-items-center rounded-xl bg-primary/10 text-primary">
-                <s.icon className="h-6 w-6" />
-              </span>
-              <div>
-                <div className="text-2xl font-bold text-foreground">{s.value}</div>
-                <div className="text-xs text-muted-foreground mt-0.5">{s.label}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+      <DailyVisitors />
     </div>
   );
 }

@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { useRegisteredStudent } from "@/lib/student-registration";
+import { StudentIdentity } from "@/components/StudentIdentity";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { showStatus } from "@/lib/status";
@@ -21,6 +23,8 @@ export const Route = createFileRoute("/huduma/$slug")({
       { name: "description", content: "Tuma ombi la huduma moja kwa moja kwa kiongozi wa idara hii ya MUMSO." },
       { property: "og:title", content: "Idara ya MUMSO" },
       { property: "og:description", content: "Tuma ombi la huduma moja kwa moja kwa kiongozi wa idara." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: DepartmentPage,
@@ -49,6 +53,7 @@ const schema = z.object({
 });
 
 function DepartmentPage() {
+  const identity = useRegisteredStudent();
   const { slug } = Route.useParams();
   const dept = useDepartmentBySlug(slug);
   const deptCats = useDepartmentCategories(dept?.id);
@@ -76,7 +81,8 @@ function DepartmentPage() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!dept) return;
-    const parsed = schema.safeParse(form);
+    if (!identity.student) { showStatus("error", "Thibitisha REG namba yako kwanza."); return; }
+    const parsed = schema.safeParse({ ...form, ...identity.student });
     if (!parsed.success) {
       showStatus("error", parsed.error.issues[0]?.message ?? "Tafadhali jaza taarifa zote.");
       return;
@@ -162,30 +168,13 @@ function DepartmentPage() {
 
       <Countdown deadline={dl?.deadline_at} note={dl?.deadline_note} className="mt-6" />
 
-      <form onSubmit={submit} className="digital-card mt-8 p-6 space-y-5">
+      <form onSubmit={submit} className="mt-8 space-y-5">
+        <StudentIdentity identity={identity} />
         <p className="text-sm text-muted-foreground">
           Fomu hii inaenda moja kwa moja kwa <strong className="text-foreground">{dept.name}</strong> pekee.
         </p>
 
         <div className="grid gap-4 md:grid-cols-2">
-          <div className="space-y-2 digital-field md:col-span-2">
-            <Label>Majina Kamili *</Label>
-            <Input required minLength={2} maxLength={120} value={form.full_name}
-              onChange={(e) => setForm({ ...form, full_name: e.target.value })}
-              placeholder="Mf. Juma Ally Hassan" />
-          </div>
-          <div className="space-y-2 digital-field">
-            <Label>REG Namba (Namba ya Chuo) *</Label>
-            <Input required minLength={2} maxLength={60} value={form.registration_number}
-              onChange={(e) => setForm({ ...form, registration_number: e.target.value })}
-              placeholder="Mf. MUM/BA/2023/001" />
-          </div>
-          <div className="space-y-2 digital-field">
-            <Label>Namba ya Simu *</Label>
-            <Input required type="tel" pattern="[+0-9\s\-]{7,20}" value={form.phone}
-              onChange={(e) => setForm({ ...form, phone: e.target.value })}
-              placeholder="+255 7XX XXX XXX" />
-          </div>
           <div className="space-y-2 digital-field">
             <Label>Jinsia *</Label>
             <Select value={form.gender} onValueChange={(v) => setForm({ ...form, gender: v })}>
@@ -193,12 +182,7 @@ function DepartmentPage() {
               <SelectContent>{genders.map((g) => <SelectItem key={g} value={g}>{g}</SelectItem>)}</SelectContent>
             </Select>
           </div>
-          <div className="space-y-2 digital-field">
-            <Label>Kozi Unayosomea *</Label>
-            <Input required minLength={2} maxLength={120} value={form.course}
-              onChange={(e) => setForm({ ...form, course: e.target.value })}
-              placeholder="Mf. LLB / BBA / BEd" />
-          </div>
+
         </div>
 
         {cats.length > 0 && (
@@ -244,7 +228,7 @@ function DepartmentPage() {
           <p className="text-xs text-muted-foreground">Kikomo: MB 25 kwa faili moja.</p>
         </div>
 
-        <Button type="submit" disabled={loading} size="lg" className="w-full digital-field">
+        <Button type="submit" disabled={loading || !identity.student} size="lg" className="w-full digital-field">
           {loading ? "Inatuma..." : `Tuma kwa ${dept.name}`}
         </Button>
       </form>

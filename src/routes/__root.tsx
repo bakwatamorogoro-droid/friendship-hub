@@ -12,6 +12,7 @@ import {
 import { useEffect, useState } from "react";
 
 import appCss from "../styles.css?url";
+import { VisitorTracker } from "@/components/DailyVisitors";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { MumAiWidget } from "@/components/MumAiWidget";
@@ -118,7 +119,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-const FORM_ONLY_PATHS = ["/misiba", "/mikopo", "/changamoto", "/matokeo"];
+const FORM_ONLY_PATHS = ["/misiba", "/mikopo", "/changamoto", "/matokeo", "/jisajili", "/jisajili-kiongozi", "/fuatilia", "/login"];
 
 function isFormOnlyPath(pathname: string) {
   if (FORM_ONLY_PATHS.includes(pathname)) return true;
@@ -136,6 +137,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
         <ThemeInjector />
+        <VisitorTracker />
         <div className="flex min-h-screen flex-col bg-background">
           <RouteLoadingBar />
           <PageLoadingOverlay />
@@ -144,7 +146,7 @@ function RootComponent() {
             <div className="border-b border-border bg-background/90 px-4 py-3 backdrop-blur">
               <div className="mx-auto flex max-w-5xl items-center justify-between">
                 <Link
-                  to={isResults ? "/fuatilia" : "/huduma"}
+                  to={isResults ? "/fuatilia" : pathname === "/jisajili" || pathname === "/login" ? "/" : "/huduma"}
                   className="inline-flex items-center gap-2 rounded-lg border border-border bg-secondary px-3 py-1.5 text-sm font-semibold text-foreground/80 transition hover:border-primary hover:text-primary"
                 >
                   {isResults ? "← Rudi Kufuatilia" : "← Rudi kwa Huduma"}

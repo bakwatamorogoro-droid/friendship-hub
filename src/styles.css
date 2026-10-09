@@ -538,3 +538,8 @@ html { font-size: 17px; }
   .maintenance-wave,
   .maintenance-panel { animation: none; }
 }
+
+@keyframes visitor-bar-rise { from { transform: scaleY(0); opacity: 0; } to { transform: scaleY(1); opacity: 1; } }
+.visitor-bar { transform-origin: bottom; animation: visitor-bar-rise 900ms cubic-bezier(.2,.8,.2,1) both; }
+.student-identity { animation: maintenance-panel-in 350ms ease-out both; }
+@media (prefers-reduced-motion: reduce) { .visitor-bar, .student-identity { animation: none; } }
