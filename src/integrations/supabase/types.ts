@@ -136,6 +136,24 @@ export type Database = {
           },
         ]
       }
+      daily_visitor_events: {
+        Row: {
+          created_at: string
+          visit_day: string
+          visitor_id: string
+        }
+        Insert: {
+          created_at?: string
+          visit_day?: string
+          visitor_id: string
+        }
+        Update: {
+          created_at?: string
+          visit_day?: string
+          visitor_id?: string
+        }
+        Relationships: []
+      }
       deaths: {
         Row: {
           created_at: string
@@ -776,6 +794,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      daily_visitor_stats: {
+        Args: never
+        Returns: {
+          day: string
+          visitors: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -783,6 +808,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      record_daily_visit: { Args: { _visitor: string }; Returns: undefined }
       student_lookup: {
         Args: { _reg: string }
         Returns: {

@@ -22,6 +22,13 @@
       "when": 1791451877177,
       "tag": "0002_grant_has_role_execute",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791528512255,
+      "tag": "0003_registered_student_forms_daily_visitors",
+      "breakpoints": true
     }
   ]
 }
