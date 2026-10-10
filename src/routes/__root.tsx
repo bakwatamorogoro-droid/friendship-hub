@@ -132,17 +132,18 @@ function RootComponent() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const formOnly = isFormOnlyPath(pathname);
   const isResults = pathname === "/matokeo";
+  const management = pathname === "/admin";
 
   return (
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
         <ThemeInjector />
         <VisitorTracker />
-        <div className="flex min-h-screen flex-col bg-background">
+        <div className={`flex min-h-screen flex-col bg-background ${formOnly ? "service-form-page" : ""}`}>
           <RouteLoadingBar />
           <PageLoadingOverlay />
           <MaintenanceGate />
-          {formOnly ? (
+          {management ? null : formOnly ? (
             <div className="border-b border-border bg-background/90 px-4 py-3 backdrop-blur">
               <div className="mx-auto flex max-w-5xl items-center justify-between">
                 <Link
@@ -160,8 +161,8 @@ function RootComponent() {
           <main className="flex-1">
             <RouteFade />
           </main>
-          {!formOnly && <Footer />}
-          {!formOnly && <AiWidgetGate />}
+          {!formOnly && !management && <Footer />}
+          {!formOnly && !management && <AiWidgetGate />}
           <Toaster />
           <StatusHost />
         </div>
