@@ -1,5 +1,11 @@
 # Roadmap
 
+## Paneli ya menejimenti na viongozi
+- [ ] Menyu ya kushoto inayofungika na paneli mpya
+- [ ] Majibu, barua na fomu kwa ombi husika; ruhusa za wizara
+- [ ] Rangi za kisasa katika fomu zote za huduma
+- [ ] Jaribio la kuingia na kusoma jibu kupitia ufuatiliaji
+
 - [ ] REG iliyosajiliwa: taarifa automatic katika huduma zote na kumbukumbu ya kikao
 - [ ] Kurasa zote za fomu bila menyu/footer/AI
 - [ ] Takwimu halisi za wageni wa kila siku na animation

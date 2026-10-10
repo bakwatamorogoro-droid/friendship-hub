@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { showStatus } from "@/lib/status";
-import { trackRequests, updateRequest, deleteRequest, type TrackedRequest } from "@/lib/tracking.functions";
+import { trackRequests, updateRequest, deleteRequest, downloadReplyAttachment, type TrackedRequest } from "@/lib/tracking.functions";
 
 export const Route = createFileRoute("/matokeo")({
   validateSearch: (search: Record<string, unknown>) => {
@@ -69,6 +69,14 @@ function ResultsPage() {
   const search = useServerFn(trackRequests);
   const save = useServerFn(updateRequest);
   const remove = useServerFn(deleteRequest);
+  const download = useServerFn(downloadReplyAttachment);
+  const [downloading, setDownloading] = useState<string | null>(null);
+  const openAttachment = async (replyId: string) => {
+    setDownloading(replyId);
+    try { const result = await download({ data: { query, replyId } }); window.location.assign(result.url); }
+    catch { showStatus("error", "Faili haijapatikana. Jaribu tena."); }
+    finally { setDownloading(null); }
+  };
 
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState<TrackedRequest[]>([]);
@@ -285,6 +293,8 @@ function ResultsPage() {
                   )}
                 </div>
               )}
+
+              {Boolean(it.replies?.length) && <section className="mt-6 border-t border-border pt-5" aria-label="Majibu ya wizara"><h3 className="flex items-center gap-2 font-bold"><MessageSquare className="h-4 w-4 text-primary" />Majibu ya wizara</h3><div className="mt-4 space-y-5">{it.replies?.map(reply => <div key={reply.id} className="border-l-2 border-primary pl-4"><p className="text-xs font-semibold text-primary">{reply.reply_type === "letter" ? "Barua" : reply.reply_type === "form" ? "Fomu" : "Ujumbe"} · {new Date(reply.created_at).toLocaleString("sw-TZ")}</p><h4 className="mt-1 font-semibold">{reply.subject}</h4><p className="mt-2 whitespace-pre-wrap break-words text-sm leading-6">{reply.body}</p>{reply.attachment_path && <Button className="mt-3 max-w-full whitespace-normal" variant="outline" size="sm" disabled={downloading === reply.id} onClick={() => openAttachment(reply.id)}>{downloading === reply.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}{reply.attachment_name ?? "Pakua faili"}</Button>}</div>)}</div></section>}
 
               {isEditing ? (
                 <div className="mt-5 grid gap-3 rounded-xl border border-border bg-secondary/30 p-4 sm:grid-cols-2">

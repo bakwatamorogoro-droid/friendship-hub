@@ -634,6 +634,45 @@ export type Database = {
         }
         Relationships: []
       }
+      request_replies: {
+        Row: {
+          attachment_name: string | null
+          attachment_path: string | null
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+          kind: string
+          reply_type: string
+          request_id: string
+          subject: string
+        }
+        Insert: {
+          attachment_name?: string | null
+          attachment_path?: string | null
+          author_id?: string
+          body: string
+          created_at?: string
+          id?: string
+          kind: string
+          reply_type?: string
+          request_id: string
+          subject: string
+        }
+        Update: {
+          attachment_name?: string | null
+          attachment_path?: string | null
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          reply_type?: string
+          request_id?: string
+          subject?: string
+        }
+        Relationships: []
+      }
       service_status: {
         Row: {
           deadline_at: string | null
@@ -794,6 +833,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_manage_request: {
+        Args: { p_id: string; p_kind: string }
+        Returns: boolean
+      }
       daily_visitor_stats: {
         Args: never
         Returns: {
@@ -830,6 +873,7 @@ export type Database = {
         Args: { p_last_name: string; p_phone: string }
         Returns: Json
       }
+      track_request_replies: { Args: { p_query: string }; Returns: Json }
       track_table_for_kind: { Args: { p_kind: string }; Returns: string }
       track_update: {
         Args: { p_id: string; p_kind: string; p_query: string; p_values: Json }

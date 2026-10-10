@@ -6,6 +6,8 @@ export type TrackField = { key: string; label: string; value: string; long?: boo
 
 export type TrackKind = "mikopo" | "changamoto" | "idara" | "misiba";
 
+export type RequestReplyRecord = { id: string; request_id: string; kind: TrackKind; subject: string; body: string; reply_type: string; attachment_path: string | null; attachment_name: string | null; created_at: string };
+
 export type TrackedRequest = {
   id: string;
   kind: TrackKind;
@@ -16,6 +18,7 @@ export type TrackedRequest = {
   createdAt: string;
   updatedAt: string | null;
   fields: TrackField[];
+  replies?: RequestReplyRecord[];
 };
 
 /**
@@ -165,8 +168,26 @@ export const trackRequests = createServerFn({ method: "POST" })
       });
     }
 
+    const { data: replyData, error: replyError } = await db.rpc("track_request_replies", { p_query: data.query.trim() });
+    if (replyError) throw new Error("Majibu ya uongozi hayajapakiwa. Jaribu tena.");
+    const replies = (replyData ?? []) as unknown as RequestReplyRecord[];
+    for (const item of items) item.replies = replies.filter(r => r.request_id === item.id && r.kind === item.kind);
     items.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
     return { items };
+  });
+
+export const downloadReplyAttachment = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => z.object({ query: z.string().trim().min(3).max(60), replyId: z.string().uuid() }).parse(input))
+  .handler(async ({ data }) => {
+    const db = publicDb();
+    const { data: records, error } = await db.rpc("track_request_replies", { p_query: data.query });
+    if (error) throw new Error("Imeshindikana kuthibitisha ombi.");
+    const reply = ((records ?? []) as unknown as RequestReplyRecord[]).find(r => r.id === data.replyId);
+    if (!reply?.attachment_path) throw new Error("Faili haijapatikana kwenye ombi hili.");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: signed, error: signError } = await supabaseAdmin.storage.from("request-replies").createSignedUrl(reply.attachment_path, 300);
+    if (signError || !signed?.signedUrl) throw new Error("Faili haijapatikana. Jaribu tena.");
+    return { url: signed.signedUrl };
   });
 
 export type RecoveredCode = {

@@ -1,9 +1,9 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, useRouter, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { createStorageUrl, useResolvedUrl } from "@/lib/storage-url";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,10 +15,20 @@ import { adminCreateUser } from "@/lib/admin.functions";
 import { approveLeaderApplication, rejectLeaderApplication } from "@/lib/leader.functions";
 import { Switch } from "@/components/ui/switch";
 import { LeadersManager } from "@/components/admin/LeadersManager";
+import { AdminNavigation } from "@/components/admin/AdminNavigation";
+import { RequestReply } from "@/components/admin/RequestReply";
+import type { TrackKind } from "@/lib/tracking.functions";
 
 
 export const Route = createFileRoute("/admin")({
-  head: () => ({ meta: [{ title: "Admin Dashboard — MUMSO" }] }),
+  head: () => ({ meta: [
+    { title: "Menejimenti na Wizara — MUMSO" },
+    { name: "description", content: "Paneli ya menejimenti na viongozi wa wizara za MUMSO." },
+    { property: "og:title", content: "Menejimenti na Wizara — MUMSO" },
+    { property: "og:description", content: "Usimamizi wa huduma, maombi na mawasiliano ya MUMSO." },
+    { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
+    { name: "robots", content: "noindex" },
+  ] }),
   component: AdminPage,
 });
 
@@ -26,6 +36,10 @@ type Row = Record<string, any>;
 
 function AdminPage() {
   const nav = useNavigate();
+  const router = useRouter();
+  const { queryClient } = Route.useRouteContext();
+  const [collapsed, setCollapsed] = useState(false);
+  const [displayName, setDisplayName] = useState("");
   const createUser = useServerFn(adminCreateUser);
   const approveLeader = useServerFn(approveLeaderApplication);
   const rejectLeader = useServerFn(rejectLeaderApplication);
@@ -53,7 +67,7 @@ function AdminPage() {
   const [grads, setGrads] = useState<Row[]>([]);
   const [newGrad, setNewGrad] = useState({ title: "", content: "", event_date: "", image_url: "" });
   const [gradUploading, setGradUploading] = useState(false);
-  const [pwd, setPwd] = useState({ next: "", confirm: "" });
+  const [pwd, setPwd] = useState({ current: "", next: "", confirm: "" });
   const [pwdSaving, setPwdSaving] = useState(false);
   const [deptSubs, setDeptSubs] = useState<Row[]>([]);
   const [leaderApps, setLeaderApps] = useState<Row[]>([]);
@@ -70,11 +84,12 @@ function AdminPage() {
 
   useEffect(() => {
     (async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { nav({ to: "/login" }); return; }
-      const { data: roles } = await supabase.from("user_roles").select("role,department_id").eq("user_id", session.user.id);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { nav({ to: "/login", replace: true }); return; }
+      setDisplayName(user.user_metadata?.full_name ?? "");
+      const { data: roles } = await supabase.from("user_roles").select("role,department_id").eq("user_id", user.id);
       const admin = (roles ?? []).some((r: any) => r.role === "admin");
-      const ok = admin || (roles ?? []).some((r: any) => r.role === "leader");
+      const ok = admin || (roles ?? []).some((r: any) => r.role === "leader" && r.department_id);
       setIsAdmin(admin);
       const leaderRow = (roles ?? []).find((r: any) => r.role === "leader");
       setMyDeptId(admin ? null : (leaderRow?.department_id ?? null));
@@ -124,8 +139,11 @@ function AdminPage() {
   };
 
   const signOut = async () => {
+    await queryClient.cancelQueries();
+    queryClient.clear();
     await supabase.auth.signOut();
-    nav({ to: "/" });
+    await router.invalidate();
+    nav({ to: "/login", replace: true });
   };
 
   const filter = (rows: Row[]) => {
@@ -499,11 +517,11 @@ function AdminPage() {
     if (pwd.next.length < 6) { toast.error("Nenosiri liwe na herufi 6 au zaidi"); return; }
     if (pwd.next !== pwd.confirm) { toast.error("Manenosiri hayafanani"); return; }
     setPwdSaving(true);
-    const { error } = await supabase.auth.updateUser({ password: pwd.next });
+    const { error } = await supabase.auth.updateUser({ password: pwd.next, current_password: pwd.current });
     setPwdSaving(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Nenosiri limebadilishwa");
-    setPwd({ next: "", confirm: "" });
+    setPwd({ current: "", next: "", confirm: "" });
   };
 
   if (!ready) return <div className="p-12 text-center text-muted-foreground">Inapakia...</div>;
@@ -518,54 +536,32 @@ function AdminPage() {
     );
   }
 
-  const menuCls =
-    "lift-menu-item justify-start data-[state=active]:bg-primary data-[state=active]:text-primary-foreground";
+  const requestRows = [...deptSubs, ...challenges, ...(isAdmin ? loans : [])];
+  const pendingCount = requestRows.filter(r => r.status === "pending").length;
+  const completedCount = requestRows.filter(r => r.status === "approved" || r.status === "completed").length;
+  const counts = { deptsubs: deptSubs.length, challenges: challenges.length, loans: loans.length, deaths: deaths.length, leaderapps: leaderApps.filter(a => a.status === "pending").length };
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-10">
-      <div className="panel-3d flex flex-wrap items-center justify-between gap-4 rounded-2xl p-5">
-        <div>
-          <h1 className="text-3xl font-bold">{isAdmin ? "Management System" : "Paneli ya Kiongozi"}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {isAdmin
-              ? "Menejimenti inadhibiti mfumo wote na kuidhinisha viongozi."
-              : "Hii ni paneli yako binafsi — unaona maombi ya idara yako pekee."}
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Tafuta..." className="pl-9 w-64" />
-          </div>
-          <Button variant="outline" className="btn-3d" onClick={signOut}><LogOut className="mr-2 h-4 w-4" />Toka</Button>
-        </div>
-      </div>
-
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6 flex flex-col gap-6 items-stretch">
-        <TabsList className="lift-menu sticky top-2 z-30 flex h-auto w-full flex-wrap items-stretch justify-start gap-1.5 rounded-2xl p-2.5">
-          <TabsTrigger value="deptsubs" className={menuCls}>Huduma za Wanafunzi ({deptSubs.length})</TabsTrigger>
-          <TabsTrigger value="challenges" className={menuCls}>Changamoto ({challenges.length})</TabsTrigger>
-          {isAdmin && <TabsTrigger value="loans" className={menuCls}>Mikopo ({loans.length})</TabsTrigger>}
-          {isAdmin && <TabsTrigger value="deaths" className={menuCls}>Misiba ({deaths.length})</TabsTrigger>}
-          <TabsTrigger value="announce" className={menuCls}>Tangaza</TabsTrigger>
-          {isAdmin && <TabsTrigger value="banner" className={menuCls}>Banner</TabsTrigger>}
-          <TabsTrigger value="departments" className={menuCls}>{isAdmin ? `Idara (${depts.length})` : "Wizara Yangu"}</TabsTrigger>
-          {isAdmin && <TabsTrigger value="graduations" className={menuCls}>Mahafali ({grads.length})</TabsTrigger>}
-          {isAdmin && <TabsTrigger value="settings" className={menuCls}>Mawasiliano</TabsTrigger>}
-          {isAdmin && <TabsTrigger value="links" className={menuCls}>Tovuti Muhimu ({links.length})</TabsTrigger>}
-          {isAdmin && <TabsTrigger value="services" className={menuCls}>Huduma</TabsTrigger>}
-          <TabsTrigger value="categories" className={menuCls}>Fomu za Idara ({cats.length})</TabsTrigger>
-          {isAdmin && <TabsTrigger value="users" className={menuCls}>Watumiaji</TabsTrigger>}
-          {isAdmin && <TabsTrigger value="leaders" className={menuCls}>Viongozi</TabsTrigger>}
-          {isAdmin && <TabsTrigger value="leaderapps" className={menuCls}>Maombi ya Viongozi ({leaderApps.filter((a: any) => a.status === "pending").length})</TabsTrigger>}
-          <TabsTrigger value="password" className={menuCls}>Nenosiri</TabsTrigger>
-        </TabsList>
-
+    <div className="management-shell">
+      <Tabs orientation="vertical" value={activeTab} onValueChange={setActiveTab} className={`management-layout ${collapsed ? "nav-collapsed" : ""}`}>
+        <AdminNavigation isAdmin={isAdmin} collapsed={collapsed} toggle={() => setCollapsed(!collapsed)} counts={counts} />
+        <div className="management-main min-w-0">
+          <header className="management-header flex flex-wrap items-center justify-between gap-4 border-b border-border bg-card px-5 py-5 md:px-8">
+            <div className="min-w-0"><p className="text-xs font-semibold text-muted-foreground">MUMSO / {isAdmin ? "MENEJIMENTI" : "WIZARA"}</p><h1 className="mt-1 text-xl font-bold">{isAdmin ? "Management System" : depts.find(d => d.id === myDeptId)?.name ?? "Paneli ya Kiongozi"}</h1></div>
+            <div className="flex min-w-0 flex-wrap items-center gap-3"><span className="text-sm font-medium">{displayName}</span><Button variant="outline" size="sm" onClick={signOut}><LogOut className="h-4 w-4" />Toka</Button></div>
+          </header>
+          <div className="px-4 py-6 md:px-8">
+            <div className="mb-6 grid grid-cols-1 gap-4 border-b border-border pb-6 sm:grid-cols-3">
+              {[["Maombi yote", requestRows.length, "text-foreground"], ["Yanasubiri", pendingCount, "text-accent-foreground"], ["Yamekamilika", completedCount, "text-primary"]].map(([label,count,color]) => <div key={String(label)} className="border-l-2 border-primary/30 pl-4"><p className="text-sm text-muted-foreground">{label}</p><p className={`mt-1 text-3xl font-bold tabular-nums ${color}`}>{count}</p></div>)}
+            </div>
+            <div className="relative mb-5 max-w-md"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input aria-label="Tafuta maombi" value={search} onChange={e => setSearch(e.target.value)} placeholder="Tafuta jina, REG au ombi…" className="bg-card pl-9" /></div>
         <div className="flex-1 min-w-0 w-full">
 
         <TabsContent value="challenges">
           <DataTable
             rows={filter(challenges)}
+            requestKind="changamoto"
+            canDelete={isAdmin}
             columns={["full_name","registration_number","course","phone","challenge_type","description","created_at"]}
             onExport={() => exportCSV(challenges, "changamoto")}
             onDelete={(id) => remove("challenges", id)}
@@ -602,6 +598,8 @@ function AdminPage() {
             return (
               <DataTable
                 rows={rows}
+            requestKind="idara"
+            canDelete={isAdmin}
                 columns={["full_name","registration_number","phone","gender","course","department","category","description","attachment_url","created_at"]}
                 onExport={() => exportDeptSubsCSV(scoped)}
                 onDelete={deleteDeptSub}
@@ -615,6 +613,8 @@ function AdminPage() {
         <TabsContent value="loans">
           <DataTable
             rows={filter(loans)}
+            requestKind="mikopo"
+            canDelete={isAdmin}
             columns={["full_name","form_four_index","registration_number","course","year_of_study","phone","problem_type","problem_description","created_at"]}
             onExport={exportLoansCSV}
             onDelete={(id) => remove("loan_requests", id)}
@@ -626,6 +626,8 @@ function AdminPage() {
         <TabsContent value="deaths">
           <DataTable
             rows={filter(deaths)}
+            requestKind="misiba"
+            canDelete={isAdmin}
             columns={["deceased_name","relationship","student_name","registration_number","phone","death_date","location","description","created_at"]}
             onExport={() => exportCSV(deaths, "misiba")}
             onDelete={(id) => remove("deaths", id)}
@@ -1274,6 +1276,8 @@ function AdminPage() {
           </TabsContent>
         )}
         </div>
+          </div>
+        </div>
       </Tabs>
     </div>
   );
@@ -1303,7 +1307,7 @@ function StatusEditor({ row, onSave }: { row: Row; onSave: (id: string, status: 
       <Textarea
         rows={2}
         className="text-xs"
-        placeholder="Ujumbe wa marekebisho kwa mwombaji..."
+        placeholder="Maelekezo kwa mwombaji…"
         value={note}
         onChange={(e) => setNote(e.target.value)}
       />
@@ -1314,9 +1318,10 @@ function StatusEditor({ row, onSave }: { row: Row; onSave: (id: string, status: 
   );
 }
 
-function DataTable({ rows, columns, onExport, onDelete, onStatusSave }: {
+function DataTable({ rows, columns, onExport, onDelete, onStatusSave, requestKind, canDelete = true }: {
   rows: Row[]; columns: string[]; onExport: () => void; onDelete: (id: string) => void;
   onStatusSave?: (id: string, status: string, note: string) => void;
+  requestKind?: TrackKind; canDelete?: boolean;
 }) {
   return (
     <div className="mt-6 rounded-xl border border-border bg-card">
@@ -1351,9 +1356,10 @@ function DataTable({ rows, columns, onExport, onDelete, onStatusSave }: {
                     <StatusEditor key={`${r.id}-${r.status}-${r.admin_note ?? ""}`} row={r} onSave={onStatusSave} />
                   </td>
                 )}
-                <td className="p-3">
-                  <Button size="icon" variant="ghost" onClick={() => onDelete(r.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
-                </td>
+                <td className="p-3 align-top"><div className="flex items-center gap-2">
+                  {requestKind && <RequestReply id={r.id} kind={requestKind} name={r.full_name ?? r.student_name ?? "Mwombaji"} />}
+                  {canDelete && <Button size="icon" variant="ghost" title="Futa ombi" aria-label="Futa ombi" onClick={() => onDelete(r.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>}
+                </div></td>
               </tr>
 
             ))}
