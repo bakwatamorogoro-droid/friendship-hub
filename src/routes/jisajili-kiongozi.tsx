@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { z } from "zod";
 import { ShieldCheck, UserPlus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { submitLeaderApplication } from "@/lib/leader.functions";
 import { showStatus } from "@/lib/status";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -68,18 +69,14 @@ function LeaderSignupPage() {
     if (!parsed.success) { showStatus("error", parsed.error.issues[0]?.message ?? "Jaza taarifa zote"); return; }
     if (!deptId) { showStatus("error", "Chagua wizara/idara yako"); return; }
     setLoading(true);
-    const { error } = await (supabase.from("leader_applications") as any).insert({
-      full_name: parsed.data.full_name,
-      registration_number: parsed.data.registration_number,
-      course: parsed.data.course,
-      year_of_study: parsed.data.year_of_study,
-      position: parsed.data.position,
-      phone: parsed.data.phone,
-      password_hash: parsed.data.password,
-      department_id: deptId || null,
-    });
+    try {
+      await submitLeaderApplication({ data: { ...parsed.data, department_id: deptId } });
+    } catch (err) {
+      setLoading(false);
+      showStatus("error", err instanceof Error ? err.message : "Usajili haujakamilika");
+      return;
+    }
     setLoading(false);
-    if (error) { showStatus("error", "Hitilafu: " + error.message); return; }
     setDone(true);
     setForm({ full_name: "", registration_number: "", course: "", year_of_study: "", position: "", phone: "", password: "" });
     setDeptId("");

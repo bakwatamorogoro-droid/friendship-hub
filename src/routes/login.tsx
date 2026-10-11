@@ -37,7 +37,11 @@ function LoginPage() {
     const identifier = email.includes("@") ? email : regToEmail(email);
     const { error } = await supabase.auth.signInWithPassword({ email: identifier, password });
     setLoading(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      const m = error.message.toLowerCase();
+      toast.error(m.includes("banned") ? "Akaunti yako inasubiri idhini ya Admin Mkuu." : m.includes("invalid") ? "REG/Email au nenosiri si sahihi." : error.message);
+      return;
+    }
     toast.success("Karibu!");
     nav({ to: "/admin" });
   };
