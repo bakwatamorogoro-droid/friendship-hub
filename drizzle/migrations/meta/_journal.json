@@ -36,6 +36,13 @@
       "when": 1791616697300,
       "tag": "0004_department_scoped_request_replies",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791702611138,
+      "tag": "0005_students_gps_geofence",
+      "breakpoints": true
     }
   ]
 }
