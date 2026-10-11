@@ -38,6 +38,7 @@ const schema = z.object({
 function StudentSignupPage() {
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
+  const gate = useCampusGate();
   const [form, setForm] = useState({
     full_name: "", phone: "", registration_number: "", year_of_study: "", course: "",
   });
