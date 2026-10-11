@@ -47,8 +47,11 @@ function StudentSignupPage() {
     e.preventDefault();
     const parsed = schema.safeParse(form);
     if (!parsed.success) { showStatus("error", parsed.error.issues[0]?.message ?? "Jaza taarifa zote"); return; }
+    if (gate.status !== "inside") { showStatus("error", "GPS bado haijathibitisha uko ndani ya chuo."); return; }
     setLoading(true);
-    const { error } = await (supabase.from("students") as any).insert(parsed.data);
+    const { error } = await (supabase.from("students") as any).insert({
+      ...parsed.data, latitude: gate.lat, longitude: gate.lng,
+    });
     setLoading(false);
     if (error) {
       showStatus("error", error.message.includes("duplicate") || error.code === "23505"
