@@ -84,8 +84,49 @@ function StudentSignupPage() {
           </p>
           <div className="mt-5 flex flex-wrap justify-center gap-3"><Button asChild><Link to="/huduma">Omba Huduma</Link></Button><Button variant="outline" onClick={() => setDone(false)}>Sajili Mwanafunzi Mwingine</Button></div>
         </div>
+      ) : gate.status !== "inside" ? (
+        <div className="digital-card mt-8 p-8 text-center">
+          <MapPin className="mx-auto h-12 w-12 text-primary" />
+          {gate.status === "checking" && (
+            <>
+              <h2 className="mt-3 text-xl font-bold">Inathibitisha eneo lako...</h2>
+              <p className="mt-2 text-muted-foreground">
+                Washa GPS na uruhusu eneo (location) kwenye kivinjari. Usajili unafanyika ndani ya chuo tu.
+              </p>
+            </>
+          )}
+          {gate.status === "outside" && (
+            <>
+              <h2 className="mt-3 text-xl font-bold">Uko nje ya eneo la chuo</h2>
+              <p className="mt-2 text-muted-foreground">
+                Umbali wako kutoka chuo ni takribani mita {gate.distance.toLocaleString()}. Usajili unaruhusiwa ndani ya mita {CAMPUS_RADIUS_M} kutoka chuo. Karibu chuo kisha ujaribu tena.
+              </p>
+              <Button className="mt-5" onClick={() => window.location.reload()}>Jaribu Tena</Button>
+            </>
+          )}
+          {gate.status === "denied" && (
+            <>
+              <h2 className="mt-3 text-xl font-bold">GPS imekataliwa</h2>
+              <p className="mt-2 text-muted-foreground">
+                Ruhusu eneo (location) kwenye mipangilio ya kivinjari chako, kisha ukurasa huu upya.
+              </p>
+              <Button className="mt-5" onClick={() => window.location.reload()}>Jaribu Tena</Button>
+            </>
+          )}
+          {gate.status === "unsupported" && (
+            <>
+              <h2 className="mt-3 text-xl font-bold">Kivinjari hakiungi GPS</h2>
+              <p className="mt-2 text-muted-foreground">
+                Tumia simu au kivinjari chenye GPS ili kujisajili ndani ya chuo.
+              </p>
+            </>
+          )}
+        </div>
       ) : (
         <form onSubmit={submit} className="mt-8 space-y-5">
+          <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-sm text-primary">
+            <MapPin className="h-4 w-4" /> Uko ndani ya chuo (mita {gate.distance}) — unaweza kujisajili.
+          </div>
           <div className="space-y-2"><Label>Majina Kamili *</Label>
             <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} placeholder="Mf. Juma Ally Hassan" required /></div>
           <div className="grid gap-4 md:grid-cols-2">
