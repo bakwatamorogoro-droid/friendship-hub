@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
-import { GraduationCap, ShieldCheck } from "lucide-react";
+import { GraduationCap, MapPin, ShieldCheck } from "lucide-react";
 import { rememberStudentReg } from "@/lib/student-registration";
+import { CAMPUS_RADIUS_M, useCampusGate } from "@/lib/geofence";
 import { supabase } from "@/integrations/supabase/client";
 import { showStatus } from "@/lib/status";
 import { Button } from "@/components/ui/button";
