@@ -45,7 +45,8 @@ const schema = z.object({
   year_of_study: z.string().min(1, "Chagua mwaka wa masomo"),
   position: z.string().min(1, "Chagua cheo chako"),
   phone: z.string().trim().regex(/^[+0-9\s-]{7,20}$/, "Namba ya simu si sahihi"),
-  password: z.string().min(6, "Nenosiri liwe herufi 6 au zaidi").max(72),
+  password: z.string().min(8, "Nenosiri liwe herufi 8 au zaidi").max(72)
+    .regex(/[A-Za-z]/, "Nenosiri liwe na herufi").regex(/[0-9]/, "Nenosiri liwe na namba angalau moja"),
 });
 
 function LeaderSignupPage() {
@@ -136,7 +137,8 @@ function LeaderSignupPage() {
               Baada ya kuidhinishwa na menejimenti, utaingia moja kwa moja kwenye paneli ya wizara hii na kuona changamoto na taarifa za wanafunzi wa wizara yako.
             </p></div>
           <div className="space-y-2"><Label>Nenosiri Unalotaka *</Label>
-            <Input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} minLength={6} required /></div>
+            <Input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} minLength={8} required />
+            <p className="text-xs text-muted-foreground">Angalau herufi 8, changanya herufi kubwa, ndogo, namba na alama. Nenosiri rahisi (kama 12345678) hukataliwa.</p></div>
           <Button type="submit" className="w-full" disabled={loading}>{loading ? "Inatuma..." : "Tuma Ombi la Usajili"}</Button>
           <p className="text-center text-sm text-muted-foreground">
             Tayari umeidhinishwa? <Link to="/login" className="text-primary underline">Ingia hapa</Link>

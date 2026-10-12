@@ -40,6 +40,8 @@ export const submitLeaderApplication = createServerFn({ method: "POST" })
     if (error || !created.user) {
       const m = (error?.message ?? "").toLowerCase();
       if (m.includes("already") || m.includes("exists") || m.includes("registered")) throw new Error("REG hii tayari ina akaunti. Wasiliana na menejimenti.");
+      if (m.includes("weak") || m.includes("guess") || m.includes("password")) throw new Error("Nenosiri hili ni dhaifu au linajulikana sana. Chagua nenosiri gumu zaidi (mf. herufi, namba na alama, kama Mumso#2026Kiongozi).");
+      console.error("[leader signup]", error?.message);
       throw new Error("Usajili haujakamilika. Jaribu tena.");
     }
     const { error: insErr } = await (supabaseAdmin.from("leader_applications") as any).insert({
