@@ -201,15 +201,30 @@ function AdminPage() {
 
   const onApproveLeader = async (id: string) => {
     try {
-      const res: any = await approveLeader({ data: { applicationId: id } });
-      toast.success(`Kiongozi ameidhinishwa. Username: ${res?.email ?? "-"}`);
+      const app: any = leaderApps.find((a: any) => a.id === id);
+      if (!app) throw new Error("Ombi halijapatikana");
+      if (app.approved_user_id) {
+        if (!app.department_id) throw new Error("Ombi halina wizara.");
+        await (supabase.from("user_roles") as any).delete().eq("user_id", app.approved_user_id).eq("role", "leader");
+        const { error: rErr } = await (supabase.from("user_roles") as any).insert({ user_id: app.approved_user_id, role: "leader", department_id: app.department_id });
+        if (rErr) throw new Error(rErr.message);
+        const { error: uErr } = await (supabase.from("leader_applications") as any).update({ status: "approved", password_hash: "PENDING_APPROVAL", updated_at: new Date().toISOString() }).eq("id", id);
+        if (uErr) throw new Error(uErr.message);
+        toast.success(`Kiongozi ameidhinishwa. Anaingia kwa REG: ${app.registration_number}`);
+      } else {
+        const res: any = await approveLeader({ data: { applicationId: id } });
+        toast.success(`Kiongozi ameidhinishwa. Username: ${res?.email ?? "-"}`);
+      }
       loadAll();
     } catch (e: any) { toast.error(e?.message ?? "Imeshindikana"); }
   };
   const onRejectLeader = async (id: string) => {
     if (!confirm("Kataa ombi hili?")) return;
     try {
-      await rejectLeader({ data: { applicationId: id } });
+      const app: any = leaderApps.find((a: any) => a.id === id);
+      if (app?.approved_user_id) await (supabase.from("user_roles") as any).delete().eq("user_id", app.approved_user_id).eq("role", "leader");
+      const { error } = await (supabase.from("leader_applications") as any).update({ status: "rejected", password_hash: "PENDING_APPROVAL", updated_at: new Date().toISOString() }).eq("id", id);
+      if (error) throw new Error(error.message);
       toast.success("Ombi limekataliwa"); loadAll();
     } catch (e: any) { toast.error(e?.message ?? "Imeshindikana"); }
   };

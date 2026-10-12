@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { z } from "zod";
 import { ShieldCheck, UserPlus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { submitLeaderApplication } from "@/lib/leader.functions";
+const regToEmail = (reg: string) =>
+  `${reg.toLowerCase().replace(/[^a-z0-9]/g, "-")}@leader.mumso.local`;
 import { showStatus } from "@/lib/status";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -71,7 +72,25 @@ function LeaderSignupPage() {
     if (!deptId) { showStatus("error", "Chagua wizara/idara yako"); return; }
     setLoading(true);
     try {
-      await submitLeaderApplication({ data: { ...parsed.data, department_id: deptId } });
+      const d = parsed.data;
+      const reg = d.registration_number.toUpperCase();
+      const { data: su, error } = await supabase.auth.signUp({
+        email: regToEmail(reg), password: d.password,
+        options: { data: { full_name: d.full_name, registration_number: reg, position: d.position } },
+      });
+      if (error || !su.user) {
+        const m = (error?.message ?? "").toLowerCase();
+        if (m.includes("already") || m.includes("registered")) throw new Error("REG hii tayari ina akaunti. Ingia au wasiliana na menejimenti.");
+        if (m.includes("weak") || m.includes("guess") || m.includes("password")) throw new Error("Nenosiri hili ni dhaifu au linajulikana sana. Chagua nenosiri gumu zaidi (mf. Mumso#2026Kiongozi).");
+        throw new Error("Usajili haujakamilika: " + (error?.message ?? ""));
+      }
+      const { error: insErr } = await (supabase.from("leader_applications") as any).insert({
+        full_name: d.full_name, registration_number: reg, course: d.course, year_of_study: d.year_of_study,
+        position: d.position, phone: d.phone, department_id: deptId, password_hash: "PENDING_APPROVAL",
+        status: "pending", approved_user_id: su.user.id,
+      });
+      await supabase.auth.signOut();
+      if (insErr) throw new Error("Ombi halijahifadhiwa: " + insErr.message);
     } catch (err) {
       setLoading(false);
       showStatus("error", err instanceof Error ? err.message : "Usajili haujakamilika");

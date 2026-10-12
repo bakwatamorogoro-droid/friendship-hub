@@ -17,3 +17,4 @@
 - Management navigation uses a shared collapsible left rail with controlled vertical tabs so existing CRUD panels retain their state and behavior.
 - Request replies are immutable records with department-scoped RLS; private attachments are exposed to applicants only after the existing tracking RPC verifies request access.
 - Leader accounts require management approval and a department assignment before panel access; department authorization is enforced in database policies, not UI filters.
+- Leader signup and approval run from the browser with the public key (signUp + RLS-guarded inserts by admin), never needing the service key, so it works on any host such as Vercel.

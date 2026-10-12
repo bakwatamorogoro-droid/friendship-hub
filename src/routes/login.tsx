@@ -35,11 +35,18 @@ function LoginPage() {
     setLoading(true);
     // Viongozi wanaingia kwa REG namba (bila `@`)
     const identifier = email.includes("@") ? email : regToEmail(email);
-    const { error } = await supabase.auth.signInWithPassword({ email: identifier, password });
-    setLoading(false);
+    const { data: si, error } = await supabase.auth.signInWithPassword({ email: identifier, password });
     if (error) {
+      setLoading(false);
       const m = error.message.toLowerCase();
       toast.error(m.includes("banned") ? "Akaunti yako inasubiri idhini ya Admin Mkuu." : m.includes("invalid") ? "REG/Email au nenosiri si sahihi." : error.message);
+      return;
+    }
+    const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", si.user.id);
+    setLoading(false);
+    if (!(roles ?? []).length) {
+      await supabase.auth.signOut();
+      toast.error("Akaunti yako inasubiri idhini ya Admin Mkuu.");
       return;
     }
     toast.success("Karibu!");
