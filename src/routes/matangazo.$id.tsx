@@ -1,9 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { resolveStorageUrl } from "@/lib/storage-url";
-import { ArrowLeft, CalendarDays, Megaphone } from "lucide-react";
+import { ArrowLeft, CalendarDays, FileText, Megaphone, Share2 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
+import {
+  announcementDate,
+  isImage,
+  loadAnnouncement,
+  type Announcement,
+} from "@/lib/announcements";
 
 export const Route = createFileRoute("/matangazo/$id")({
   head: () => ({
@@ -19,62 +24,119 @@ export const Route = createFileRoute("/matangazo/$id")({
   component: AnnouncementPage,
 });
 
-type A = {
-  id: string;
-  title: string;
-  content: string;
-  created_at: string;
-  image_url: string | null;
-};
-
 function AnnouncementPage() {
   const { t, locale } = useI18n();
   const { id } = Route.useParams();
-  const [a, setA] = useState<A | null>(null);
+  const [a, setA] = useState<Announcement | null>(null);
   const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    (supabase.from("announcements") as any)
-      .select("id,title,content,created_at,image_url")
-      .eq("id", id)
-      .eq("published", true)
-      .maybeSingle()
-      .then(async ({ data }: any) => {
-        if (data) setA({ ...data, image_url: await resolveStorageUrl(data.image_url) });
-        setLoading(false);
-      });
+    loadAnnouncement(id).then(async (row) => {
+      if (row) {
+        setA({
+          ...row,
+          image_url: await resolveStorageUrl(row.image_url),
+          attachment_url: await resolveStorageUrl(row.attachment_url),
+        });
+      }
+      setLoading(false);
+    });
   }, [id]);
 
+  const share = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      /* Clipboard inaweza kuwa imezuiwa. */
+    }
+  };
+
+  // Picha inaweza kuwa kwenye `image_url` au kama kiambatisho cha picha.
+  const heroImage =
+    a?.image_url ?? (isImage(a?.attachment_name ?? a?.attachment_url) ? a?.attachment_url : null);
+  const pdf =
+    a?.attachment_url && !isImage(a.attachment_name ?? a.attachment_url) ? a.attachment_url : null;
+
   return (
-    <div className="mx-auto max-w-4xl px-4 py-10">
-      <Link to="/matangazo" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline">
+    <div className="page-shell page-shell-narrow py-10">
+      <Link
+        to="/matangazo"
+        className="inline-flex items-center gap-2 text-sm font-bold text-primary transition hover:-translate-x-0.5"
+      >
         <ArrowLeft className="h-4 w-4" /> {t("news.title")}
       </Link>
 
       {loading ? (
-        <p className="mt-10 text-muted-foreground">{t("common.loading")}</p>
+        <p className="empty-state mt-8">{t("common.loading")}</p>
       ) : !a ? (
-        <p className="mt-10 text-muted-foreground">{t("news.not_found")}</p>
+        <p className="empty-state mt-8">{t("news.not_found")}</p>
       ) : (
-        <article className="mt-6">
-          <div className="panel-3d overflow-hidden rounded-3xl border border-border bg-card">
-            {a.image_url ? (
-              <img src={a.image_url} alt={a.title} className="mx-auto max-h-[520px] w-full bg-secondary/40 object-contain" />
-            ) : (
-              <div className="grid h-56 w-full place-items-center bg-gradient-to-br from-primary to-accent/60 text-primary-foreground">
-                <Megaphone className="h-14 w-14 opacity-80" />
-              </div>
-            )}
-            <div className="p-6 md:p-9">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-primary">
-                <CalendarDays className="h-3.5 w-3.5" />
-                {new Date(a.created_at).toLocaleDateString(locale, { dateStyle: "long" })}
-              </span>
-              <h1 className="mt-4 text-3xl md:text-4xl font-black leading-tight text-foreground">{a.title}</h1>
-              <div className="mt-6 whitespace-pre-wrap text-base md:text-lg leading-relaxed text-foreground/90">
-                {a.content}
-              </div>
+        <article className="news-article mt-6">
+          {heroImage ? (
+            <div className="news-article-media">
+              <img src={heroImage} alt={a.title} />
             </div>
+          ) : (
+            <div className="news-article-media grid h-52 place-items-center">
+              <Megaphone className="h-16 w-16 text-primary-foreground/80" />
+            </div>
+          )}
+
+          <div className="news-article-body">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="news-badge">
+                <Megaphone className="h-3.5 w-3.5" /> {t("news.badge")}
+              </span>
+              <span className="news-meta">
+                <span className="inline-flex items-center gap-1.5 text-primary">
+                  <CalendarDays className="h-4 w-4" />
+                  {t("news.published_on")}:{" "}
+                  {announcementDate(a).toLocaleDateString(locale, { dateStyle: "long" })}
+                </span>
+              </span>
+              <button
+                type="button"
+                onClick={share}
+                className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary px-3 py-1.5 text-xs font-bold text-foreground/80 transition hover:border-primary hover:text-primary"
+              >
+                <Share2 className="h-3.5 w-3.5" />
+                {copied ? t("common.copied") : t("common.copy_link")}
+              </button>
+            </div>
+
+            <h1 className="mt-5 text-3xl leading-tight font-black text-foreground md:text-4xl">
+              {a.title}
+            </h1>
+
+            {a.excerpt && (
+              <p className="mt-4 border-l-4 border-primary/50 pl-4 text-base font-medium text-muted-foreground italic md:text-lg">
+                {a.excerpt}
+              </p>
+            )}
+
+            <div className="news-prose mt-6">{a.content}</div>
+
+            {pdf && (
+              <a
+                href={pdf}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="news-attachment mt-8"
+              >
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground">
+                  <FileText className="h-5 w-5" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-bold text-foreground">
+                    {a.attachment_name || t("news.attachment")}
+                  </span>
+                  <span className="block text-xs text-muted-foreground">{t("news.open_pdf")}</span>
+                </span>
+              </a>
+            )}
           </div>
         </article>
       )}

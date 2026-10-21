@@ -26,6 +26,8 @@ import { approveLeaderApplication, rejectLeaderApplication } from "@/lib/leader.
 import { Switch } from "@/components/ui/switch";
 import { LeadersManager } from "@/components/admin/LeadersManager";
 import { AdminNavigation } from "@/components/admin/AdminNavigation";
+import { AnnouncementManager } from "@/components/admin/AnnouncementManager";
+import { useNewsroomRole } from "@/lib/announcements";
 import { ManagementOverview } from "@/components/admin/ManagementOverview";
 import { LeaderProfileEditor } from "@/components/admin/LeaderProfileEditor";
 import { ensureLeaderPage } from "@/lib/leader-profile";
@@ -69,8 +71,6 @@ function AdminPage() {
   const [loans, setLoans] = useState<Row[]>([]);
   const [deaths, setDeaths] = useState<Row[]>([]);
   const [search, setSearch] = useState("");
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
   const [heroImgs, setHeroImgs] = useState<Row[]>([]);
   const [uploading, setUploading] = useState(false);
   const [newUser, setNewUser] = useState({
@@ -108,13 +108,9 @@ function AdminPage() {
   const [subFilterDept, setSubFilterDept] = useState<string>("all");
   const [myDeptId, setMyDeptId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>("dashibodi");
+  const newsroom = useNewsroomRole();
   const [links, setLinks] = useState<Row[]>([]);
   const [newLink, setNewLink] = useState({ label: "", url: "", description: "", image_url: "" });
-  const [anns, setAnns] = useState<Row[]>([]);
-  const [annImage, setAnnImage] = useState<string>("");
-  const [annExcerpt, setAnnExcerpt] = useState<string>("");
-  const [annUploading, setAnnUploading] = useState(false);
-  const [editAnn, setEditAnn] = useState<Row | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -179,10 +175,6 @@ function AdminPage() {
     setGrads(gr.data ?? []);
     setDeptSubs((ds as any)?.data ?? []);
     setLeaderApps((la as any)?.data ?? []);
-    const { data: an } = await (supabase.from("announcements") as any)
-      .select("*")
-      .order("created_at", { ascending: false });
-    setAnns((an as any) ?? []);
     const { data: lk } = await (supabase.from("official_links") as any)
       .select("*")
       .order("sort_order", { ascending: true });
@@ -400,84 +392,6 @@ function AdminPage() {
       return null;
     }
     return await createStorageUrl("site-assets", path);
-  };
-
-  const postAnnouncement = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (editAnn) {
-      const { error } = await (supabase.from("announcements") as any)
-        .update({
-          title,
-          content,
-          excerpt: annExcerpt.trim() || null,
-          image_url: annImage || null,
-        })
-        .eq("id", editAnn.id);
-      if (error) {
-        toast.error(error.message);
-        return;
-      }
-      toast.success("Tangazo limehaririwa");
-    } else {
-      const { error } = await (supabase.from("announcements") as any).insert({
-        title,
-        content,
-        author_id: session?.user.id,
-        excerpt: annExcerpt.trim() || null,
-        image_url: annImage || null,
-      });
-      if (error) {
-        toast.error(error.message);
-        return;
-      }
-      toast.success("Tangazo limechapishwa");
-    }
-    setTitle("");
-    setContent("");
-    setAnnExcerpt("");
-    setAnnImage("");
-    setEditAnn(null);
-    loadAll();
-  };
-
-  const startEditAnn = (a: Row) => {
-    setEditAnn(a);
-    setTitle(a.title ?? "");
-    setContent(a.content ?? "");
-    setAnnExcerpt(a.excerpt ?? "");
-    setAnnImage(a.image_url ?? "");
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-  const cancelEditAnn = () => {
-    setEditAnn(null);
-    setTitle("");
-    setContent("");
-    setAnnExcerpt("");
-    setAnnImage("");
-  };
-  const toggleAnnPublished = async (id: string, v: boolean) => {
-    const { error } = await (supabase.from("announcements") as any)
-      .update({ published: v })
-      .eq("id", id);
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-    setAnns((p) => p.map((a) => (a.id === id ? { ...a, published: v } : a)));
-  };
-  const deleteAnn = async (id: string) => {
-    if (!confirm("Futa tangazo hili?")) return;
-    const { error } = await (supabase.from("announcements") as any).delete().eq("id", id);
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-    toast.success("Tangazo limefutwa");
-    if (editAnn?.id === id) cancelEditAnn();
-    loadAll();
   };
 
   /** Weka muda wa mwisho wa huduma / idara. */
@@ -992,122 +906,12 @@ function AdminPage() {
               </TabsContent>
 
               <TabsContent value="announce">
-                <div className="max-w-3xl mt-6 space-y-6">
-                  <form
-                    onSubmit={postAnnouncement}
-                    className="space-y-4 rounded-xl border border-border bg-card p-6"
-                  >
-                    <h2 className="font-semibold text-lg">
-                      {editAnn ? "Hariri Tangazo" : "Chapisha Tangazo"}
-                    </h2>
-                    <div className="space-y-2">
-                      <Label>Kichwa</Label>
-                      <Input
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        required
-                        maxLength={200}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Muhtasari mfupi (hiari)</Label>
-                      <Input
-                        value={annExcerpt}
-                        onChange={(e) => setAnnExcerpt(e.target.value)}
-                        maxLength={300}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Picha ya tangazo</Label>
-                      <div className="flex items-center gap-3">
-                        <Input
-                          type="file"
-                          accept="image/*"
-                          disabled={annUploading}
-                          onChange={async (e) => {
-                            const f = e.target.files?.[0];
-                            if (!f) return;
-                            setAnnUploading(true);
-                            const url = await uploadAsset(f, "announcement");
-                            setAnnUploading(false);
-                            if (url) setAnnImage(url);
-                          }}
-                        />
-                        {annImage && (
-                          <img
-                            src={annImage}
-                            alt=""
-                            className="h-14 w-14 rounded-lg border object-cover"
-                          />
-                        )}
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Maudhui yote</Label>
-                      <Textarea
-                        value={content}
-                        onChange={(e) => setContent(e.target.value)}
-                        required
-                        rows={8}
-                      />
-                    </div>
-                    <div className="flex gap-2">
-                      <Button type="submit" disabled={annUploading}>
-                        {editAnn ? "Hifadhi Mabadiliko" : "Chapisha"}
-                      </Button>
-                      {editAnn && (
-                        <Button type="button" variant="outline" onClick={cancelEditAnn}>
-                          Ghairi
-                        </Button>
-                      )}
-                    </div>
-                  </form>
-
-                  <div className="space-y-3">
-                    <h3 className="font-semibold">Matangazo Yote ({anns.length})</h3>
-                    {anns.length === 0 && (
-                      <p className="text-sm text-muted-foreground">Hakuna matangazo bado.</p>
-                    )}
-                    {anns.map((a) => (
-                      <div
-                        key={a.id}
-                        className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card p-4"
-                      >
-                        {a.image_url ? (
-                          <img
-                            src={a.image_url}
-                            alt=""
-                            className="h-16 w-24 rounded-lg border object-cover"
-                          />
-                        ) : (
-                          <span className="grid h-16 w-24 place-items-center rounded-lg bg-primary/10 text-xs text-primary">
-                            Hakuna picha
-                          </span>
-                        )}
-                        <div className="min-w-0 flex-1">
-                          <p className="font-semibold truncate">{a.title}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {new Date(a.created_at).toLocaleDateString("sw-TZ", {
-                              dateStyle: "long",
-                            })}{" "}
-                            · {a.published ? "Imechapishwa" : "Rasimu"}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Switch
-                            checked={!!a.published}
-                            onCheckedChange={(v) => toggleAnnPublished(a.id, v)}
-                          />
-                          <Button size="sm" variant="outline" onClick={() => startEditAnn(a)}>
-                            Hariri
-                          </Button>
-                          <Button size="icon" variant="ghost" onClick={() => deleteAnn(a.id)}>
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                <div className="mt-6 max-w-5xl">
+                  <AnnouncementManager
+                    canPublish={newsroom.isAdmin || newsroom.isNewsMinistry}
+                    departmentId={newsroom.departmentId}
+                    departmentName={newsroom.departmentName}
+                  />
                 </div>
               </TabsContent>
 

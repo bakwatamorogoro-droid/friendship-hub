@@ -1312,3 +1312,387 @@ html { font-size: 17px; }
     transform: none;
   }
 }
+
+/* ==========================================================================
+   MATANGAZO: kadi za kisasa, beji ya NEWS inayowaka, na viungo
+   ========================================================================== */
+
+/* Beji ya "NEWS"/"Habari" inayowakawaka. */
+.news-badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-foreground);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent) 55%, transparent);
+  animation: news-glow 2.2s ease-in-out infinite;
+}
+.news-badge::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  background: linear-gradient(
+    100deg,
+    transparent 35%,
+    color-mix(in oklab, white 60%, transparent) 50%,
+    transparent 65%
+  );
+  background-size: 220% 100%;
+  animation: news-shine 3.2s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes news-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent) 50%, transparent);
+    transform: translateY(0);
+  }
+  50% {
+    box-shadow: 0 0 0 8px color-mix(in oklab, var(--accent) 0%, transparent);
+    transform: translateY(-1px);
+  }
+}
+@keyframes news-shine {
+  0% {
+    background-position: 180% 0;
+  }
+  60%,
+  100% {
+    background-position: -80% 0;
+  }
+}
+
+/* Kadi ya tangazo. */
+.news-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: var(--card);
+  box-shadow: var(--lift-1);
+  transition:
+    transform 0.32s var(--ease-soft),
+    box-shadow 0.32s var(--ease-soft),
+    border-color 0.32s var(--ease-soft);
+}
+.news-card:hover {
+  transform: translateY(-5px);
+  border-color: color-mix(in oklab, var(--primary) 42%, var(--border));
+  box-shadow: var(--lift-2);
+}
+.news-card-media {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--primary) 88%, var(--card)),
+    color-mix(in oklab, var(--accent) 62%, var(--card))
+  );
+}
+.news-card-media img {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  transition: transform 0.7s var(--ease-soft);
+}
+.news-card:hover .news-card-media img {
+  transform: scale(1.06);
+}
+.news-card-media::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 45%;
+  background: linear-gradient(to top, color-mix(in oklab, black 42%, transparent), transparent);
+  pointer-events: none;
+}
+.news-card-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--primary-foreground) 92%, transparent);
+}
+.news-card-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.15rem 1.25rem 1.35rem;
+}
+.news-card-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: var(--foreground);
+  transition: color 0.2s var(--ease-soft);
+}
+.news-card:hover .news-card-title {
+  color: var(--primary);
+}
+.news-card-excerpt {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--muted-foreground);
+  white-space: pre-wrap;
+}
+
+/* Kadi kubwa ya habari ya kwanza. */
+.news-hero {
+  display: grid;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius-xl) + 4px);
+  background: var(--card);
+  box-shadow: var(--lift-1);
+  transition:
+    box-shadow 0.34s var(--ease-soft),
+    border-color 0.34s var(--ease-soft);
+}
+@media (min-width: 900px) {
+  .news-hero {
+    grid-template-columns: 1.05fr 1fr;
+  }
+}
+.news-hero:hover {
+  border-color: color-mix(in oklab, var(--primary) 45%, var(--border));
+  box-shadow: var(--lift-2);
+}
+.news-hero-media {
+  position: relative;
+  min-height: 240px;
+  overflow: hidden;
+  background: linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--primary) 88%, var(--card)),
+    color-mix(in oklab, var(--accent) 62%, var(--card))
+  );
+}
+.news-hero-media img {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  transition: transform 0.8s var(--ease-soft);
+}
+.news-hero:hover .news-hero-media img {
+  transform: scale(1.05);
+}
+.news-hero-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1.5rem;
+}
+@media (min-width: 900px) {
+  .news-hero-body {
+    padding: 2.25rem;
+  }
+}
+.news-hero-title {
+  font-size: 1.5rem;
+  font-weight: 900;
+  line-height: 1.18;
+  letter-spacing: -0.02em;
+  color: var(--foreground);
+}
+@media (min-width: 900px) {
+  .news-hero-title {
+    font-size: 2rem;
+  }
+}
+
+/* Ukurasa wa tangazo moja. */
+.news-article {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius-xl) + 4px);
+  background: var(--card);
+  box-shadow: var(--lift-1);
+}
+.news-article-media {
+  position: relative;
+  max-height: 560px;
+  overflow: hidden;
+  background: var(--secondary);
+}
+.news-article-media img {
+  display: block;
+  margin: 0 auto;
+  max-height: 560px;
+  width: 100%;
+  object-fit: contain;
+}
+.news-article-body {
+  padding: 1.5rem;
+}
+@media (min-width: 768px) {
+  .news-article-body {
+    padding: 2.5rem;
+  }
+}
+.news-prose {
+  font-size: 1.05rem;
+  line-height: 1.85;
+  color: color-mix(in oklab, var(--foreground) 92%, transparent);
+  white-space: pre-wrap;
+}
+@media (min-width: 768px) {
+  .news-prose {
+    font-size: 1.125rem;
+  }
+}
+
+/* Kiambatisho (PDF) na meta. */
+.news-attachment {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.9rem 1.1rem;
+  border: 1px solid color-mix(in oklab, var(--primary) 30%, var(--border));
+  border-radius: var(--radius-lg);
+  background: color-mix(in oklab, var(--primary) 7%, var(--card));
+  transition:
+    transform 0.24s var(--ease-soft),
+    border-color 0.24s var(--ease-soft);
+}
+.news-attachment:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary);
+}
+.news-meta {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+}
+
+/* Chips za hali ya tangazo kwenye paneli. */
+.news-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+}
+.news-chip-published {
+  background: color-mix(in oklab, var(--primary) 14%, transparent);
+  color: var(--primary);
+  border-color: color-mix(in oklab, var(--primary) 32%, transparent);
+}
+.news-chip-pending {
+  background: color-mix(in oklab, var(--accent) 20%, transparent);
+  color: var(--accent-foreground);
+  border-color: color-mix(in oklab, var(--accent) 45%, transparent);
+}
+.news-chip-draft {
+  background: var(--secondary);
+  color: var(--muted-foreground);
+  border-color: var(--border);
+}
+.news-chip-rejected {
+  background: color-mix(in oklab, var(--destructive) 14%, transparent);
+  color: var(--destructive);
+  border-color: color-mix(in oklab, var(--destructive) 34%, transparent);
+}
+
+/* Kadi za viungo vya rasmi. */
+.link-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: var(--card);
+  box-shadow: var(--lift-1);
+  transition:
+    transform 0.3s var(--ease-soft),
+    box-shadow 0.3s var(--ease-soft),
+    border-color 0.3s var(--ease-soft);
+}
+.link-card:hover {
+  transform: translateY(-5px);
+  border-color: color-mix(in oklab, var(--primary) 45%, var(--border));
+  box-shadow: var(--lift-2);
+}
+.link-card-media {
+  position: relative;
+  height: 9.5rem;
+  overflow: hidden;
+  background: linear-gradient(
+    135deg,
+    var(--primary),
+    color-mix(in oklab, var(--accent) 70%, var(--primary))
+  );
+}
+.link-card-media img {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  transition: transform 0.7s var(--ease-soft);
+}
+.link-card:hover .link-card-media img {
+  transform: scale(1.07);
+}
+.link-card-body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1.1rem 1.25rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .news-badge,
+  .news-badge::after {
+    animation: none;
+  }
+  .news-card,
+  .news-card-media img,
+  .news-hero,
+  .news-hero-media img,
+  .news-attachment,
+  .link-card,
+  .link-card-media img {
+    transition: none;
+  }
+  .news-card:hover,
+  .news-hero:hover .news-hero-media img,
+  .news-card:hover .news-card-media img,
+  .news-attachment:hover,
+  .link-card:hover,
+  .link-card:hover .link-card-media img {
+    transform: none;
+  }
+}
