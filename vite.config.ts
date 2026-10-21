@@ -12,4 +12,11 @@ export default defineConfig({
   tanstackStart: {
     server: { entry: "server" },
   },
+  // Sandbox preview proxies the dev server through a *.prod-runtime.all-hands.dev
+  // host, which Vite 7 blocks by default. Dev-only; does not affect builds.
+  vite: {
+    server: {
+      allowedHosts: [".prod-runtime.all-hands.dev"],
+    },
+  },
 });
