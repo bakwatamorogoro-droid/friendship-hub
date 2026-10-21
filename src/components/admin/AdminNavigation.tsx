@@ -32,8 +32,8 @@ type Item = readonly [value: string, labelKey: string, Icon: typeof Home, scope:
 const OVERVIEW: Item[] = [["dashibodi", "mgmt.tab_dashboard", LayoutDashboard, "all"]];
 
 const REQUESTS: Item[] = [
-  ["deptsubs", "mgmt.tab_student_services", ClipboardList, "all"],
-  ["challenges", "mgmt.tab_challenges", MessageSquare, "all"],
+  ["deptsubs", "mgmt.tab_student_services", ClipboardList, "admin"],
+  ["challenges", "mgmt.tab_challenges", MessageSquare, "admin"],
   ["loans", "mgmt.tab_loans", Landmark, "admin"],
   ["deaths", "mgmt.tab_deaths", HeartHandshake, "admin"],
 ];

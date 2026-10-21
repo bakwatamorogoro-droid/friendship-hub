@@ -8,17 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import {
-  Download,
-  LogOut,
-  Search,
-  Trash2,
-  Upload,
-  UserPlus,
-  Plus,
-  Power,
-  KeyRound,
-} from "lucide-react";
+import { Download, LogOut, Search, Trash2, Upload, UserPlus, Plus, Power } from "lucide-react";
 import { toCSV, downloadCSV } from "@/lib/csv";
 import { useServerFn } from "@tanstack/react-start";
 import { adminCreateUser } from "@/lib/admin.functions";
@@ -28,6 +18,10 @@ import { LeadersManager } from "@/components/admin/LeadersManager";
 import { AdminNavigation } from "@/components/admin/AdminNavigation";
 import { AnnouncementManager } from "@/components/admin/AnnouncementManager";
 import { useNewsroomRole } from "@/lib/announcements";
+import { useMinistryRole } from "@/lib/ministry";
+import { MinistryWorkspace } from "@/components/admin/MinistryWorkspace";
+import { BannerManager } from "@/components/admin/BannerManager";
+import { PasswordPanel } from "@/components/admin/PasswordPanel";
 import { ManagementOverview } from "@/components/admin/ManagementOverview";
 import { LeaderProfileEditor } from "@/components/admin/LeaderProfileEditor";
 import { ensureLeaderPage } from "@/lib/leader-profile";
@@ -71,8 +65,6 @@ function AdminPage() {
   const [loans, setLoans] = useState<Row[]>([]);
   const [deaths, setDeaths] = useState<Row[]>([]);
   const [search, setSearch] = useState("");
-  const [heroImgs, setHeroImgs] = useState<Row[]>([]);
-  const [uploading, setUploading] = useState(false);
   const [newUser, setNewUser] = useState({
     email: "",
     password: "",
@@ -101,14 +93,14 @@ function AdminPage() {
   const [grads, setGrads] = useState<Row[]>([]);
   const [newGrad, setNewGrad] = useState({ title: "", content: "", event_date: "", image_url: "" });
   const [gradUploading, setGradUploading] = useState(false);
-  const [pwd, setPwd] = useState({ current: "", next: "", confirm: "" });
-  const [pwdSaving, setPwdSaving] = useState(false);
   const [deptSubs, setDeptSubs] = useState<Row[]>([]);
   const [leaderApps, setLeaderApps] = useState<Row[]>([]);
   const [subFilterDept, setSubFilterDept] = useState<string>("all");
   const [myDeptId, setMyDeptId] = useState<string | null>(null);
+  const [allDepts, setAllDepts] = useState<Row[]>([]);
   const [activeTab, setActiveTab] = useState<string>("dashibodi");
   const newsroom = useNewsroomRole();
+  const ministry = useMinistryRole();
   const [links, setLinks] = useState<Row[]>([]);
   const [newLink, setNewLink] = useState({ label: "", url: "", description: "", image_url: "" });
 
@@ -147,11 +139,10 @@ function AdminPage() {
       .select("*")
       .order("created_at", { ascending: false });
     if (leaderDeptId) challengesQuery.eq("department_id", leaderDeptId);
-    const [c, l, d, h, st, sv, ct, dp, gr, ds, la] = await Promise.all([
+    const [c, l, d, st, sv, ct, dp, gr, ds, la] = await Promise.all([
       challengesQuery,
       supabase.from("loan_requests").select("*").order("created_at", { ascending: false }),
       supabase.from("deaths").select("*").order("created_at", { ascending: false }),
-      supabase.from("hero_images").select("*").order("sort_order", { ascending: true }),
       supabase.from("site_settings").select("*").limit(1).maybeSingle(),
       supabase.from("service_status").select("*").order("key"),
       supabase.from("form_categories").select("*").order("service_key").order("sort_order"),
@@ -165,13 +156,14 @@ function AdminPage() {
     setChallenges(c.data ?? []);
     setLoans(l.data ?? []);
     setDeaths(d.data ?? []);
-    setHeroImgs(h.data ?? []);
     setSettings(st.data ?? null);
     setServices(sv.data ?? []);
     const allCats = ct.data ?? [];
-    const allDepts = dp.data ?? [];
+    const deptRows = dp.data ?? [];
     setCats(leaderDeptId ? allCats.filter((c: any) => c.department_id === leaderDeptId) : allCats);
-    setDepts(leaderDeptId ? allDepts.filter((d: any) => d.id === leaderDeptId) : allDepts);
+    setDepts(leaderDeptId ? deptRows.filter((d: any) => d.id === leaderDeptId) : deptRows);
+    // Rais na Waziri Mkuu huhitaji orodha ya wizara zote kwenye muhtasari wao.
+    setAllDepts(deptRows);
     setGrads(gr.data ?? []);
     setDeptSubs((ds as any)?.data ?? []);
     setLeaderApps((la as any)?.data ?? []);
@@ -417,42 +409,6 @@ function AdminPage() {
     }
   };
 
-  const uploadHero = async (file: File) => {
-    setUploading(true);
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    const path = `${session?.user.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
-    const up = await supabase.storage.from("hero-images").upload(path, file, { upsert: false });
-    if (up.error) {
-      setUploading(false);
-      toast.error(up.error.message);
-      return;
-    }
-    const url = await createStorageUrl("hero-images", path);
-    const { error } = await supabase.from("hero_images").insert({
-      url,
-      sort_order: heroImgs.length,
-      created_by: session?.user.id,
-    });
-    setUploading(false);
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-    toast.success("Picha imeongezwa kwenye banner");
-    loadAll();
-  };
-
-  const deleteHero = async (id: string, url: string) => {
-    if (!confirm("Futa picha hii?")) return;
-    const path = decodeURIComponent((url.split("/hero-images/")[1] ?? "").split("?")[0]);
-    if (path) await supabase.storage.from("hero-images").remove([path]);
-    await supabase.from("hero_images").delete().eq("id", id);
-    toast.success("Picha imefutwa");
-    loadAll();
-  };
-
   const saveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!settings?.id) return;
@@ -656,30 +612,6 @@ function AdminPage() {
     }
   };
 
-  const changePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (pwd.next.length < 6) {
-      toast.error("Nenosiri liwe na herufi 6 au zaidi");
-      return;
-    }
-    if (pwd.next !== pwd.confirm) {
-      toast.error("Manenosiri hayafanani");
-      return;
-    }
-    setPwdSaving(true);
-    const { error } = await supabase.auth.updateUser({
-      password: pwd.next,
-      current_password: pwd.current,
-    });
-    setPwdSaving(false);
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-    toast.success("Nenosiri limebadilishwa");
-    setPwd({ current: "", next: "", confirm: "" });
-  };
-
   if (!ready) return <div className="p-12 text-center text-muted-foreground">Inapakia...</div>;
 
   if (!authorized) {
@@ -771,17 +703,28 @@ function AdminPage() {
             )}
             <div className="flex-1 min-w-0 w-full">
               <TabsContent value="dashibodi">
-                <ManagementOverview
-                  isAdmin={isAdmin}
-                  displayName={displayName}
-                  departmentName={deptName}
-                  deptSubs={deptSubs}
-                  challenges={challenges}
-                  loans={loans}
-                  deaths={deaths}
-                  leaderApps={leaderApps}
-                  onOpenTab={setActiveTab}
-                />
+                {isAdmin ? (
+                  <ManagementOverview
+                    isAdmin={isAdmin}
+                    displayName={displayName}
+                    departmentName={deptName}
+                    deptSubs={deptSubs}
+                    challenges={challenges}
+                    loans={loans}
+                    deaths={deaths}
+                    leaderApps={leaderApps}
+                    onOpenTab={setActiveTab}
+                  />
+                ) : (
+                  <MinistryWorkspace
+                    role={ministry}
+                    deptSubs={deptSubs}
+                    challenges={challenges}
+                    depts={allDepts.length ? allDepts : depts}
+                    userId={userId ?? ""}
+                    onSaved={() => loadAll()}
+                  />
+                )}
               </TabsContent>
 
               <TabsContent value="challenges">
@@ -916,47 +859,7 @@ function AdminPage() {
               </TabsContent>
 
               <TabsContent value="banner">
-                <div className="max-w-3xl mt-6 space-y-6">
-                  <div className="rounded-xl border border-border bg-card p-6">
-                    <h2 className="font-semibold text-lg">Ongeza Picha ya Banner</h2>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Picha zinaonekana kwenye ukurasa wa nyumbani kama carousel.
-                    </p>
-                    <Label className="mt-4 inline-flex cursor-pointer items-center gap-2 rounded-md bg-primary text-primary-foreground px-4 py-2 text-sm">
-                      <Upload className="h-4 w-4" /> {uploading ? "Inapakia..." : "Chagua Picha"}
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        disabled={uploading}
-                        onChange={(e) => e.target.files?.[0] && uploadHero(e.target.files[0])}
-                      />
-                    </Label>
-                  </div>
-                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {heroImgs.length === 0 && (
-                      <p className="text-sm text-muted-foreground col-span-full">
-                        Hakuna picha bado.
-                      </p>
-                    )}
-                    {heroImgs.map((h) => (
-                      <div
-                        key={h.id}
-                        className="relative rounded-lg overflow-hidden border border-border group"
-                      >
-                        <img src={h.url} alt="" className="w-full h-40 object-cover" />
-                        <Button
-                          size="icon"
-                          variant="destructive"
-                          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100"
-                          onClick={() => deleteHero(h.id, h.url)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                <BannerManager />
               </TabsContent>
 
               <TabsContent value="settings">
@@ -1936,48 +1839,7 @@ function AdminPage() {
               )}
 
               <TabsContent value="password">
-                <form
-                  onSubmit={changePassword}
-                  className="max-w-md space-y-4 mt-6 rounded-xl border border-border bg-card p-6"
-                >
-                  <div className="flex items-center gap-2">
-                    <KeyRound className="h-5 w-5 text-primary" />
-                    <h2 className="font-semibold text-lg">Badili Nenosiri</h2>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Weka nenosiri jipya kwa akaunti yako.
-                  </p>
-                  <div className="space-y-2">
-                    <Label>Nenosiri Jipya</Label>
-                    <Input
-                      type="password"
-                      value={pwd.next}
-                      onChange={(e) => setPwd({ ...pwd, next: e.target.value })}
-                      required
-                      minLength={6}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Thibitisha Nenosiri</Label>
-                    <Input
-                      type="password"
-                      value={pwd.confirm}
-                      onChange={(e) => setPwd({ ...pwd, confirm: e.target.value })}
-                      required
-                      minLength={6}
-                    />
-                  </div>
-                  <Button type="submit" disabled={pwdSaving}>
-                    {pwdSaving ? (
-                      "Inahifadhi..."
-                    ) : (
-                      <>
-                        <KeyRound className="mr-2 h-4 w-4" />
-                        Hifadhi Nenosiri
-                      </>
-                    )}
-                  </Button>
-                </form>
+                <PasswordPanel />
               </TabsContent>
 
               {isAdmin && (

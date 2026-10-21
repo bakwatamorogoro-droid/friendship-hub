@@ -165,6 +165,7 @@ export const approveLeaderApplication = createServerFn({ method: "POST" })
 
     // Unda ukurasa wake wa umma ikiwa haupo, ili kiongozi aone na kuhariri ukurasa wake.
     // `user_id` humfunga ukurasa na akaunti yake; `published` hubaki kwa Menejimenti.
+    // Kabla ya migrasheni ya umiliki, safu hizo hazipo — uthibitisho usikwame.
     const { data: existingPage } = await (supabaseAdmin.from("leaders") as any)
       .select("id")
       .ilike("full_name", escapeLike(app.full_name))
@@ -177,7 +178,7 @@ export const approveLeaderApplication = createServerFn({ method: "POST" })
         .eq("slug", base)
         .maybeSingle();
       const slug = clash ? `${base}-${Date.now().toString().slice(-4)}` : base;
-      await (supabaseAdmin.from("leaders") as any).insert({
+      const { error: insErr } = await (supabaseAdmin.from("leaders") as any).insert({
         slug,
         full_name: app.full_name,
         position: app.position,
@@ -186,14 +187,25 @@ export const approveLeaderApplication = createServerFn({ method: "POST" })
         user_id: userId,
         department_id: app.department_id,
       });
+      if (insErr?.message?.includes("user_id")) {
+        await (supabaseAdmin.from("leaders") as any).insert({
+          slug,
+          full_name: app.full_name,
+          position: app.position,
+          phone: app.phone ?? null,
+          published: true,
+        });
+      }
     } else {
-      await (supabaseAdmin.from("leaders") as any)
+      const { error: linkErr } = await (supabaseAdmin.from("leaders") as any)
         .update({
           user_id: userId,
           department_id: app.department_id,
         })
         .eq("id", existingPage.id)
         .is("user_id", null);
+      // Safu haipo bado; wasifu upo tayari hivyo hakuna cha kuunganisha.
+      if (linkErr && !linkErr.message.includes("user_id")) throw new Error(linkErr.message);
     }
 
     await (supabaseAdmin.from("leader_applications") as any)
@@ -234,4 +246,67 @@ export const rejectLeaderApplication = createServerFn({ method: "POST" })
       .eq("id", data.applicationId);
     if (error) throw new Error(error.message);
     return { ok: true };
+  });
+
+/**
+ * Kiongozi aliyeidhinishwa huhakikisha ukurasa wake wa umma upo na umeunganishwa
+ * naye. Huthibitisha ombi lake mwenyewe kwa REG iliyothibitishwa na akaunti —
+ * si kwa jina la metadata, ambalo mtumiaji anaweza kulibadilisha.
+ */
+export const linkOwnLeaderPage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: app } = await (supabaseAdmin.from("leader_applications") as any)
+      .select("full_name,position,phone,department_id,status")
+      .eq("approved_user_id", context.userId)
+      .eq("status", "approved")
+      .maybeSingle();
+    if (!app) return { ok: false as const, fullName: null };
+
+    const { data: mine } = await (supabaseAdmin.from("leaders") as any)
+      .select("id")
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    if (mine) return { ok: true as const, created: false, fullName: app.full_name };
+
+    const { data: existing } = await (supabaseAdmin.from("leaders") as any)
+      .select("id")
+      .ilike("full_name", escapeLike(app.full_name))
+      .limit(1)
+      .maybeSingle();
+    if (existing) {
+      const { error } = await (supabaseAdmin.from("leaders") as any)
+        .update({ user_id: context.userId, department_id: app.department_id })
+        .eq("id", existing.id)
+        .is("user_id", null);
+      // Safu haipo kabla ya migrasheni ya umiliki; kosa hilo halizuii kuingia.
+      if (error && !error.message.includes("user_id")) throw new Error(error.message);
+      return { ok: true as const, created: false, fullName: app.full_name };
+    }
+
+    const base = slugify(app.full_name) || `kiongozi-${Date.now().toString().slice(-6)}`;
+    const { data: clash } = await (supabaseAdmin.from("leaders") as any)
+      .select("id")
+      .eq("slug", base)
+      .maybeSingle();
+    const slug = clash ? `${base}-${Date.now().toString().slice(-4)}` : base;
+    const row = {
+      slug,
+      full_name: app.full_name,
+      position: app.position,
+      phone: app.phone ?? null,
+      published: true,
+    };
+    const { error } = await (supabaseAdmin.from("leaders") as any).insert({
+      ...row,
+      user_id: context.userId,
+      department_id: app.department_id,
+    });
+    if (error?.message?.includes("user_id")) {
+      await (supabaseAdmin.from("leaders") as any).insert(row);
+    } else if (error) {
+      throw new Error(error.message);
+    }
+    return { ok: true as const, created: true, fullName: app.full_name };
   });

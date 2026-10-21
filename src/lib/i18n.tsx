@@ -758,6 +758,10 @@ const dict: Record<string, { sw: string; en: string }> = {
     sw: "Wasifu wako wa umma bado haujaundwa. Menejimenti huunda wasifu kwenye kichupo cha Viongozi.",
     en: "Your public profile has not been created yet. Management creates profiles under the Leaders tab.",
   },
+  "mgmt.no_public_profile_hint": {
+    sw: "Mara Menejimenti inapounda wasifu wako, utaweza kuhariri picha, neno lako na mawasiliano yako hapa.",
+    en: "Once Management creates your profile, you will be able to edit your photo, message and contacts here.",
+  },
   "mgmt.profile_name": { sw: "Jina", en: "Name" },
   "mgmt.profile_position": { sw: "Cheo", en: "Position" },
   "mgmt.profile_state": { sw: "Hali", en: "Status" },
@@ -849,6 +853,156 @@ const dict: Record<string, { sw: string; en: string }> = {
     sw: "Historia ya mahafali yaliyopita ya Chuo Kikuu cha Kiislamu cha Morogoro.",
     en: "The history of past graduation ceremonies at the Muslim University of Morogoro.",
   },
+
+  // ===== Paneli ya wizara / Ministry workspace =====
+  "mw.my_ministry": { sw: "Wizara Yangu", en: "My Ministry" },
+  "mw.sections": { sw: "Sehemu za paneli", en: "Panel sections" },
+  "mw.services": { sw: "Huduma za Wanafunzi", en: "Student Services" },
+  "mw.challenges": { sw: "Changamoto", en: "Issues" },
+  "mw.services_short": { sw: "huduma", en: "requests" },
+  "mw.challenges_short": { sw: "changamoto", en: "issues" },
+  "mw.no_services": {
+    sw: "Hakuna huduma iliyotumwa na wanafunzi kwa wizara yako bado.",
+    en: "No student services have been submitted to your ministry yet.",
+  },
+  "mw.no_challenges": {
+    sw: "Hakuna changamoto iliyotumwa kwa wizara yako bado.",
+    en: "No issues have been submitted to your ministry yet.",
+  },
+  "mw.filter_stage": { sw: "Chuja kwa hatua", en: "Filter by stage" },
+  "mw.all": { sw: "Zote", en: "All" },
+  "mw.change_stage": { sw: "Badili hatua", en: "Change stage" },
+  "mw.note_placeholder": {
+    sw: "Maelezo kwa mwanafunzi (yataonekana kwenye ufuatiliaji)…",
+    en: "Note for the student (shown in tracking)…",
+  },
+  "mw.save_stage": { sw: "Hifadhi hatua", en: "Save stage" },
+  "mw.stage_saved": { sw: "Hatua ya ombi imehifadhiwa", en: "Request stage saved" },
+  "mw.stage_received": { sw: "Limepokelewa", en: "Received" },
+  "mw.stage_review": { sw: "Linapitiwa", en: "Under review" },
+  "mw.stage_forwarded": { sw: "Kwa uongozi", en: "With management" },
+  "mw.stage_done": { sw: "Limekamilika", en: "Completed" },
+  "mw.rejected_note": {
+    sw: "Ombi limekataliwa. Wasiliana na ofisi ya MUMSO kwa maelezo zaidi.",
+    en: "The request was declined. Contact the MUMSO office for more details.",
+  },
+
+  // ===== Ripoti ya wiki =====
+  "mw.report": { sw: "Ripoti ya Wiki", en: "Weekly Report" },
+  "mw.report_lead": {
+    sw: "Andika kazi ulizofanya wiki hii; Rais na Waziri Mkuu wataona ripoti ya wizara yako.",
+    en: "Describe the work you did this week; the President and Prime Minister will see your ministry's report.",
+  },
+  "mw.handled_auto": { sw: "Maombi yaliyopokelewa wiki hii", en: "Requests received this week" },
+  "mw.report_summary": { sw: "Kazi zilizofanyika", en: "Work completed" },
+  "mw.report_summary_ph": {
+    sw: "Mfano: tulipokea maombi 12, tuliyapitia na kuyapeleka kwa uongozi…",
+    en: "Example: we received 12 requests, reviewed them and forwarded them…",
+  },
+  "mw.report_challenges": { sw: "Changamoto zilizojitokeza", en: "Challenges faced" },
+  "mw.report_next": { sw: "Mpango wa wiki ijayo", en: "Plan for next week" },
+  "mw.report_submit": { sw: "Tuma ripoti", en: "Submit report" },
+  "mw.report_update": { sw: "Sahihisha ripoti", en: "Update report" },
+  "mw.report_saved": { sw: "Ripoti ya wiki imehifadhiwa", en: "Weekly report saved" },
+  "mw.report_too_short": {
+    sw: "Andika angalau sentensi moja kuhusu kazi ulizofanya.",
+    en: "Write at least one sentence about the work you did.",
+  },
+  "mw.report_history": { sw: "Ripoti zilizopita", en: "Previous reports" },
+  "mw.no_reports": { sw: "Hakuna ripoti bado.", en: "No reports yet." },
+  "mw.no_ministry": {
+    sw: "Akaunti yako haijaunganishwa na wizara. Wasiliana na menejimenti.",
+    en: "Your account is not linked to a ministry. Contact management.",
+  },
+
+  // ===== Mawasiliano ya ndani =====
+  "mw.messages": { sw: "Mawasiliano", en: "Messages" },
+  "mw.compose": { sw: "Tuma ujumbe", en: "Send a message" },
+  "mw.channel": { sw: "Aina ya ujumbe", en: "Message type" },
+  "mw.to_pm": { sw: "Kwa Waziri Mkuu", en: "To the Prime Minister" },
+  "mw.to_pm_lead": {
+    sw: "Wasilisha tatizo au ombi kwa Katibu Mkuu",
+    en: "Raise an issue or request with the Secretary General",
+  },
+  "mw.to_news": { sw: "Kwa Wizara ya Habari", en: "To the News Ministry" },
+  "mw.to_news_lead": {
+    sw: "Omba tangazo lako lichapishwe",
+    en: "Request that your announcement be published",
+  },
+  "mw.recipient": { sw: "Mpokeaji", en: "Recipient" },
+  "mw.choose_recipient": { sw: "Chagua mpokeaji", en: "Choose a recipient" },
+  "mw.subject": { sw: "Kichwa", en: "Subject" },
+  "mw.message": { sw: "Ujumbe", en: "Message" },
+  "mw.send_message": { sw: "Tuma ujumbe", en: "Send message" },
+  "mw.message_sent": { sw: "Ujumbe umetumwa", en: "Message sent" },
+  "mw.message_too_short": {
+    sw: "Kichwa na ujumbe ni mafupi mno.",
+    en: "The subject and message are too short.",
+  },
+  "mw.inbox": { sw: "Kikasha", en: "Inbox" },
+  "mw.sent": { sw: "Zilizotumwa", en: "Sent" },
+  "mw.no_inbox": { sw: "Hakuna ujumbe uliopokelewa.", en: "No messages received." },
+  "mw.no_sent": { sw: "Hakuna ujumbe uliotumwa.", en: "No messages sent." },
+  "mw.mark_read": { sw: "Weka alama ya kusomwa", en: "Mark as read" },
+  "mw.news_requests": { sw: "Maombi ya matangazo", en: "Announcement requests" },
+  "mw.from_ministry": { sw: "Kutoka", en: "From" },
+  "mw.unknown_ministry": { sw: "Wizara isiyojulikana", en: "Unknown ministry" },
+  "mw.channel_news": { sw: "Wizara ya Habari", en: "News Ministry" },
+  "mw.channel_direct": { sw: "Ujumbe wa moja kwa moja", en: "Direct message" },
+
+  // ===== Muhtasari wa Rais na Waziri Mkuu =====
+  "mw.cabinet_title": { sw: "Ripoti za Wizara Zote", en: "All Ministry Reports" },
+  "mw.reported_this_week": {
+    sw: "wizara zimeripoti wiki hii",
+    en: "ministries reported this week",
+  },
+  "mw.handled_total": { sw: "maombi yaliyoshughulikiwa", en: "requests handled" },
+  "mw.reported": { sw: "Imeripoti", en: "Reported" },
+  "mw.not_reported": { sw: "Hakuna ripoti", en: "No report" },
+  "mw.awaiting_report": {
+    sw: "Wizara hii haijatuma ripoti ya wiki hii.",
+    en: "This ministry has not submitted this week's report.",
+  },
+  "mw.no_ministries": { sw: "Hakuna wizara bado.", en: "No ministries yet." },
+
+  // ===== Kidhibiti cha picha za mwanzo / Banner manager =====
+  "bm.lead": {
+    sw: "Pakia picha za banner zinazopita kwenye ukurasa wa nyumbani. Unaweza kupanga mfululizo.",
+    en: "Upload banner images that rotate on the home page. You can reorder them.",
+  },
+  "bm.caption": { sw: "Maelezo ya picha", en: "Image caption" },
+  "bm.caption_ph": { sw: "Mfano: Lango la chuo", en: "Example: the campus gate" },
+  "bm.choose": { sw: "Chagua picha", en: "Choose image" },
+  "bm.empty": { sw: "Hakuna picha bado.", en: "No images yet." },
+  "bm.uploaded": { sw: "Picha imeongezwa", en: "Image added" },
+  "bm.caption_saved": { sw: "Maelezo yamehifadhiwa", en: "Caption saved" },
+  "bm.move_up": { sw: "Pandisha juu", en: "Move up" },
+  "bm.move_down": { sw: "Shusha chini", en: "Move down" },
+  "bm.confirm_delete": { sw: "Futa picha hii?", en: "Delete this image?" },
+  "bm.too_large": { sw: "Picha isizidi MB 10.", en: "Image must not exceed 10 MB." },
+  "bm.only_images": { sw: "Chagua faili la picha.", en: "Choose an image file." },
+
+  // ===== Kubadilisha nenosiri =====
+  "pw.title": { sw: "Badili Nenosiri", en: "Change Password" },
+  "pw.lead": {
+    sw: "Nenosiri lako ni siri yako. Menejimenti haiwezi kuliona.",
+    en: "Your password is private. Management cannot see it.",
+  },
+  "pw.current": { sw: "Nenosiri la sasa", en: "Current password" },
+  "pw.new": { sw: "Nenosiri jipya", en: "New password" },
+  "pw.confirm": { sw: "Thibitisha nenosiri jipya", en: "Confirm new password" },
+  "pw.save": { sw: "Hifadhi nenosiri", en: "Save password" },
+  "pw.changed": { sw: "Nenosiri limebadilishwa", en: "Password changed" },
+  "pw.mismatch": { sw: "Manenosiri hayafanani", en: "The passwords do not match" },
+  "pw.too_short": { sw: "Nenosiri liwe na herufi 6 au zaidi", en: "Use at least 6 characters" },
+  "pw.same": {
+    sw: "Nenosiri jipya linafanana na la sasa",
+    en: "The new password matches the current one",
+  },
+
+  // ===== Nyongeza za jumla =====
+  "common.save": { sw: "Hifadhi", en: "Save" },
+  "common.save_changes": { sw: "Hifadhi mabadiliko", en: "Save changes" },
 };
 
 export type I18n = {

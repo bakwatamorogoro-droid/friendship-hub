@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createStorageUrl, useResolvedUrl } from "@/lib/storage-url";
+import { escapeLike } from "@/lib/leader-profile";
+import { linkOwnLeaderPage } from "@/lib/leader.functions";
 import { FormSection } from "@/components/FormSection";
 import { showStatus } from "@/lib/status";
 import { useI18n } from "@/lib/i18n";
@@ -27,6 +29,12 @@ type Profile = {
   published: boolean;
 };
 
+const PROFILE_SELECT =
+  "id,slug,full_name,position,short_message,bio,phone,email,photo_url,published";
+
+/** `leaders.user_id` haipo hadi migrasheni ya umiliki wa wasifu inatumika. */
+const isMissingOwnerColumn = (message?: string) => !!message?.includes("user_id");
+
 /**
  * Kiongozi huhariri ukurasa wake mwenyewe. Safu zake pekee huruhusiwa na RLS;
  * `slug`, `published`, `position` na `department_id` zinahifadhiwa na trigger.
@@ -37,6 +45,7 @@ export function LeaderProfileEditor({ userId }: { userId: string }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [linked, setLinked] = useState(true);
   const [draft, setDraft] = useState({
     full_name: "",
     phone: "",
@@ -48,22 +57,45 @@ export function LeaderProfileEditor({ userId }: { userId: string }) {
   const photo = useResolvedUrl(profile?.photo_url ?? null);
 
   const load = useCallback(async () => {
-    const { data } = await (supabase.from("leaders") as any)
-      .select("id,slug,full_name,position,short_message,bio,phone,email,photo_url,published")
+    const apply = (row: Profile | null, isLinked: boolean) => {
+      setProfile(row);
+      setLinked(isLinked);
+      if (row) {
+        setDraft({
+          full_name: row.full_name ?? "",
+          phone: row.phone ?? "",
+          email: row.email ?? "",
+          short_message: row.short_message ?? "",
+          bio: row.bio ?? "",
+        });
+      }
+      setLoading(false);
+    };
+
+    const { data, error } = await (supabase.from("leaders") as any)
+      .select(PROFILE_SELECT)
       .eq("user_id", userId)
       .maybeSingle();
-    const row = (data as Profile) ?? null;
-    setProfile(row);
-    if (row) {
-      setDraft({
-        full_name: row.full_name ?? "",
-        phone: row.phone ?? "",
-        email: row.email ?? "",
-        short_message: row.short_message ?? "",
-        bio: row.bio ?? "",
-      });
+    if (!error) {
+      apply((data as Profile) ?? null, true);
+      return;
     }
-    setLoading(false);
+
+    // Kabla ya migrasheni ya umiliki, safu `user_id` haipo: tunaomba seva
+    // iunde/kuunganisha ukurasa wetu kwa kutumia ombi letu lililothibitishwa.
+    if (isMissingOwnerColumn(error.message)) {
+      const linked = await linkOwnLeaderPage().catch(() => null);
+      if (linked?.fullName) {
+        const { data: byName } = await (supabase.from("leaders") as any)
+          .select(PROFILE_SELECT)
+          .ilike("full_name", escapeLike(linked.fullName))
+          .limit(1)
+          .maybeSingle();
+        apply((byName as Profile) ?? null, false);
+        return;
+      }
+    }
+    apply(null, false);
   }, [userId]);
 
   useEffect(() => {
@@ -78,7 +110,7 @@ export function LeaderProfileEditor({ userId }: { userId: string }) {
       return;
     }
     setSaving(true);
-    const { error } = await (supabase.from("leaders") as any)
+    let q = (supabase.from("leaders") as any)
       .update({
         full_name: draft.full_name.trim(),
         phone: draft.phone.trim() || null,
@@ -87,8 +119,11 @@ export function LeaderProfileEditor({ userId }: { userId: string }) {
         bio: draft.bio.trim() || null,
         updated_at: new Date().toISOString(),
       })
-      .eq("id", profile.id)
-      .eq("user_id", userId);
+      .eq("id", profile.id);
+    // Kabla ya migrasheni ya umiliki, safu `user_id` haipo; uandishi huamuliwa
+    // na RLS ya `id` pekee.
+    if (linked) q = q.eq("user_id", userId);
+    const { error } = await q;
     setSaving(false);
     if (error) {
       showStatus("error", `${t("mgmt.profile_save_failed")} ${error.message}`);
@@ -99,6 +134,7 @@ export function LeaderProfileEditor({ userId }: { userId: string }) {
   };
 
   const uploadPhoto = async (file: File) => {
+    if (!profile) return;
     if (!ACCEPTED.includes(file.type)) {
       showStatus("error", t("mgmt.photo_type"));
       return;
@@ -117,9 +153,11 @@ export function LeaderProfileEditor({ userId }: { userId: string }) {
       return;
     }
     const url = await createStorageUrl("site-assets", path);
-    const { error } = await (supabase.from("leaders") as any)
+    let q = (supabase.from("leaders") as any)
       .update({ photo_url: url, updated_at: new Date().toISOString() })
-      .eq("user_id", userId);
+      .eq("id", profile.id);
+    if (linked) q = q.eq("user_id", userId);
+    const { error } = await q;
     setUploading(false);
     if (error) {
       showStatus("error", `${t("mgmt.photo_failed")} ${error.message}`);
@@ -135,9 +173,19 @@ export function LeaderProfileEditor({ userId }: { userId: string }) {
 
   if (!profile) {
     return (
-      <div className="panel-3d mt-6 max-w-2xl rounded-2xl p-6">
-        <h2 className="font-bold">{t("mgmt.my_profile")}</h2>
-        <p className="mt-2 text-sm text-muted-foreground">{t("mgmt.no_public_profile")}</p>
+      <div className="mw-panel mt-6">
+        <div className="mw-panel-head">
+          <h2 className="flex items-center gap-2 text-lg font-bold">
+            <UserRound className="h-5 w-5 text-primary" /> {t("mgmt.my_profile")}
+          </h2>
+        </div>
+        <div className="mw-empty-state">
+          <span className="mw-empty-icon">
+            <UserRound className="h-6 w-6" />
+          </span>
+          <p className="mw-empty-title">{t("mgmt.no_public_profile")}</p>
+          <p className="mw-empty-hint">{t("mgmt.no_public_profile_hint")}</p>
+        </div>
       </div>
     );
   }
