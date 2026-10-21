@@ -68,9 +68,9 @@ export function Header() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur">
-      <div className="mx-auto max-w-7xl px-4 py-2">
-        <div className="flex items-center justify-between gap-3 md:gap-8 py-2 border-b border-border/60">
+    <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-xl supports-[backdrop-filter]:bg-background/70">
+      <div className="page-shell py-2">
+        <div className="brand-strip flex items-center justify-between gap-3 py-2 md:gap-8">
           {settings?.logo_url ? (
             <img src={logoUrl ?? settings.logo_url} alt="MUMSO" className="h-14 w-14 md:h-20 md:w-20 shrink-0 rounded-xl object-contain bg-background p-1 shadow-sm" />
           ) : (
@@ -97,13 +97,13 @@ export function Header() {
               <GraduationCap className="h-5 w-5" /> MUMSO
             </span>
           </Link>
-          <nav className="flex items-center justify-center gap-1">
+          <nav className="flex flex-wrap items-center justify-center gap-1">
             {nav.map((n) => (
               <Link
                 key={n.to}
                 to={n.to}
-                className="rounded-lg px-3 py-2 text-base font-medium text-foreground/80 transition hover:text-primary"
-                activeProps={{ className: "rounded-lg px-3 py-2 text-base font-semibold bg-accent/60 text-primary" }}
+                className="nav-link"
+                activeProps={{ className: "nav-link nav-link-active" }}
                 activeOptions={{ exact: n.to === "/" }}
               >
                 {t(n.key)}
@@ -121,28 +121,28 @@ export function Header() {
           <Link to="/" className="font-bold text-primary text-base">MUMSO</Link>
           <div className="flex items-center gap-2">
             <LangToggle />
-            <button className="p-2" onClick={() => setOpen(!open)} aria-label={t("nav.menu")}>
+            <button className="rounded-lg p-2 transition hover:bg-secondary" onClick={() => setOpen(!open)} aria-label={t("nav.menu")} aria-expanded={open}>
               {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           </div>
         </div>
       </div>
       {open && (
-        <div className="lg:hidden border-t border-border bg-background px-4 py-3 space-y-1">
+        <div className="mobile-drawer lg:hidden border-t border-border bg-background px-4 py-3 space-y-1">
           {nav.map((n) => (
             <Link
               key={n.to}
               to={n.to}
               onClick={() => setOpen(false)}
-              className="block rounded-md px-3 py-2 text-base font-medium hover:bg-secondary"
-              activeProps={{ className: "block rounded-md px-3 py-2 text-base font-semibold bg-accent/60 text-primary" }}
+              className="nav-link nav-link-block"
+              activeProps={{ className: "nav-link nav-link-block nav-link-active" }}
               activeOptions={{ exact: n.to === "/" }}
             >
               {t(n.key)}
             </Link>
           ))}
           {userId && (
-            <Link to="/admin" onClick={() => setOpen(false)} className="block">
+            <Link to="/admin" onClick={() => setOpen(false)} className="block pt-2">
               <Button className="w-full" size="sm">{t("nav.dashboard")}</Button>
             </Link>
           )}

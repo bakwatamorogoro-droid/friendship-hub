@@ -94,7 +94,7 @@ function LeaderProfilePage() {
   return (
     <div>
       <section className="leader-profile-hero">
-        <div className="relative z-10 mx-auto grid max-w-5xl gap-8 px-4 py-14 md:grid-cols-[280px_1fr] md:items-center">
+        <div className="page-shell page-shell-narrow relative z-10 grid gap-8 py-14 md:grid-cols-[280px_1fr] md:items-center">
           <div className="mx-auto md:mx-0">
             {photo ? (
               <img
@@ -156,7 +156,7 @@ function LeaderProfilePage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-3xl px-4 py-14">
+      <section className="page-shell page-shell-narrow section-y-sm">
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="leader-fact">
             <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">

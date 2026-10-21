@@ -99,12 +99,12 @@ function Index() {
     <div>
       <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-[oklch(0.32_0.11_155)]">
         <div className="absolute inset-0 opacity-[0.08] bg-[radial-gradient(circle_at_20%_20%,white_1px,transparent_1px)] [background-size:24px_24px]" />
-        <div className="relative mx-auto max-w-7xl px-4 py-12 md:py-20 grid gap-10 lg:grid-cols-2 items-center">
+        <div className="page-shell relative grid items-center gap-10 py-14 md:py-20 lg:grid-cols-2">
           <div className="text-primary-foreground">
-            <span className="inline-block rounded-full bg-accent/90 text-accent-foreground px-3 py-1 text-xs font-semibold mb-4 backdrop-blur">
+            <span className="mb-4 inline-block rounded-full bg-accent/90 px-3.5 py-1.5 text-xs font-bold uppercase tracking-[0.1em] text-accent-foreground shadow-lg backdrop-blur">
               {t("home.welcome")}
             </span>
-            <h1 className="text-5xl md:text-7xl font-black leading-[1.05] tracking-tight">
+            <h1 className="text-[2.6rem] font-black leading-[1.04] tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
               {t("home.hero_1")} <br/>
               <span className="text-white drop-shadow-[0_4px_20px_rgba(0,0,0,0.35)]">MUMSO</span>
             </h1>
@@ -173,12 +173,10 @@ function Index() {
       <LeadershipSection />
 
 
-      <section className="mx-auto max-w-7xl px-4 py-16">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground">{t("home.services")}</h2>
-          <p className="mt-3 text-muted-foreground max-w-2xl mx-auto text-base md:text-lg">
-            {t("home.services_sub")}
-          </p>
+      <section className="page-shell section-y">
+        <div className="section-head">
+          <h2 className="section-title">{t("home.services")}</h2>
+          <p className="section-sub">{t("home.services_sub")}</p>
         </div>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {services.filter((s) => {
@@ -188,9 +186,9 @@ function Index() {
             <Link
               key={s.to}
               to={s.to}
-              className="group rounded-xl border border-border bg-card p-6 transition hover:-translate-y-1 hover:border-primary/40 hover:shadow-[var(--shadow-elegant)]"
+              className="surface surface-pad surface-hover group flex flex-col"
             >
-              <span className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition">
+              <span className="icon-badge">
                 <s.icon className="h-6 w-6" />
               </span>
               <h3 className="mt-4 text-lg font-semibold text-foreground">{t(s.titleKey)}</h3>
@@ -227,10 +225,10 @@ function LoanQuickLink() {
     } catch { /* ignore */ }
   };
   return (
-    <section className="mx-auto max-w-7xl px-4 pt-12">
-      <div className="rounded-3xl border border-border bg-card p-6 md:p-8 shadow-[var(--shadow-card)] flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+    <section className="page-shell pt-12">
+      <div className="surface surface-pad flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
         <div className="flex items-start gap-4">
-          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+          <span className="icon-badge">
             <Wallet className="h-6 w-6" />
           </span>
           <div>
@@ -262,7 +260,7 @@ function PresidentBanner() {
   if (!s?.president_name && !s?.president_message) return null;
 
   return (
-    <section className="mx-auto max-w-7xl px-4 pt-14">
+    <section className="page-shell pt-14">
       <div className="relative overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-primary via-primary to-[oklch(0.32_0.11_155)] text-primary-foreground shadow-[var(--shadow-elegant)]">
         <div className="absolute inset-0 opacity-[0.10] bg-[radial-gradient(circle_at_85%_15%,white_1px,transparent_1px)] [background-size:22px_22px]" />
         <div className="relative grid gap-8 p-7 md:p-10 md:grid-cols-[220px_1fr] items-center">
@@ -324,14 +322,14 @@ function NewsSection() {
   }, []);
 
   return (
-    <section className="bg-secondary/40 border-y border-border py-16">
-      <div className="mx-auto max-w-7xl px-4">
-        <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
+    <section className="border-y border-border bg-secondary/40 section-y">
+      <div className="page-shell">
+        <div className="section-head section-head-row">
           <div>
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground flex items-center gap-3">
-              <Megaphone className="h-8 w-8 text-primary" /> {t("home.news")}
+            <h2 className="section-title flex items-center gap-3">
+              <Megaphone className="h-7 w-7 shrink-0 text-primary md:h-8 md:w-8" /> {t("home.news")}
             </h2>
-            <p className="mt-2 text-muted-foreground text-base md:text-lg">{t("home.news_sub")}</p>
+            <p className="section-sub mt-2">{t("home.news_sub")}</p>
           </div>
           <Link to="/matangazo">
             <Button variant="outline" className="font-semibold btn-3d">
@@ -429,10 +427,10 @@ function LinksSection() {
   const { t } = useI18n();
   if (links.length === 0) return null;
   return (
-    <section className="mx-auto max-w-7xl px-4 py-16">
-      <div className="text-center mb-8">
-        <h2 className="text-3xl md:text-4xl font-bold text-foreground">{t("home.links")}</h2>
-        <p className="mt-2 text-muted-foreground text-base md:text-lg">{t("home.links_sub")}</p>
+    <section className="page-shell section-y">
+      <div className="section-head">
+        <h2 className="section-title">{t("home.links")}</h2>
+        <p className="section-sub">{t("home.links_sub")}</p>
       </div>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {links.map((l: any) => (

@@ -47,9 +47,9 @@ function MatangazoPage() {
   }, []);
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-12">
+    <div className="page-shell page-shell-narrow py-12">
       <div className="digital-page-hero">
-        <h1 className="relative z-10 text-3xl md:text-4xl font-bold flex items-center gap-3">
+        <h1 className="relative z-10 flex items-center gap-3 text-3xl font-black md:text-4xl">
           <Megaphone className="h-8 w-8" /> {t("news.title")}
         </h1>
         <p className="relative z-10 mt-2 text-base text-primary-foreground/85 md:text-lg">{t("news.lead")}</p>
@@ -57,7 +57,7 @@ function MatangazoPage() {
 
       <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {items.length === 0 && (
-          <p className="col-span-full py-12 text-center text-muted-foreground">{t("news.empty")}</p>
+          <p className="empty-state col-span-full">{t("news.empty")}</p>
         )}
         {items.map((a, i) => (
           <Link

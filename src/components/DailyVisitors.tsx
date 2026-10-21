@@ -62,8 +62,8 @@ export function DailyVisitors() {
   const today = rows?.at(-1);
   const max = Math.max(1, ...(rows ?? []).map((r) => Number(r.visitors)));
   return (
-    <section aria-label={t("visitors.aria")} className="border-y border-border bg-secondary/30 py-10">
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 md:grid-cols-[1fr_1.3fr] md:items-center">
+    <section aria-label={t("visitors.aria")} className="border-y border-border bg-secondary/30 section-y-sm">
+      <div className="page-shell grid gap-8 md:grid-cols-[1fr_1.3fr] md:items-center">
         <div>
           <div className="flex items-center gap-2 text-primary"><Users className="h-5 w-5" /><h2 className="text-lg font-bold">{t("visitors.title")}</h2></div>
           <div className="mt-4 flex items-end gap-4"><p data-testid="daily-visitors" className="min-w-20 text-5xl font-bold text-foreground">{error ? "—" : today ? <AnimatedNumber value={Number(today.visitors)} /> : "…"}</p><p className="pb-1 text-sm text-muted-foreground">{t("visitors.today")}<br /><span className="text-xs">{t("visitors.eat")}</span></p></div>

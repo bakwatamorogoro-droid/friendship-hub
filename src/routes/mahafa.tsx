@@ -36,9 +36,9 @@ function MahafaPage() {
   }, []);
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-12">
+    <div className="page-shell page-shell-narrow py-12">
       <div className="digital-page-hero">
-        <h1 className="relative z-10 flex items-center gap-3 text-3xl font-bold md:text-5xl">
+        <h1 className="relative z-10 flex items-center gap-3 text-3xl font-black md:text-5xl">
           <GraduationCap className="h-9 w-9" /> {t("grad.title")}
         </h1>
         <p className="relative z-10 mt-3 max-w-3xl text-primary-foreground/90">{t("grad.lead")}</p>
@@ -46,15 +46,15 @@ function MahafaPage() {
 
       <div className="mt-8 grid gap-6 md:grid-cols-2">
         {items.length === 0 && (
-          <p className="col-span-full py-12 text-center text-muted-foreground">{t("grad.empty")}</p>
+          <p className="empty-state col-span-full">{t("grad.empty")}</p>
         )}
         {items.map((g) => (
-          <article key={g.id} className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] transition hover:shadow-[var(--shadow-elegant)]">
+          <article key={g.id} className="surface overflow-hidden surface-hover">
             {g.image_url && (
               <img src={g.image_url} alt={g.title} loading="lazy" className="h-56 w-full object-cover" />
             )}
             <div className="p-6">
-              <h2 className="text-xl font-semibold text-primary">{g.title}</h2>
+              <h2 className="text-xl font-bold tracking-tight text-primary">{g.title}</h2>
               {g.event_date && (
                 <p className="mt-1 text-xs text-muted-foreground">
                   {t("grad.date")}: {new Date(g.event_date).toLocaleDateString(locale, { dateStyle: "long" })}

@@ -10,7 +10,7 @@ function LeaderCard({ leader }: { leader: Leader }) {
   const { t } = useI18n();
 
   return (
-    <article className="group flex flex-col overflow-hidden rounded-3xl border border-border bg-card shadow-[var(--shadow-card)] transition duration-300 hover:-translate-y-1.5 hover:border-primary/40 hover:shadow-[var(--shadow-elegant)]">
+    <article className="surface surface-hover group flex flex-col overflow-hidden">
       <div className="relative aspect-[4/5] overflow-hidden bg-secondary">
         {photo ? (
           <img

@@ -27,8 +27,8 @@ function NotFoundComponent() {
   const { t } = useI18n();
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-7xl font-bold text-foreground">404</h1>
+      <div className="surface surface-pad max-w-md text-center">
+        <h1 className="text-7xl font-black tracking-tight text-primary">404</h1>
         <h2 className="mt-4 text-xl font-semibold text-foreground">{t("common.page_not_found")}</h2>
         <p className="mt-2 text-sm text-muted-foreground">{t("common.page_not_found_sub")}</p>
         <div className="mt-6">
@@ -51,7 +51,7 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
+      <div className="surface surface-pad max-w-md text-center">
         <h1 className="text-xl font-semibold tracking-tight text-foreground">{t("common.page_failed")}</h1>
         <p className="mt-2 text-sm text-muted-foreground">{t("common.page_failed_sub")}</p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
@@ -141,15 +141,15 @@ function RootComponent() {
           <PageLoadingOverlay />
           <MaintenanceGate />
           {management ? null : formOnly ? (
-            <div className="border-b border-border bg-background/90 px-4 py-3 backdrop-blur">
-              <div className="mx-auto flex max-w-5xl items-center justify-between">
+            <div className="border-b border-border bg-background/85 py-3 backdrop-blur-xl">
+              <div className="page-shell page-shell-narrow flex items-center justify-between">
                 <Link
                   to={isResults ? "/fuatilia" : pathname === "/jisajili" || pathname === "/login" ? "/" : "/huduma"}
-                  className="inline-flex items-center gap-2 rounded-lg border border-border bg-secondary px-3 py-1.5 text-sm font-semibold text-foreground/80 transition hover:border-primary hover:text-primary"
+                  className="inline-flex items-center gap-2 rounded-full border border-border bg-secondary px-3.5 py-1.5 text-sm font-semibold text-foreground/80 transition hover:-translate-x-0.5 hover:border-primary hover:text-primary"
                 >
                   {isResults ? `← ${t("results.back_track")}` : `← ${t("common.back_services")}`}
                 </Link>
-                <span className="text-sm font-bold uppercase tracking-wide text-primary">MUMSO</span>
+                <span className="text-sm font-bold uppercase tracking-[0.14em] text-primary">MUMSO</span>
               </div>
             </div>
           ) : (

@@ -164,7 +164,7 @@ function ResultsPage() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
+    <div className="page-shell page-shell-narrow py-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="flex items-center gap-2 text-2xl font-bold md:text-3xl">

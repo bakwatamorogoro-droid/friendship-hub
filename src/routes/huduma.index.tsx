@@ -28,9 +28,9 @@ function HudumaPage() {
     : departments;
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-12">
+    <div className="page-shell page-shell-narrow py-12">
       <div className="digital-page-hero">
-        <h1 className="relative z-10 text-3xl font-bold md:text-4xl">{t("services.title")}</h1>
+        <h1 className="relative z-10 text-3xl font-black md:text-4xl">{t("services.title")}</h1>
         <p className="relative z-10 mt-2 text-primary-foreground/85">{t("services.lead")}</p>
       </div>
 
@@ -42,18 +42,18 @@ function HudumaPage() {
 
       <div className="mt-8 grid gap-6 md:grid-cols-2">
         {departments.length === 0 && (
-          <p className="col-span-full py-12 text-center text-muted-foreground">{t("services.none")}</p>
+          <p className="empty-state col-span-full">{t("services.none")}</p>
         )}
         {ordered.map((d) => (
           <Link
             key={d.id}
             to="/huduma/$slug"
             params={{ slug: d.slug }}
-            className={`group rounded-2xl border bg-card p-6 shadow-[var(--shadow-card)] transition hover:-translate-y-1 hover:border-primary/40 hover:shadow-[var(--shadow-elegant)] ${
-              d.slug === mySlug ? "border-primary/50 ring-1 ring-primary/20" : "border-border"
+            className={`surface surface-pad surface-hover group ${
+              d.slug === mySlug ? "border-primary/50 ring-1 ring-primary/20" : ""
             }`}
           >
-            <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary transition group-hover:bg-primary group-hover:text-primary-foreground">
+            <span className="icon-badge">
               <Building2 className="h-6 w-6" />
             </span>
             {d.slug === mySlug && (

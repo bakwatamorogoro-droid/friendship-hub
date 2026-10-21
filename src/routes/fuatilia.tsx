@@ -74,9 +74,9 @@ function TrackPage() {
   };
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-12">
+    <div className="page-shell page-shell-narrow py-12">
       <div className="digital-page-hero">
-        <h1 className="relative z-10 flex items-center gap-3 text-3xl font-bold md:text-4xl">
+        <h1 className="relative z-10 flex items-center gap-3 text-3xl font-black md:text-4xl">
           <Search className="h-8 w-8" /> {t("track.title")}
         </h1>
         <p className="relative z-10 mt-2 text-base text-primary-foreground/85 md:text-lg">{t("track.lead")}</p>

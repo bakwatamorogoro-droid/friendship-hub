@@ -44,7 +44,7 @@ function LeadersPage() {
   return (
     <div>
       <section className="leader-profile-hero">
-        <div className="relative z-10 mx-auto max-w-7xl px-4 py-14 text-center">
+        <div className="page-shell relative z-10 py-14 text-center">
           <span className="inline-block rounded-full bg-accent/90 px-3 py-1 text-xs font-bold uppercase tracking-wider text-accent-foreground">
             {t("home.leaders_badge")}
           </span>
@@ -61,7 +61,7 @@ function LeadersPage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-14">
+      <section className="page-shell section-y-sm">
         {loading ? (
           <p className="text-center text-muted-foreground">{t("common.loading")}</p>
         ) : leaders.length === 0 ? (
@@ -95,7 +95,7 @@ function LeadersPage() {
         )}
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 pb-16">
+      <section className="page-shell pb-16">
         <div className="panel-3d flex flex-col items-center gap-4 rounded-2xl p-6 text-center md:flex-row md:justify-between md:text-left">
           <div>
             <h2 className="text-lg font-bold">{t("leaders.signup_cta_title")}</h2>

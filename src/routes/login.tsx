@@ -75,7 +75,7 @@ function LoginPage() {
   };
 
   return (
-    <div className="mx-auto max-w-md px-4 py-14">
+    <div className="page-shell page-shell-narrow py-14" style={{ maxWidth: "28rem" }}>
       <div className="mgmt-hero mb-6">
         <div className="mgmt-hero-inner text-center">
           <span className="mgmt-chip mx-auto">
@@ -86,7 +86,7 @@ function LoginPage() {
           <p className="mt-2 text-sm text-primary-foreground/85">{t("login.lead")}</p>
         </div>
       </div>
-      <div className="panel-3d rounded-2xl p-6">
+      <div className="panel-3d rounded-2xl p-6 sm:p-7">
         <form onSubmit={signIn} className="space-y-4">
           <div className="space-y-2">
             <Label>{t("login.identifier")}</Label>

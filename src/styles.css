@@ -581,11 +581,11 @@ html { font-size: 17px; }
   background: var(--sidebar); color: var(--sidebar-foreground); overflow-y: auto;
 }
 .management-nav { display: flex; height: auto; flex-direction: column; align-items: stretch; justify-content: start; gap: 4px; background: transparent; padding: 0 10px 18px; border-radius: 0; }
-.management-nav-item { display: flex; gap: 11px; justify-content: flex-start; min-height: 42px; border-radius: 6px; padding: 9px 12px; color: var(--sidebar-foreground); font-weight: 500; }
-.management-nav-item:hover { background: var(--workspace-sidebar-active); }
-.management-nav-item[data-state="active"] { background: var(--workspace-sidebar-active); color: var(--sidebar-foreground); box-shadow: none; }
+.management-nav-item { display: flex; gap: 11px; justify-content: flex-start; min-height: 44px; border-radius: 10px; padding: 10px 12px; color: var(--sidebar-foreground); font-weight: 500; transition: background-color .2s var(--ease-soft), transform .2s var(--ease-soft), box-shadow .2s var(--ease-soft); }
+.management-nav-item:hover { background: var(--workspace-sidebar-active); transform: translateX(2px); }
+.management-nav-item[data-state="active"] { background: var(--workspace-sidebar-active); color: var(--sidebar-foreground); box-shadow: inset 3px 0 0 color-mix(in oklab, var(--accent) 70%, transparent); }
 .management-sidebar.is-collapsed .management-nav-item { justify-content: center; padding: 10px; }
-.management-main .panel-3d { box-shadow: none; background: var(--card); border-radius: 8px; }
+.management-main .panel-3d { box-shadow: var(--lift-1); background: var(--card); border-radius: var(--radius-xl); }
 .management-main table th { white-space: nowrap; letter-spacing: 0; }
 .management-main table td { white-space: normal; overflow-wrap: anywhere; }
 .service-form-page { background: var(--service-background); --form-blue: var(--service-accent); --form-blue-soft: var(--service-soft); }
@@ -942,4 +942,373 @@ html { font-size: 17px; }
   text-align: center;
   font-size: 0.85rem;
   color: var(--muted-foreground);
+}
+
+/* ==========================================================================
+   SAFU YA MUONEKANO WA KISASA (modern UI layer)
+   Rangi zote hutokana na tokeni zilizopo — hakuna rangi mpya ya theme
+   iliyoongezwa au kubadilishwa hapa.
+   ========================================================================== */
+
+:root {
+  --ease-soft: cubic-bezier(0.2, 0.9, 0.25, 1);
+  --ease-spring: cubic-bezier(0.34, 1.36, 0.64, 1);
+  --hairline: color-mix(in oklab, var(--border) 82%, var(--primary));
+  --lift-1:
+    0 1px 2px color-mix(in oklab, var(--foreground) 5%, transparent),
+    0 10px 26px -16px color-mix(in oklab, var(--foreground) 20%, transparent);
+  --lift-2:
+    0 2px 6px color-mix(in oklab, var(--foreground) 7%, transparent),
+    0 26px 54px -22px color-mix(in oklab, var(--foreground) 26%, transparent);
+  --focus-ring: 0 0 0 3px color-mix(in oklab, var(--primary) 22%, transparent);
+}
+
+@layer base {
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    letter-spacing: -0.021em;
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+  :where(a, button):focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+}
+
+/* ---------- Mpangilio wa kurasa (page layout rhythm) ---------- */
+.page-shell {
+  width: 100%;
+  margin-inline: auto;
+  max-width: 80rem;
+  padding-inline: clamp(1rem, 4vw, 2rem);
+}
+.page-shell-narrow {
+  max-width: 56rem;
+}
+.page-shell-wide {
+  max-width: 90rem;
+}
+.section-y {
+  padding-block: clamp(2.75rem, 6vw, 4.75rem);
+}
+.section-y-sm {
+  padding-block: clamp(2rem, 4vw, 3rem);
+}
+
+/* ---------- Vichwa vya sehemu (section headings) ---------- */
+.section-head {
+  display: grid;
+  justify-items: center;
+  gap: 0.6rem;
+  text-align: center;
+  margin-bottom: clamp(1.75rem, 4vw, 3rem);
+}
+.section-head-start {
+  justify-items: start;
+  text-align: left;
+}
+/* Kichwa cha sehemu chenye kitufe upande wa kulia (row layout). */
+.section-head-row {
+  justify-items: start;
+  text-align: left;
+  margin-bottom: 2rem;
+}
+@media (min-width: 768px) {
+  .section-head-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+}
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--primary) 22%, transparent);
+  background: color-mix(in oklab, var(--primary) 8%, transparent);
+  padding: 0.3rem 0.8rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+.section-title {
+  font-size: clamp(1.55rem, 1rem + 2.2vw, 2.5rem);
+  font-weight: 800;
+  line-height: 1.12;
+  color: var(--foreground);
+}
+.section-sub {
+  max-width: 44rem;
+  font-size: clamp(0.95rem, 0.9rem + 0.2vw, 1.1rem);
+  line-height: 1.65;
+  color: var(--muted-foreground);
+}
+
+/* ---------- Nyuso (surfaces / cards) ---------- */
+.surface {
+  position: relative;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-2xl);
+  background: var(--card);
+  box-shadow: var(--lift-1);
+}
+.surface-pad {
+  padding: clamp(1.15rem, 2.6vw, 1.75rem);
+}
+.surface-hover {
+  transition:
+    transform 0.28s var(--ease-soft),
+    box-shadow 0.28s var(--ease-soft),
+    border-color 0.28s var(--ease-soft);
+}
+.surface-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--lift-2);
+  border-color: color-mix(in oklab, var(--primary) 45%, var(--hairline));
+}
+.icon-badge {
+  display: grid;
+  place-items: center;
+  height: 3rem;
+  width: 3rem;
+  flex-shrink: 0;
+  border-radius: var(--radius-lg);
+  background: color-mix(in oklab, var(--primary) 10%, transparent);
+  color: var(--primary);
+  transition:
+    background-color 0.24s var(--ease-soft),
+    color 0.24s var(--ease-soft),
+    transform 0.24s var(--ease-soft);
+}
+.surface-hover:hover .icon-badge {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  transform: scale(1.05);
+}
+
+/* ---------- Vipimo vidogo (stat tiles, meta rows) ---------- */
+.stat-tile {
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-xl);
+  background: color-mix(in oklab, var(--card) 94%, var(--primary));
+  padding: 0.85rem 1rem;
+}
+.meta-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: var(--radius-md);
+  padding: 0.4rem 0;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+.empty-state {
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+  border: 1px dashed var(--hairline);
+  border-radius: var(--radius-2xl);
+  background: color-mix(in oklab, var(--card) 70%, transparent);
+  padding: clamp(2rem, 6vw, 3.5rem) 1.5rem;
+  text-align: center;
+  color: var(--muted-foreground);
+}
+
+/* ---------- Kichwa cha ukurasa (page hero) ---------- */
+.digital-page-hero {
+  padding: clamp(1.6rem, 4vw, 2.75rem);
+  border-radius: var(--radius-3xl);
+}
+.digital-page-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    color-mix(in oklab, var(--primary-foreground) 22%, transparent) 1px,
+    transparent 0
+  );
+  background-size: 22px 22px;
+  opacity: 0.5;
+}
+
+/* ---------- Urambazaji (navigation) ---------- */
+.nav-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 999px;
+  padding: 0.5rem 0.85rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: color-mix(in oklab, var(--foreground) 78%, transparent);
+  transition:
+    background-color 0.2s var(--ease-soft),
+    color 0.2s var(--ease-soft),
+    box-shadow 0.2s var(--ease-soft);
+}
+.nav-link:hover {
+  background: color-mix(in oklab, var(--primary) 9%, transparent);
+  color: var(--primary);
+}
+.nav-link-active {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-weight: 600;
+  box-shadow: var(--lift-1);
+}
+.nav-link-active:hover {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+.nav-link-block {
+  display: flex;
+  width: 100%;
+  border-radius: var(--radius-lg);
+  padding: 0.7rem 0.9rem;
+}
+@keyframes drawer-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.mobile-drawer {
+  animation: drawer-in 0.26s var(--ease-soft) both;
+}
+.brand-strip {
+  border-bottom: 1px solid var(--hairline);
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--card) 92%, var(--primary)),
+    var(--card)
+  );
+}
+
+/* ---------- Kijachini (footer) ---------- */
+.site-footer {
+  position: relative;
+  overflow: hidden;
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+.site-footer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at 12% 0%,
+    color-mix(in oklab, var(--accent) 22%, transparent),
+    transparent 45%
+  );
+}
+.site-footer > * {
+  position: relative;
+}
+.footer-heading {
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--primary-foreground) 72%, transparent);
+}
+.footer-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: color-mix(in oklab, var(--primary-foreground) 88%, transparent);
+  transition:
+    color 0.2s var(--ease-soft),
+    transform 0.2s var(--ease-soft);
+}
+.footer-link:hover {
+  color: var(--primary-foreground);
+  transform: translateX(2px);
+}
+
+/* ---------- Mwendo uliopunguzwa ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .surface-hover,
+  .icon-badge,
+  .nav-link,
+  .footer-link,
+  .mobile-drawer {
+    transition: none;
+    animation: none;
+  }
+  .surface-hover:hover,
+  .footer-link:hover,
+  .surface-hover:hover .icon-badge {
+    transform: none;
+  }
+}
+
+/* ===== Paneli ya menejimenti: uboreshaji wa kisasa ===== */
+.management-header {
+  background: color-mix(in oklab, var(--card) 92%, transparent);
+  backdrop-filter: blur(14px);
+}
+.management-main table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.management-main table thead th {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  background: color-mix(in oklab, var(--secondary) 60%, transparent);
+}
+.management-main table tbody tr {
+  transition: background-color 0.16s var(--ease-soft);
+}
+.management-main table tbody tr:hover {
+  background: color-mix(in oklab, var(--primary) 5%, transparent);
+}
+.management-main input,
+.management-main textarea,
+.management-main [role="combobox"],
+.management-main button[role="combobox"] {
+  transition:
+    border-color 0.18s var(--ease-soft),
+    box-shadow 0.18s var(--ease-soft);
+}
+.management-main input:focus,
+.management-main textarea:focus,
+.management-main [role="combobox"]:focus,
+.management-main button[role="combobox"]:focus {
+  border-color: var(--primary);
+  box-shadow: var(--focus-ring);
+  outline: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .management-nav-item,
+  .management-main table tbody tr {
+    transition: none;
+  }
+  .management-nav-item:hover {
+    transform: none;
+  }
 }
