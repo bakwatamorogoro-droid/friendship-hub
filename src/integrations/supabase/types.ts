@@ -476,6 +476,7 @@ export type Database = {
         Row: {
           bio: string | null
           created_at: string
+          department_id: string | null
           email: string | null
           full_name: string
           id: string
@@ -487,10 +488,12 @@ export type Database = {
           slug: string
           sort_order: number
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           bio?: string | null
           created_at?: string
+          department_id?: string | null
           email?: string | null
           full_name: string
           id?: string
@@ -502,10 +505,12 @@ export type Database = {
           slug: string
           sort_order?: number
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           bio?: string | null
           created_at?: string
+          department_id?: string | null
           email?: string | null
           full_name?: string
           id?: string

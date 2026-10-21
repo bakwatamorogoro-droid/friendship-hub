@@ -541,7 +541,10 @@ html { font-size: 17px; }
 
 @keyframes visitor-bar-rise { from { transform: scaleY(0); opacity: 0; } to { transform: scaleY(1); opacity: 1; } }
 .visitor-bar { transform-origin: bottom; animation: visitor-bar-rise 900ms cubic-bezier(.2,.8,.2,1) both; }
-.student-identity { animation: maintenance-panel-in 350ms ease-out both; }
+.student-identity { animation: maintenance-panel-in 350ms ease-out both; border: 1px solid var(--primary); border-radius: 14px; background: color-mix(in oklch, var(--primary) 6%, var(--card)); padding: 1.1rem 1.25rem; }
+.student-lookup { border: 1px dashed var(--border); border-radius: 14px; background: var(--card); padding: 1.1rem 1.25rem; }
+.service-form-wrap .digital-card > * + * { margin-top: 1.25rem; }
+.service-form-wrap .digital-card .digital-field + .digital-field { margin-top: 0; }
 @media (prefers-reduced-motion: reduce) { .visitor-bar, .student-identity { animation: none; } }
 
 /* Management workspace and isolated service forms */
@@ -600,3 +603,343 @@ html { font-size: 17px; }
   .service-form-page .digital-page-hero { padding: 1.5rem; }
 }
 @media (prefers-reduced-motion: reduce) { .service-form-page .digital-card, .service-form-page .digital-field, .service-form-page .digital-page-hero { animation: none; } }
+
+/* ===== Dashibodi ya menejimenti (management dashboard) ===== */
+.management-nav-group {
+  padding: 14px 14px 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--sidebar-foreground) 55%, transparent);
+}
+.management-nav-group::after {
+  content: "";
+  display: block;
+  margin-top: 6px;
+  height: 1px;
+  background: color-mix(in oklab, var(--sidebar-foreground) 16%, transparent);
+}
+
+.mgmt-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-2xl);
+  padding: clamp(1.25rem, 3.5vw, 2rem);
+  color: var(--primary-foreground);
+  background: var(--gradient-hero);
+  box-shadow: var(--shadow-elegant);
+}
+.mgmt-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 12% 18%, oklch(1 0 0 / 0.16), transparent 45%),
+    radial-gradient(
+      circle at 88% 90%,
+      color-mix(in oklab, var(--accent) 28%, transparent),
+      transparent 45%
+    );
+}
+.mgmt-hero-inner {
+  position: relative;
+  z-index: 1;
+}
+
+.mgmt-avatar {
+  display: grid;
+  place-items: center;
+  height: 5.25rem;
+  width: 5.25rem;
+  flex-shrink: 0;
+  border-radius: var(--radius-2xl);
+  border: 3px solid oklch(1 0 0 / 0.28);
+  background: oklch(1 0 0 / 0.14);
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  overflow: hidden;
+  box-shadow: 0 18px 34px -20px oklch(0 0 0 / 0.6);
+}
+.mgmt-avatar img {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+
+.mgmt-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 999px;
+  background: oklch(1 0 0 / 0.16);
+  padding: 0.3rem 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  backdrop-filter: blur(6px);
+}
+
+.mgmt-kpi {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid color-mix(in oklab, var(--border) 70%, var(--primary));
+  border-radius: var(--radius-xl);
+  background: var(--card);
+  padding: 1.05rem 1.15rem;
+  box-shadow: var(--shadow-card);
+  transition:
+    transform 0.22s cubic-bezier(0.2, 0.9, 0.25, 1),
+    box-shadow 0.22s;
+}
+.mgmt-kpi:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-elegant);
+}
+.mgmt-kpi::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--kpi-accent, var(--primary));
+}
+.mgmt-kpi-value {
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.mgmt-kpi-icon {
+  display: grid;
+  place-items: center;
+  height: 2.4rem;
+  width: 2.4rem;
+  border-radius: var(--radius-md);
+  background: color-mix(in oklab, var(--kpi-accent, var(--primary)) 14%, transparent);
+  color: var(--kpi-accent, var(--primary));
+}
+
+.mgmt-panel {
+  border: 1px solid color-mix(in oklab, var(--border) 80%, var(--primary));
+  border-radius: var(--radius-xl);
+  background: var(--card);
+  box-shadow: var(--shadow-card);
+}
+.mgmt-panel-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border-bottom: 1px solid var(--border);
+  padding: 0.95rem 1.15rem;
+}
+
+.mgmt-bar {
+  height: 0.6rem;
+  border-radius: 999px;
+  background: var(--muted);
+  overflow: hidden;
+}
+.mgmt-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  transition: width 700ms cubic-bezier(0.2, 0.9, 0.25, 1);
+}
+
+.mgmt-row {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  border-radius: var(--radius-md);
+  padding: 0.7rem 0.85rem;
+  transition: background-color 0.18s;
+}
+.mgmt-row:hover {
+  background: color-mix(in oklab, var(--primary) 6%, transparent);
+}
+
+.mgmt-action {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  padding: 0.75rem 0.9rem;
+  font-weight: 600;
+  text-align: left;
+  transition:
+    transform 0.18s cubic-bezier(0.2, 0.9, 0.25, 1),
+    border-color 0.18s,
+    box-shadow 0.18s;
+}
+.mgmt-action:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in oklab, var(--primary) 45%, var(--border));
+  box-shadow: var(--shadow-card);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mgmt-kpi,
+  .mgmt-action,
+  .mgmt-bar > span {
+    transition: none;
+  }
+  .mgmt-kpi:hover,
+  .mgmt-action:hover {
+    transform: none;
+  }
+}
+
+/* ===== Ukurasa wa wasifu wa kiongozi ===== */
+.leader-profile-hero {
+  position: relative;
+  overflow: hidden;
+  background: var(--gradient-hero);
+  color: var(--primary-foreground);
+}
+.leader-profile-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 15% 15%, oklch(1 0 0 / 0.14), transparent 42%),
+    radial-gradient(circle at 85% 85%, oklch(0.78 0.16 80 / 0.22), transparent 42%);
+}
+.leader-photo {
+  border-radius: var(--radius-3xl);
+  border: 5px solid oklch(1 0 0 / 0.28);
+  object-fit: cover;
+  box-shadow: 0 30px 60px -26px oklch(0 0 0 / 0.65);
+}
+.leader-fact {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: color-mix(in oklab, var(--card) 92%, var(--primary));
+  padding: 0.85rem 1rem;
+}
+
+/* ===== Ukurasa wa usajili wa kiongozi ===== */
+.signup-steps {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.signup-step-dot {
+  display: grid;
+  place-items: center;
+  height: 1.85rem;
+  width: 1.85rem;
+  flex-shrink: 0;
+  border-radius: 999px;
+  border: 2px solid color-mix(in oklab, var(--primary) 35%, transparent);
+  background: var(--card);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+.signup-step-dot[data-done="true"] {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-foreground);
+}
+.signup-step-line {
+  height: 2px;
+  flex: 1;
+  background: color-mix(in oklab, var(--primary) 22%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .service-form-page .digital-card,
+  .service-form-page .digital-field,
+  .service-form-page .digital-page-hero {
+    animation: none;
+  }
+}
+
+/* ===== Fomu za huduma: mpangilio wa sehemu (form sections) ===== */
+.service-form-wrap .digital-card {
+  padding: clamp(1.25rem, 3.5vw, 2rem);
+}
+
+.form-section + .form-section {
+  margin-top: 1.75rem;
+}
+.form-section-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--border);
+}
+.form-section-step {
+  display: grid;
+  place-items: center;
+  height: 1.9rem;
+  width: 1.9rem;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-size: 0.8rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.form-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 1.02rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--foreground);
+}
+.form-section-hint {
+  margin-top: 0.2rem;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--muted-foreground);
+}
+.form-section-body {
+  margin-top: 1.15rem;
+}
+
+/* Sehemu ya utambulisho na uwanja wa fomu: nafasi inayolingana kwenye kila fomu. */
+.service-form-wrap .digital-card .digital-field + .digital-field {
+  margin-top: 1rem;
+}
+.form-section-body .digital-field + .digital-field {
+  margin-top: 1rem;
+}
+.form-grid {
+  display: grid;
+  gap: 1rem;
+}
+@media (min-width: 640px) {
+  .form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Kitufe kikuu cha kutuma: kikubwa, kiko katikati na kinaonekana wazi. */
+.form-submit {
+  width: 100%;
+  min-height: 3.15rem;
+  border-radius: var(--radius-lg);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+.form-footnote {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+}

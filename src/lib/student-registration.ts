@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { translate, useI18n } from "@/lib/i18n";
 
 export type RegisteredStudent = {
   registration_number: string;
@@ -14,6 +15,7 @@ export function rememberStudentReg(reg: string) {
 }
 
 export function useRegisteredStudent() {
+  const { lang } = useI18n();
   const [reg, setReg] = useState("");
   const [student, setStudent] = useState<RegisteredStudent | null>(null);
   const [searching, setSearching] = useState(false);
@@ -26,7 +28,7 @@ export function useRegisteredStudent() {
     setError("");
     if (!/^[A-Z0-9][A-Z0-9/._ -]{3,59}$/.test(clean)) {
       setSearching(false);
-      setError("Andika REG namba sahihi ya chuo.");
+      setError(translate(lang, "form.err_bad_reg"));
       return;
     }
     setSearching(true);
@@ -34,17 +36,17 @@ export function useRegisteredStudent() {
       const { data, error: failure } = await supabase.rpc("student_lookup", { _reg: clean });
       if (id !== requestId.current) return;
       const row = data?.[0];
-      if (failure) { setError("Taarifa hazijapatikana kwa sasa. Jaribu tena."); return; }
-      if (!row) { setError("REG namba hii haijasajiliwa. Jisajili kwanza."); return; }
+      if (failure) { setError(translate(lang, "form.err_lookup_failed")); return; }
+      if (!row) { setError(translate(lang, "form.err_not_registered")); return; }
       setReg(clean);
       setStudent({ ...row, registration_number: clean });
       rememberStudentReg(clean);
     } catch {
-      if (id === requestId.current) setError("Muunganisho umeshindikana. Jaribu tena.");
+      if (id === requestId.current) setError(translate(lang, "form.err_connection"));
     } finally {
       if (id === requestId.current) setSearching(false);
     }
-  }, []);
+  }, [lang]);
   useEffect(() => {
     try {
       const saved = sessionStorage.getItem(KEY);

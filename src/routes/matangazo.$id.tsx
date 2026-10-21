@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveStorageUrl } from "@/lib/storage-url";
 import { ArrowLeft, CalendarDays, Megaphone } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/matangazo/$id")({
   head: () => ({
@@ -27,6 +28,7 @@ type A = {
 };
 
 function AnnouncementPage() {
+  const { t, locale } = useI18n();
   const { id } = Route.useParams();
   const [a, setA] = useState<A | null>(null);
   const [loading, setLoading] = useState(true);
@@ -46,13 +48,13 @@ function AnnouncementPage() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-10">
       <Link to="/matangazo" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline">
-        <ArrowLeft className="h-4 w-4" /> Matangazo yote
+        <ArrowLeft className="h-4 w-4" /> {t("news.title")}
       </Link>
 
       {loading ? (
-        <p className="mt-10 text-muted-foreground">Inapakia...</p>
+        <p className="mt-10 text-muted-foreground">{t("common.loading")}</p>
       ) : !a ? (
-        <p className="mt-10 text-muted-foreground">Tangazo hili halipo au limefichwa.</p>
+        <p className="mt-10 text-muted-foreground">{t("news.not_found")}</p>
       ) : (
         <article className="mt-6">
           <div className="panel-3d overflow-hidden rounded-3xl border border-border bg-card">
@@ -66,7 +68,7 @@ function AnnouncementPage() {
             <div className="p-6 md:p-9">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-primary">
                 <CalendarDays className="h-3.5 w-3.5" />
-                {new Date(a.created_at).toLocaleDateString("sw-TZ", { dateStyle: "long" })}
+                {new Date(a.created_at).toLocaleDateString(locale, { dateStyle: "long" })}
               </span>
               <h1 className="mt-4 text-3xl md:text-4xl font-black leading-tight text-foreground">{a.title}</h1>
               <div className="mt-6 whitespace-pre-wrap text-base md:text-lg leading-relaxed text-foreground/90">

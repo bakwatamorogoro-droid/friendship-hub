@@ -21,23 +21,22 @@ import { Toaster } from "@/components/ui/sonner";
 import { StatusHost } from "@/lib/status";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveStorageUrl } from "@/lib/storage-url";
-import { LanguageProvider } from "@/lib/i18n";
+import { LanguageProvider, useI18n } from "@/lib/i18n";
 
 function NotFoundComponent() {
+  const { t } = useI18n();
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
-        </p>
+        <h2 className="mt-4 text-xl font-semibold text-foreground">{t("common.page_not_found")}</h2>
+        <p className="mt-2 text-sm text-muted-foreground">{t("common.page_not_found_sub")}</p>
         <div className="mt-6">
           <Link
             to="/"
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            Go home
+            {t("common.go_home")}
           </Link>
         </div>
       </div>
@@ -46,18 +45,15 @@ function NotFoundComponent() {
 }
 
 function ErrorComponent({ error, reset }: ErrorComponentProps) {
+  const { t } = useI18n();
   console.error(error);
   const router = useRouter();
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
-        </p>
+        <h1 className="text-xl font-semibold tracking-tight text-foreground">{t("common.page_failed")}</h1>
+        <p className="mt-2 text-sm text-muted-foreground">{t("common.page_failed_sub")}</p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
             onClick={() => {
@@ -66,13 +62,13 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
             }}
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            Try again
+            {t("common.try_again")}
           </button>
           <a
             href="/"
             className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
           >
-            Go home
+            {t("common.go_home")}
           </a>
         </div>
       </div>
@@ -112,7 +108,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        {children}
+        <LanguageProvider>{children}</LanguageProvider>
         <Scripts />
       </body>
     </html>
@@ -128,6 +124,7 @@ function isFormOnlyPath(pathname: string) {
 }
 
 function RootComponent() {
+  const { t } = useI18n();
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const formOnly = isFormOnlyPath(pathname);
@@ -136,7 +133,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <LanguageProvider>
+      <>
         <ThemeInjector />
         <VisitorTracker />
         <div className={`flex min-h-screen flex-col bg-background ${formOnly ? "service-form-page" : ""}`}>
@@ -150,7 +147,7 @@ function RootComponent() {
                   to={isResults ? "/fuatilia" : pathname === "/jisajili" || pathname === "/login" ? "/" : "/huduma"}
                   className="inline-flex items-center gap-2 rounded-lg border border-border bg-secondary px-3 py-1.5 text-sm font-semibold text-foreground/80 transition hover:border-primary hover:text-primary"
                 >
-                  {isResults ? "← Rudi Kufuatilia" : "← Rudi kwa Huduma"}
+                  {isResults ? `← ${t("results.back_track")}` : `← ${t("common.back_services")}`}
                 </Link>
                 <span className="text-sm font-bold uppercase tracking-wide text-primary">MUMSO</span>
               </div>
@@ -166,7 +163,7 @@ function RootComponent() {
           <Toaster />
           <StatusHost />
         </div>
-      </LanguageProvider>
+      </>
     </QueryClientProvider>
   );
 }
@@ -222,6 +219,7 @@ function RouteLoadingBar() {
 }
 
 function PageLoadingOverlay() {
+  const { t } = useI18n();
   const isPending = useRouterState({ select: (s) => s.status === "pending" });
   const [visible, setVisible] = useState(false);
   useEffect(() => {
@@ -235,7 +233,7 @@ function PageLoadingOverlay() {
       <div className="flex flex-col items-center">
         <div className="page-loader-ring" />
         <div className="page-loader-dots"><span /><span /><span /></div>
-        <p className="mt-4 text-sm text-muted-foreground font-medium tracking-wide">Inapakia ukurasa...</p>
+        <p className="mt-4 text-sm font-medium tracking-wide text-muted-foreground">{t("common.loading_page")}</p>
       </div>
     </div>
   );
@@ -247,6 +245,7 @@ function RouteFade() {
 }
 
 function MaintenanceGate() {
+  const { t, locale } = useI18n();
   const location = useRouterState({ select: (s) => s.location.pathname });
   const [now, setNow] = useState(() => Date.now());
   const [status, setStatus] = useState<{
@@ -275,10 +274,10 @@ function MaintenanceGate() {
   const hours = remaining === null ? "--" : Math.floor((remaining % 86_400_000) / 3_600_000);
   const minutes = remaining === null ? "--" : Math.floor((remaining % 3_600_000) / 60_000);
   const seconds = remaining === null ? "--" : Math.floor((remaining % 60_000) / 1000);
-  const currentDate = new Intl.DateTimeFormat("sw-TZ", {
+  const currentDate = new Intl.DateTimeFormat(locale, {
     weekday: "long", day: "numeric", month: "long", year: "numeric",
   }).format(now);
-  const currentTime = new Intl.DateTimeFormat("sw-TZ", {
+  const currentTime = new Intl.DateTimeFormat("en-GB", {
     hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
     timeZone: "Africa/Dar_es_Salaam",
   }).format(now);
@@ -291,14 +290,14 @@ function MaintenanceGate() {
         <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary ring-1 ring-primary/20">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
         </div>
-        <p className="text-xs font-semibold uppercase text-primary">MUMSO • Taarifa ya Mfumo</p>
-        <h1 className="mt-2 text-2xl font-bold text-foreground md:text-3xl">Mfumo Umefungwa kwa Muda</h1>
+        <p className="text-xs font-semibold uppercase text-primary">{t("maint.notice")}</p>
+        <h1 className="mt-2 text-2xl font-bold text-foreground md:text-3xl">{t("maint.title")}</h1>
         <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-muted-foreground md:text-base">
-          {status.message ?? "Huduma za MUMSO zimefungwa kwa muda kwa matengenezo. Tafadhali jaribu tena baadaye."}
+          {status.message ?? t("maint.default")}
         </p>
-        <div className="mt-7 grid grid-cols-4 gap-2 md:gap-3" aria-label="Muda uliobaki">
+        <div className="mt-7 grid grid-cols-4 gap-2 md:gap-3" aria-label={t("maint.remaining")}>
           {[
-            [days, "Siku"], [hours, "Saa"], [minutes, "Dakika"], [seconds, "Sekunde"],
+            [days, t("maint.days")], [hours, t("maint.hours")], [minutes, t("maint.minutes")], [seconds, t("maint.seconds")],
           ].map(([value, label]) => (
             <div key={label} className="maintenance-time-block">
               <strong className="block text-2xl font-bold text-foreground md:text-4xl">{value}</strong>
@@ -311,7 +310,7 @@ function MaintenanceGate() {
           <p className="mt-1 font-mono text-xl font-bold text-primary">{currentTime} EAT</p>
           {endTime && (
             <p className="mt-2 text-xs text-muted-foreground">
-              Mfumo unatarajiwa kufunguliwa {new Date(endTime).toLocaleString("sw-TZ", { dateStyle: "medium", timeStyle: "short", timeZone: "Africa/Dar_es_Salaam" })}
+              {t("maint.reopen")} {new Date(endTime).toLocaleString(locale, { dateStyle: "medium", timeStyle: "short", timeZone: "Africa/Dar_es_Salaam" })}
             </p>
           )}
         </div>

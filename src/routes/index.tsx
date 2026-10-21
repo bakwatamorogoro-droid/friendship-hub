@@ -24,28 +24,29 @@ export const Route = createFileRoute("/")({
 });
 
 const services = [
-  { to: "/huduma", icon: MessageSquare, title: "Huduma za Wanafunzi", desc: "Tuma huduma za kitaaluma, kifedha, afya na ushauri." },
-  { to: "/mikopo", icon: Wallet, title: "Huduma ya Mikopo", desc: "Ripoti matatizo ya disbursement, allocation, appeal na zaidi." },
-  { to: "/misiba", icon: HeartCrack, title: "Taarifa za Misiba", desc: "Toa taarifa ya msiba na pokea pole kutoka kwa wanafunzi wenzio." },
-  { to: "/matangazo", icon: Megaphone, title: "Matangazo", desc: "Pata taarifa muhimu na matangazo ya MUMSO." },
+  { to: "/huduma", icon: MessageSquare, titleKey: "home.service_1_title", descKey: "home.service_1_desc" },
+  { to: "/mikopo", icon: Wallet, titleKey: "home.service_2_title", descKey: "home.service_2_desc" },
+  { to: "/misiba", icon: HeartCrack, titleKey: "home.service_3_title", descKey: "home.service_3_desc" },
+  { to: "/matangazo", icon: Megaphone, titleKey: "home.service_4_title", descKey: "home.service_4_desc" },
 ] as const;
 
-const phrases = [
-  "Sauti ya Mwanafunzi, Suluhisho la Pamoja.",
-  "Karibu MUMSO — Tuma Huduma Yako.",
-  "Fuatilia Mikopo Yako Kwa Wakati.",
-  "Pata Matangazo Mapya Moja Kwa Moja.",
-];
+const PHRASE_KEYS = [
+  "home.typewriter_1",
+  "home.typewriter_2",
+  "home.typewriter_3",
+  "home.typewriter_4",
+] as const;
 
 function Typewriter() {
+  const { t } = useI18n();
   const [i, setI] = useState(0);
   const [text, setText] = useState("");
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
-    const full = phrases[i];
+    const full = t(PHRASE_KEYS[i]);
     const speed = deleting ? 35 : 70;
-    const t = setTimeout(() => {
+    const timer = setTimeout(() => {
       if (!deleting) {
         const next = full.slice(0, text.length + 1);
         setText(next);
@@ -55,17 +56,17 @@ function Typewriter() {
         setText(next);
         if (next === "") {
           setDeleting(false);
-          setI((p) => (p + 1) % phrases.length);
+          setI((p) => (p + 1) % PHRASE_KEYS.length);
         }
       }
     }, speed);
-    return () => clearTimeout(t);
-  }, [text, deleting, i]);
+    return () => clearTimeout(timer);
+  }, [text, deleting, i, t]);
 
   return (
     <span className="inline-block min-h-[1.2em]">
       {text}
-      <span className="ml-1 inline-block w-[3px] h-[0.9em] -mb-1 bg-accent animate-caret" aria-hidden />
+      <span className="ml-1 inline-block h-[0.9em] w-[3px] -mb-1 animate-caret bg-accent" aria-hidden />
     </span>
   );
 }
@@ -101,27 +102,25 @@ function Index() {
         <div className="relative mx-auto max-w-7xl px-4 py-12 md:py-20 grid gap-10 lg:grid-cols-2 items-center">
           <div className="text-primary-foreground">
             <span className="inline-block rounded-full bg-accent/90 text-accent-foreground px-3 py-1 text-xs font-semibold mb-4 backdrop-blur">
-              Karibu MUMSO
+              {t("home.welcome")}
             </span>
             <h1 className="text-5xl md:text-7xl font-black leading-[1.05] tracking-tight">
-              Karibu <br/>
+              {t("home.hero_1")} <br/>
               <span className="text-white drop-shadow-[0_4px_20px_rgba(0,0,0,0.35)]">MUMSO</span>
             </h1>
             <div className="mt-4 text-lg md:text-xl font-medium text-primary-foreground/95 max-w-xl min-h-[3rem]">
               <Typewriter />
             </div>
-            <p className="mt-4 text-primary-foreground/85 max-w-xl">
-              Mfumo rasmi wa MUMSO unaokuunganisha na viongozi wako — tuma huduma, fuatilia mikopo, na pata habari kwa wakati.
-            </p>
+            <p className="mt-4 text-primary-foreground/85 max-w-xl">{t("home.intro")}</p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link to="/huduma">
                 <Button size="lg" variant="secondary" className="font-semibold shadow-lg">
-                  Tuma Huduma <ArrowRight className="ml-2 h-4 w-4" />
+                  {t("home.cta_service")} <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
               <Link to="/mikopo">
                 <Button size="lg" variant="outline" className="bg-transparent border-primary-foreground/50 text-primary-foreground hover:bg-primary-foreground hover:text-primary">
-                  Ripoti Tatizo la Mkopo
+                  {t("home.cta_loan")}
                 </Button>
               </Link>
             </div>
@@ -189,13 +188,13 @@ function Index() {
             <Link
               key={s.to}
               to={s.to}
-              className="group rounded-xl border border-border bg-card p-6 transition hover:-translate-y-1 hover:shadow-[var(--shadow-elegant)]"
+              className="group rounded-xl border border-border bg-card p-6 transition hover:-translate-y-1 hover:border-primary/40 hover:shadow-[var(--shadow-elegant)]"
             >
               <span className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition">
                 <s.icon className="h-6 w-6" />
               </span>
-              <h3 className="mt-4 text-lg font-semibold text-foreground">{s.title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{s.desc}</p>
+              <h3 className="mt-4 text-lg font-semibold text-foreground">{t(s.titleKey)}</h3>
+              <p className="mt-2 text-sm text-muted-foreground">{t(s.descKey)}</p>
               <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary">
                 {t("home.read")} <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
               </span>
@@ -216,6 +215,7 @@ function Index() {
 }
 
 function LoanQuickLink() {
+  const { t } = useI18n();
   const [copied, setCopied] = useState(false);
   const path = "/mikopo";
   const copy = async () => {
@@ -234,21 +234,19 @@ function LoanQuickLink() {
             <Wallet className="h-6 w-6" />
           </span>
           <div>
-            <h2 className="text-xl md:text-2xl font-bold text-foreground">Fomu ya Mkopo (HESLB)</h2>
-            <p className="mt-1 text-sm md:text-base text-muted-foreground">
-              Kiungo cha ndani cha fomu ya mkopo — bofya kufungua au nakili kiungo kushirikisha wanafunzi wenzio.
-            </p>
+            <h2 className="text-xl md:text-2xl font-bold text-foreground">{t("home.loan_form_title")}</h2>
+            <p className="mt-1 text-sm md:text-base text-muted-foreground">{t("home.loan_form_sub")}</p>
             <code className="mt-2 inline-block rounded-md bg-secondary px-2 py-1 text-xs text-foreground/80">{path}</code>
           </div>
         </div>
         <div className="flex flex-wrap gap-3">
           <Link to="/mikopo">
             <Button size="lg" className="font-semibold">
-              Fungua Fomu ya Mkopo <ArrowRight className="ml-2 h-4 w-4" />
+              {t("home.loan_open")} <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </Link>
           <Button size="lg" variant="outline" onClick={copy} className="font-semibold">
-            <LinkIcon className="mr-2 h-4 w-4" /> {copied ? "Imenakiliwa!" : "Nakili Kiungo"}
+            <LinkIcon className="mr-2 h-4 w-4" /> {copied ? t("common.copied") : t("common.copy_link")}
           </Button>
         </div>
       </div>
@@ -308,7 +306,7 @@ type NewsItem = {
 };
 
 function NewsSection() {
-  const { t, lang } = useI18n();
+  const { t, locale } = useI18n();
   const [items, setItems] = useState<NewsItem[]>([]);
   useEffect(() => {
     (supabase.from("announcements") as any)
@@ -369,13 +367,13 @@ function NewsSection() {
                   )}
                   {i === 0 && (
                     <span className="absolute left-3 top-3 rounded-full bg-accent px-3 py-1 text-xs font-bold uppercase tracking-wider text-accent-foreground">
-                      Jipya
+                      {t("home.news_new")}
                     </span>
                   )}
                 </div>
                 <div className="flex flex-1 flex-col p-5">
                   <span className="text-xs font-bold uppercase tracking-wider text-primary">
-                    {new Date(a.created_at).toLocaleDateString(lang === "sw" ? "sw-TZ" : "en-GB", { dateStyle: "long" })}
+                    {new Date(a.created_at).toLocaleDateString(locale, { dateStyle: "long" })}
                   </span>
                   <h3 className={`mt-2 font-bold text-foreground group-hover:text-primary transition ${i === 0 ? "text-2xl" : "text-lg"}`}>
                     {a.title}

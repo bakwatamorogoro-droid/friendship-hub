@@ -13,6 +13,7 @@ export type Leader = {
   email: string | null;
   sort_order: number;
   published: boolean;
+  department_id: string | null;
 };
 
 export function useLeaders(limit?: number) {
@@ -31,12 +32,18 @@ export function useLeaders(limit?: number) {
       setLeaders((data ?? []) as Leader[]);
       setLoading(false);
     });
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+    };
   }, [limit]);
 
   return { leaders, loading };
 }
 
+/**
+ * Wasifu mmoja kwa slug. Hatuweki kichujio cha `published` kwa sababu RLS
+ * inaruhusu kiongozi kuona wasifu wake mwenyewe hata kabla ya kuchapishwa.
+ */
 export function useLeader(slug: string) {
   const [leader, setLeader] = useState<Leader | null>(null);
   const [loading, setLoading] = useState(true);
@@ -44,13 +51,17 @@ export function useLeader(slug: string) {
   useEffect(() => {
     let alive = true;
     (supabase.from("leaders") as any)
-      .select("*").eq("slug", slug).eq("published", true).maybeSingle()
+      .select("*")
+      .eq("slug", slug)
+      .maybeSingle()
       .then(({ data }: any) => {
         if (!alive) return;
         setLeader((data as Leader) ?? null);
         setLoading(false);
       });
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+    };
   }, [slug]);
 
   return { leader, loading };

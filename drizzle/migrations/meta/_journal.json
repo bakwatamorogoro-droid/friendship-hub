@@ -43,6 +43,13 @@
       "when": 1791702611138,
       "tag": "0005_students_gps_geofence",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791702671138,
+      "tag": "0006_leader_own_profile",
+      "breakpoints": true
     }
   ]
 }

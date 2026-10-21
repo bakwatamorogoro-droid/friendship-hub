@@ -24,17 +24,30 @@ const nav = [
 
 
 function LangToggle({ className = "" }: { className?: string }) {
-  const { lang, setLang } = useI18n();
+  const { lang, setLang, t } = useI18n();
   return (
-    <button
-      type="button"
-      onClick={() => setLang(lang === "sw" ? "en" : "sw")}
-      className={`inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary px-3 py-1.5 text-sm font-semibold text-foreground/80 transition hover:border-primary hover:text-primary ${className}`}
-      aria-label="Language"
+    <div
+      className={`inline-flex items-center gap-0.5 rounded-full border border-border bg-secondary p-0.5 ${className}`}
+      role="group"
+      aria-label={t("nav.language")}
     >
-      <Languages className="h-4 w-4" />
-      {lang === "sw" ? "SW" : "EN"}
-    </button>
+      <Languages className="ml-1.5 h-3.5 w-3.5 text-muted-foreground" aria-hidden />
+      {(["sw", "en"] as const).map((code) => (
+        <button
+          key={code}
+          type="button"
+          onClick={() => setLang(code)}
+          aria-pressed={lang === code}
+          className={`rounded-full px-2.5 py-1 text-xs font-bold uppercase transition ${
+            lang === code
+              ? "bg-primary text-primary-foreground"
+              : "text-foreground/70 hover:text-primary"
+          }`}
+        >
+          {code}
+        </button>
+      ))}
+    </div>
   );
 }
 
@@ -66,8 +79,8 @@ export function Header() {
             </span>
           )}
           <Link to="/" className="flex-1 text-center font-bold text-primary uppercase tracking-wide leading-tight text-[13px] sm:text-base md:text-xl">
-            MUSLIM UNIVERSITY OF MOROGORO<br className="hidden sm:block" />
-            <span className="sm:hidden"> </span>STUDENTS ORGANIZATION
+            {t("site.org_line1")}<br className="hidden sm:block" />
+            <span className="sm:hidden"> </span>{t("site.org_line2")}
           </Link>
           {settings?.mum_logo_url ? (
             <img src={mumLogoUrl ?? settings.mum_logo_url} alt="MUM" className="h-14 w-14 md:h-20 md:w-20 shrink-0 rounded-xl object-contain bg-background p-1 border border-border shadow-sm" />
@@ -108,7 +121,7 @@ export function Header() {
           <Link to="/" className="font-bold text-primary text-base">MUMSO</Link>
           <div className="flex items-center gap-2">
             <LangToggle />
-            <button className="p-2" onClick={() => setOpen(!open)} aria-label="Menu">
+            <button className="p-2" onClick={() => setOpen(!open)} aria-label={t("nav.menu")}>
               {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           </div>

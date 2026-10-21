@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveStorageUrl } from "@/lib/storage-url";
 import { Megaphone, ArrowRight, CalendarDays } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/matangazo")({
   head: () => ({
@@ -28,6 +29,7 @@ type A = {
 };
 
 function MatangazoPage() {
+  const { t, locale } = useI18n();
   const [items, setItems] = useState<A[]>([]);
 
   useEffect(() => {
@@ -48,16 +50,14 @@ function MatangazoPage() {
     <div className="mx-auto max-w-6xl px-4 py-12">
       <div className="digital-page-hero">
         <h1 className="relative z-10 text-3xl md:text-4xl font-bold flex items-center gap-3">
-          <Megaphone className="h-8 w-8" /> Matangazo & Habari
+          <Megaphone className="h-8 w-8" /> {t("news.title")}
         </h1>
-        <p className="relative z-10 mt-2 text-primary-foreground/85 text-base md:text-lg">
-          Taarifa rasmi na habari mpya kutoka kwa uongozi wa MUMSO.
-        </p>
+        <p className="relative z-10 mt-2 text-base text-primary-foreground/85 md:text-lg">{t("news.lead")}</p>
       </div>
 
       <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {items.length === 0 && (
-          <p className="col-span-full text-center text-muted-foreground py-12">Hakuna matangazo kwa sasa.</p>
+          <p className="col-span-full py-12 text-center text-muted-foreground">{t("news.empty")}</p>
         )}
         {items.map((a, i) => (
           <Link
@@ -83,14 +83,14 @@ function MatangazoPage() {
               )}
               {i === 0 && (
                 <span className="absolute left-3 top-3 rounded-full bg-accent px-3 py-1 text-xs font-bold uppercase tracking-wider text-accent-foreground">
-                  Jipya
+                  {t("home.news_new")}
                 </span>
               )}
             </div>
             <div className="flex flex-1 flex-col p-5">
               <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-primary">
                 <CalendarDays className="h-3.5 w-3.5" />
-                {new Date(a.created_at).toLocaleDateString("sw-TZ", { dateStyle: "long" })}
+                {new Date(a.created_at).toLocaleDateString(locale, { dateStyle: "long" })}
               </span>
               <h2 className={`mt-2 font-bold text-foreground group-hover:text-primary transition ${i === 0 ? "text-2xl" : "text-lg"}`}>
                 {a.title}
@@ -99,7 +99,7 @@ function MatangazoPage() {
                 {a.excerpt || a.content}
               </p>
               <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary">
-                Soma zaidi <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+                {t("home.read")} <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
               </span>
             </div>
           </Link>
