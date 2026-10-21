@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, BadgeCheck, ExternalLink, Save, Upload, UserRound } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -53,6 +54,7 @@ export function LeaderProfileEditor({ userId }: { userId: string }) {
     short_message: "",
     bio: "",
   });
+  const linkOwn = useServerFn(linkOwnLeaderPage);
   const fileRef = useRef<HTMLInputElement>(null);
   const photo = useResolvedUrl(profile?.photo_url ?? null);
 
@@ -84,7 +86,7 @@ export function LeaderProfileEditor({ userId }: { userId: string }) {
     // Kabla ya migrasheni ya umiliki, safu `user_id` haipo: tunaomba seva
     // iunde/kuunganisha ukurasa wetu kwa kutumia ombi letu lililothibitishwa.
     if (isMissingOwnerColumn(error.message)) {
-      const linked = await linkOwnLeaderPage().catch(() => null);
+      const linked = await linkOwn().catch(() => null);
       if (linked?.fullName) {
         const { data: byName } = await (supabase.from("leaders") as any)
           .select(PROFILE_SELECT)
@@ -96,7 +98,7 @@ export function LeaderProfileEditor({ userId }: { userId: string }) {
       }
     }
     apply(null, false);
-  }, [userId]);
+  }, [userId, linkOwn]);
 
   useEffect(() => {
     void load();
