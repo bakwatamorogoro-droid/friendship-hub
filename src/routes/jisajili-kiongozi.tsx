@@ -172,7 +172,7 @@ function LeaderSignupPage() {
   };
 
   return (
-    <div className="service-form-wrap mx-auto max-w-3xl px-4 py-12">
+    <div className="service-form-wrap page-shell page-shell-form form-page section-y-sm">
       <div className="mgmt-hero">
         <div className="mgmt-hero-inner">
           <span className="mgmt-chip">
@@ -185,7 +185,7 @@ function LeaderSignupPage() {
           <p className="mt-2 text-sm text-primary-foreground/85 md:text-base">
             {t("lsignup.lead")}
           </p>
-          <div className="signup-steps mt-6">
+          <div className="signup-steps">
             {steps.map((s, i) => (
               <div key={s.label} className="flex flex-1 items-center gap-2">
                 <span className="signup-step-dot" data-done={s.done}>
@@ -204,7 +204,7 @@ function LeaderSignupPage() {
       </div>
 
       {done ? (
-        <div className="digital-card mt-8 p-8 text-center">
+        <div className="digital-card text-center">
           <ShieldCheck className="mx-auto h-12 w-12 text-primary" />
           <h2 className="mt-3 text-xl font-bold">{t("lsignup.done_title")}</h2>
           <p className="mt-2 text-muted-foreground">{t("lsignup.done_msg")}</p>
@@ -222,7 +222,7 @@ function LeaderSignupPage() {
           </div>
         </div>
       ) : (
-        <form onSubmit={submit} className="digital-card mt-8">
+        <form onSubmit={submit} className="digital-card">
           <FormSection step={1} title={t("lsignup.s1")}>
             <div className="space-y-2">
               <Label>{t("form.full_name")} *</Label>

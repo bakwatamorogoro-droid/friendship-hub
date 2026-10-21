@@ -118,14 +118,14 @@ function ChangamotoPage() {
   const dl = useServiceDeadline("changamoto");
 
   return (
-    <div className="service-form-wrap mx-auto max-w-3xl px-4 py-10">
+    <div className="service-form-wrap page-shell page-shell-form form-page section-y-sm">
       <div className="digital-page-hero">
         <h1 className="relative z-10 text-3xl font-bold md:text-4xl">{t("chal.title")}</h1>
         <p className="relative z-10 mt-2 text-primary-foreground/85">{t("chal.lead")}</p>
       </div>
-      <Countdown deadline={dl?.deadline_at} note={dl?.deadline_note} className="mt-6" />
+      <Countdown deadline={dl?.deadline_at} note={dl?.deadline_note} />
 
-      <form onSubmit={submit} className="digital-card mt-8">
+      <form onSubmit={submit} className="digital-card">
         <FormSection step={1} title={t("form.step_identity")} hint={t("form.step_identity_hint")}>
           <StudentIdentity identity={identity} />
         </FormSection>

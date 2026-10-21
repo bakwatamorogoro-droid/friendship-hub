@@ -545,6 +545,25 @@ html { font-size: 17px; }
 .student-lookup { border: 1px dashed var(--border); border-radius: 14px; background: var(--card); padding: 1.1rem 1.25rem; }
 .service-form-wrap .digital-card > * + * { margin-top: 1.25rem; }
 .service-form-wrap .digital-card .digital-field + .digital-field { margin-top: 0; }
+
+/* ---------- Kurasa za fomu (isolated form pages) ---------- */
+.form-page {
+  display: grid;
+  gap: clamp(1.5rem, 3.5vw, 2.5rem);
+}
+.form-page .digital-page-hero {
+  padding: clamp(1.6rem, 4vw, 2.75rem);
+}
+.form-page-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-top: 1px solid var(--hairline);
+  padding-top: 1.25rem;
+  margin-top: 0.5rem;
+}
 @media (prefers-reduced-motion: reduce) { .visitor-bar, .student-identity { animation: none; } }
 
 /* Management workspace and isolated service forms */
@@ -994,6 +1013,12 @@ html { font-size: 17px; }
 }
 .page-shell-narrow {
   max-width: 56rem;
+}
+.page-shell-form {
+  max-width: 48rem;
+}
+.page-shell-compact {
+  max-width: 42rem;
 }
 .page-shell-wide {
   max-width: 90rem;

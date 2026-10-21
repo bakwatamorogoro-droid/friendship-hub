@@ -105,7 +105,7 @@ function StudentSignupPage() {
   };
 
   return (
-    <div className="service-form-wrap mx-auto max-w-2xl px-4 py-12">
+    <div className="service-form-wrap page-shell page-shell-compact form-page section-y-sm">
       <div className="digital-page-hero">
         <h1 className="relative z-10 flex items-center gap-3 text-3xl font-bold md:text-4xl">
           <GraduationCap className="h-8 w-8" /> {t("signup.title")}
@@ -116,7 +116,7 @@ function StudentSignupPage() {
       </div>
 
       {done ? (
-        <div className="digital-card mt-8 p-8 text-center">
+        <div className="digital-card text-center">
           <ShieldCheck className="mx-auto h-12 w-12 text-primary" />
           <h2 className="mt-3 text-xl font-bold">{t("common.success")}</h2>
           <p className="mt-2 text-muted-foreground">{t("signup.lead")}</p>
@@ -130,7 +130,7 @@ function StudentSignupPage() {
           </div>
         </div>
       ) : gate.status !== "inside" ? (
-        <div className="digital-card mt-8 p-8 text-center">
+        <div className="digital-card text-center">
           <MapPin className="mx-auto h-12 w-12 text-primary" />
           {gate.status === "checking" && (
             <>
@@ -160,7 +160,7 @@ function StudentSignupPage() {
           )}
         </div>
       ) : (
-        <form onSubmit={submit} className="digital-card mt-8">
+        <form onSubmit={submit} className="digital-card">
           <FormSection step={1} title={t("form.step_identity")} hint={t("form.step_identity_hint")}>
             <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-sm text-primary">
               <MapPin className="h-4 w-4" /> {gate.distance} m

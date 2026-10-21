@@ -216,7 +216,7 @@ function DepartmentPage() {
   }
 
   return (
-    <div className="service-form-wrap mx-auto max-w-3xl px-4 py-10">
+    <div className="service-form-wrap page-shell page-shell-form form-page section-y-sm">
       <Link
         to="/huduma"
         className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary"
@@ -244,9 +244,9 @@ function DepartmentPage() {
         </div>
       </div>
 
-      <Countdown deadline={dl?.deadline_at} note={dl?.deadline_note} className="mt-6" />
+      <Countdown deadline={dl?.deadline_at} note={dl?.deadline_note} />
 
-      <form onSubmit={submit} className="digital-card mt-8">
+      <form onSubmit={submit} className="digital-card">
         <FormSection step={1} title={t("form.step_identity")} hint={t("form.step_identity_hint")}>
           <StudentIdentity identity={identity} />
         </FormSection>
