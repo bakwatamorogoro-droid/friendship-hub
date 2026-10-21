@@ -40,18 +40,25 @@
 - `git push` to `origin` fails with 403: the `GITHUB_TOKEN` is a GitHub App installation token (`ghu_`, REST `permissions.push: true`) that git-over-HTTPS rejects as "denied to <login>". Commit locally, then tell the user to push or sync from Lovable; do not force-push or rewrite published history.
 
 ## Hali halisi ya database (imethibitishwa 2026-10-21 kwa probe ya REST)
-- Migrasheni zifuatazo **hazijatumika** kwenye project `gmmidfajxztdfpaogqqf`, na msimbo wote unaozitegemea hufanya kazi kwa njia ya akiba (fallback) pekee:
-  - `supabase/migrations/20260918004943_*` — RPC za `track_*` (`track_lookup`, `track_set_code`, `track_code_of`, `track_recover_code`, `track_update`, `track_delete`). Kwa sasa hazipo.
-  - `drizzle/migrations/0003_*` — `daily_visitor_events`, `record_daily_visit`, `validate_student_registration`, `fill_registered_student_request`.
-  - `drizzle/migrations/0004_*` — `request_replies`, `can_manage_request`, `track_request_replies`.
-  - `drizzle/migrations/0005_*` — `validate_student_location`.
-  - `drizzle/migrations/0006_*` — **muhimu**: `leaders.user_id` na `leaders.department_id`. Bila hizi, kiongozi aliyeidhinishwa **hawezi kuona ukurasa wake** (`LeaderProfileEditor` huangukia kulinganisha `full_name`).
-  - `supabase/migrations/20261021090000_announcement_newsroom.sql` — `announcements.status`, `author_department_id`, `announcement_date`, na wizara ya `habari` haipo.
-  - `supabase/migrations/20261021120000_ministry_workspace.sql` — `ministry_reports`, `internal_messages`, `request_stage_history`.
-- Zilizotumika tayari: `daily_visitor_stats`, `has_role`, `user_roles.department_id`, `leader_applications.*`, `profiles`, `hero_images`, `site_settings`, `challenges`, `department_submissions`, `request_replies` (jedwali lipo).
-- Kwa hivyo: **kabla ya kuhitimisha kuwa kipengele "hakifanyi kazi", thibitisha jedwali/RPC kwa probe ya REST** — msimbo mwingi hushughulikia kwa upole na huonekana kama "haipo" tu.
-- Faili `APPLY_PENDING_MIGRATIONS.sql` (mzizi wa repo) ni migrasheni zote zilizosubiri zikiwa katika muamala mmoja; huendeshwa kwa mkono kwenye Supabase SQL Editor. Ni idempotent. Ikishatumika, iondolewe kwenye commit ya baadaye.
-- Hakuna admin kwenye `user_roles`, na `.env` haina `SUPABASE_SERVICE_ROLE_KEY` — hivyo kuingia `/admin` hupeleka `/login`. Trigger `promote_first_user_to_admin` (inayompa admin mtumiaji wa kwanza) **haipo** kwenye database hii; ni lazima kuundwa kwa mkono.
+**Tumia probe, sio dhana.** Kuna vyanzo vitatu tofauti vya migrasheni (`supabase/migrations/`, `drizzle/migrations/`) na hazitumiki zote kwa pamoja. Njia ya kuamini ni ku-probe REST:
+
+```
+GET {SUPABASE_URL}/rest/v1/{table}?select=*&limit=1      -> PGRST205 = jedwali haipo
+GET {SUPABASE_URL}/rest/v1/{table}?select={col}&limit=1  -> 42703    = safu haipo
+POST {SUPABASE_URL}/rest/v1/rpc/{fn}  {}                 -> PGRST202 = RPC haipo
+```
+
+Zilizothibitishwa **ZIMETUMIKA**: `students` (+`latitude`/`longitude`), `daily_visitor_events`, `record_daily_visit`, `daily_visitor_stats`, `request_replies`, `can_manage_request`, `track_request_replies`, `track_lookup`, `track_code_of`, `track_recover_code`, `track_update`, `track_delete`, `has_role`, `user_roles.department_id`, `departments.deadline_at`, `leaders`, `announcements.published`, `loan_requests`, `deaths`, `challenges`, `department_submissions`, `profiles`, `hero_images`, `site_settings`.
+
+Zilizothibitishwa **HAZIJATUMIKA** (3 tu):
+- `drizzle/migrations/0006_leader_own_profile.sql` — **muhimu**: `leaders.user_id` + `leaders.department_id` hazipo, kwa hivyo kiongozi aliyeidhinishwa hawezi kuona ukurasa wake; `LeaderProfileEditor`/`linkOwnLeaderPage` huangukia kulinganisha `full_name`.
+- `supabase/migrations/20261021090000_announcement_newsroom.sql` — `announcements.status`/`author_department_id`/`announcement_date` hazipo; wizara ya `habari` haipo (kuna `taaluma`, `afya-na-ustawi`, `mahusiano` pekee).
+- `supabase/migrations/20261021120000_ministry_workspace.sql` — `ministry_reports`, `internal_messages`, `request_stage_history` hazipo.
+
+Kumbuka: `track_set_code`, `validate_student_registration`, `fill_registered_student_request`, `validate_student_location` ni **trigger** functions — haziitwi kupitia REST, kwa hivyo `PGRST202` juu yao haimaanishi hazipo. Zipo.
+
+- `APPLY_PENDING_MIGRATIONS.sql` (mzizi wa repo) ni migrasheni hizo 3 zikiwa katika muamala mmoja; huendeshwa kwa mkono kwenye Supabase SQL Editor. Ni idempotent na haina `DROP TABLE`/`TRUNCATE`. Ikishatumika, iondolewe kwenye commit ya baadaye.
+- Hakuna admin kwenye `user_roles`, na `.env` haina `SUPABASE_SERVICE_ROLE_KEY`, hivyo `/admin` hupeleka `/login`. Trigger `promote_first_user_to_admin` haipo kwenye database hii; admin huundwa kwa mkono (maelekezo yapo mwisho wa `APPLY_PENDING_MIGRATIONS.sql`).
 
 ## Mpangilio wa kurasa za fomu
 - Kurasa za fomu pekee (`misiba`, `mikopo`, `changamoto`, `huduma.$slug`, `jisajili`, `jisajili-kiongozi`) hutumia `service-form-wrap page-shell page-shell-form|page-shell-compact form-page section-y-sm`. Darasa la `form-page` huweka pengo kwa grid, kwa hiyo **usirudishe `mt-6`/`mt-8`** kwenye `digital-card` au `Countdown` humo.
