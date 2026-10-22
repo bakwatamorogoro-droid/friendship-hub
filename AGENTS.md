@@ -63,3 +63,14 @@ Kumbuka: `track_set_code`, `validate_student_registration`, `fill_registered_stu
 ## Mpangilio wa kurasa za fomu
 - Kurasa za fomu pekee (`misiba`, `mikopo`, `changamoto`, `huduma.$slug`, `jisajili`, `jisajili-kiongozi`) hutumia `service-form-wrap page-shell page-shell-form|page-shell-compact form-page section-y-sm`. Darasa la `form-page` huweka pengo kwa grid, kwa hiyo **usirudishe `mt-6`/`mt-8`** kwenye `digital-card` au `Countdown` humo.
 - `page-shell-form` (48rem) na `page-shell-compact` (42rem) ni vipimo vya upana pekee — hakuna rangi.
+
+## Kuendesha muonekano (preview) wa build ya Cloudflare
+- Build ni preset `cloudflare-module`; matokeo yapo `.output/`. `vite preview` **haitafanya kazi** (`ERR_MODULE_NOT_FOUND dist/server/server.js`). Tumia:
+  ```
+  npx vite build
+  setsid nohup npx wrangler --cwd ./.output dev --port 12000 --ip 0.0.0.0 > /tmp/wr.log 2>&1 < /dev/null &
+  ```
+- `setsid` ni **lazima**: bila hiyo wrangler hufa mara amri ya terminal inapomaliza, na ukurasa wa preview hutoa **502 Bad Gateway** kwa sababu hakuna anayesikiliza kwenye 12000.
+- `nohup ... &` peke yake haitoshi kwenye shell hii; pia usiendeshe kama foreground (itakwama kwenye timeout ya 10s).
+- Port 12000 ikikaliwa na mchakato wa zamani, wrangler hushindwa kuanza (`Address already in use`). Ua kwa `kill -9` kwa PID za `wrangler`/`workerd`, kisha subiri sekunde 4.
+- Kuanza huchukua sekunde ~40 kabla ya `Ready on http://0.0.0.0:12000`; subiri kabla ya ku-probe.
