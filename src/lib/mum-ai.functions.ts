@@ -58,12 +58,7 @@ export const askMumAI = createServerFn({ method: "POST" })
       process.env["GOOGLE_API_KEY"] ||
       process.env["GOOGLE_GENERATIVE_AI_API_KEY"] ||
       undefined;
-    if (!lovableKey && !geminiKey) {
-      console.error("MUMSO AI: GEMINI_API_KEY haijawekwa kwenye seva.");
-      throw new Error(
-        "MUMSO AI haijaunganishwa kwa sasa. Menejimenti iweke GEMINI_API_KEY kwenye Environment Variables za Vercel, kisha ifanye deployment mpya.",
-      );
-    }
+    // Bila funguo zote, tunaendelea: Pollinations (bila ufunguo) itatumika mwishoni.
     // Gemini moja kwa moja (native) ili tuweze kutumia Google Search ya muda halisi.
     const geminiModel = "gemini-3.6-flash";
 
@@ -260,6 +255,17 @@ export const askMumAI = createServerFn({ method: "POST" })
         console.error("gemini request failed", error);
         pendingError = pendingError ?? (error instanceof Error ? error : null);
       }
+    }
+
+    // NJIA YA TATU: Pollinations (bila ufunguo wowote). Huhakikisha AI inafanya kazi
+    // hata kwenye hosting isiyo na funguo za AI.
+    try {
+      const { askPollinations } = await import("./ai-gateway.server");
+      const text = await askPollinations(system, history);
+      return { reply: text };
+    } catch (error) {
+      console.error("pollinations failed", error);
+      pendingError = pendingError ?? (error instanceof Error ? error : null);
     }
 
     throw pendingError ?? new Error("AI haipatikani kwa muda. Tafadhali jaribu tena baadaye.");
