@@ -39,3 +39,16 @@ npx vite build
 npx wrangler --cwd ./.output deploy --temporary
 ```
 Hii hupeleka kwenye **temporary preview account** ya Cloudflare na kurudisha URL ya `https://<name>.<adjective>-<noun>.workers.dev`. Ni njia pekee ya ku-deploy kutoka sandbox hii (hakuna `CLOUDFLARE_API_TOKEN`). Angalizo: akaunti hii ni ya muda — si ya mtumiaji, na URL inaweza kuisha. Kwa deploy ya kudumu, mtumiaji aunganishe repo na Cloudflare au Lovable.
+
+## Umiliki wa ukurasa wa kiongozi (imetumika 2026-10-21)
+**Dalili:** kiongozi anajisajili na kuidhinishwa, lakini haoni ukurasa wake; maswali kwa `leaders` hurudisha **HTTP 400** (`column leaders.user_id does not exist`).
+
+**Chanzo:** database hai ilikuwa na safu za msingi za `leaders` pekee (`slug`, `published`, `bio`, `short_message`, `email`, `photo_url`) — `user_id` na `department_id` hazikuwepo kwa sababu migrasheni haijatumika. Push kwenda GitHub imezuiwa (403), hivyo Lovable Cloud haipati migrasheni mpya. Angalia `supabase/migrations/20261021110000_leader_page_ownership.sql` na `APPLY_PENDING_MIGRATIONS.sql`.
+
+**Mpangilio wa migrasheni ni wa lazima:** `20261021110000_leader_page_ownership.sql` LAZIMA itumike **kabla ya** `20261021120000_ministry_workspace.sql`, ambayo `is_cabinet()`/`my_position()` hutegemea `leaders.user_id`. Bila hivyo ile ya pili hushindwa na meza zake (`ministry_reports`, `internal_messages`) hukosekana.
+
+**Kiongozi huunda ukurasa wake bila ufunguo wa seva:** `ensureOwnLeaderPage()` (`src/lib/leader-profile.ts`) hurudia RPC `my_leader_application()` kupata jina/cheo/wizara, kisha huingiza mstari kwa RLS. Sera ya INSERT inahitaji `user_id = auth.uid()`, `published = false`, na `department_id` lingane na `user_roles.department_id` ya kiongozi. Trigger `leaders_force_position` hurudia cheo kutoka ombi lililoidhinishwa — hivyo kiongozi hawezi kujipa cheo. Triggers hupitisha service_role kwa `auth.uid() IS NULL`.
+
+**Picha za viongozi:** sera za awali za bucket ya `site-assets` zilikuwa za **admin pekee** (`has_role(...,'admin')`), hivyo kiongozi alishindwa kupakia picha. Sera mpya huruhusu kiongozi kuandika chini ya `leaders/<user_id>/` pekee.
+
+**Uthibitisho:** `mailer_autoconfirm: true` kwenye `GET /auth/v1/settings`, hivyo usajili hufanya kazi bila uthibitisho wa barua pepe. Hakuna `SUPABASE_ACCESS_TOKEN`/DB password kwenye sandbox hii, kwa hivyo migrasheni hupangwa kwa mkono kupitia SQL Editor.
