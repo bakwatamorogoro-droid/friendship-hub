@@ -75,16 +75,20 @@ Kumbuka: `track_set_code`, `validate_student_registration`, `fill_registered_stu
 - Port 12000 ikikaliwa na mchakato wa zamani, wrangler hushindwa kuanza (`Address already in use`). Ua kwa `kill -9` kwa PID za `wrangler`/`workerd`, kisha subiri sekunde 4.
 - Kuanza huchukua sekunde ~40 kabla ya `Ready on http://0.0.0.0:12000`; subiri kabla ya ku-probe.
 
-## Kusukuma GitHub: kikwazo cha token (imethibitishwa 2026-10-21)
-`GITHUB_TOKEN` ni **installation token ya GitHub App** (`ghu_`, len 40) yenye uwezo wa **kusoma pekee**:
-- `GET /repos/.../friendship-hub` -> `permissions.push: true` (hii inadanganya; ni uwezo wa *kuonekana*, sio wa kuandika)
-- `POST /git/blobs` -> 403 `Resource not accessible by integration`
-- `POST /git/refs` -> 403
-- `POST /user/repos` -> 403
-- `git push` (HTTPS, `x-access-token:`, `http.extraheader`) -> 403 `Permission ... denied`
+## Kusukuma GitHub: token inayofanya kazi
+`GITHUB_TOKEN` ya mazingira (installation token ya GitHub App, `ghu_`, len 40) **haina uwezo wa kuandika**: `POST /git/blobs`, `POST /git/refs`, `POST /user/repos` na `git push` zote hurudisha 403 `Resource not accessible by integration`. Ondoa dhana hiyo.
 
-Hakuna `~/.netrc`, hakuna `~/.config/gh/hosts.yml`, hakuna `CLOUDFLARE_API_TOKEN`, hakuna SSH key. Kwa hivyo **hauwezi kusukuma wala kuunda repo kutoka sandbox hii**. Usijaribu `--force`, usibadilishe historia. Ripoti kwa mtumiaji: atoe token yenye `Contents: Read and write` (fine-grained) au asukume kutoka Lovable/kompyuta yake.
-
+Kinachofanya kazi: **classic PAT yenye scope `repo`** (`ghp_`, len 40). Thibitisha kwanza kwa `x-oauth-scopes: repo` kwenye `HEAD /user`, kisha:
+```
+umask 077
+printf 'https://x-access-token:%s@github.com\n' "$TOKEN" > /tmp/.gc && chmod 600 /tmp/.gc
+git -c credential.helper="store --file=/tmp/.gc" push origin main
+rm -f /tmp/.gc
+```
+- Usiweke token kwenye `git remote set-url` (hubaki kwenye `.git/config`). Tumia `credential.helper` ya muda.
+- Fine-grained PAT yenye `Contents: Read and write` pia inafanya kazi; ile yenye `Read` pekee haitoshi.
+- `GET /repos/...` hurudisha `permissions.push: true` hata kwa token ya kusoma pekee — **usiamini**. Jaribu `PUT /contents/<faili>` ili kujua ukweli.
+- Repo inaunganishwa na Lovable: **kabla ya push, fanya `git fetch` na `git rebase origin/main`**. Lovable husukuma commits mara kwa mara na push itakataliwa. Rebase hutunza historia (usifanye force-push).
 ## Ku-deploy Cloudflare bila kuingia (imetumika)
 ```
 npx vite build
