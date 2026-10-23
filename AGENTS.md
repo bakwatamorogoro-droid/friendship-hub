@@ -74,3 +74,20 @@ Kumbuka: `track_set_code`, `validate_student_registration`, `fill_registered_stu
 - `nohup ... &` peke yake haitoshi kwenye shell hii; pia usiendeshe kama foreground (itakwama kwenye timeout ya 10s).
 - Port 12000 ikikaliwa na mchakato wa zamani, wrangler hushindwa kuanza (`Address already in use`). Ua kwa `kill -9` kwa PID za `wrangler`/`workerd`, kisha subiri sekunde 4.
 - Kuanza huchukua sekunde ~40 kabla ya `Ready on http://0.0.0.0:12000`; subiri kabla ya ku-probe.
+
+## Kusukuma GitHub: kikwazo cha token (imethibitishwa 2026-10-21)
+`GITHUB_TOKEN` ni **installation token ya GitHub App** (`ghu_`, len 40) yenye uwezo wa **kusoma pekee**:
+- `GET /repos/.../friendship-hub` -> `permissions.push: true` (hii inadanganya; ni uwezo wa *kuonekana*, sio wa kuandika)
+- `POST /git/blobs` -> 403 `Resource not accessible by integration`
+- `POST /git/refs` -> 403
+- `POST /user/repos` -> 403
+- `git push` (HTTPS, `x-access-token:`, `http.extraheader`) -> 403 `Permission ... denied`
+
+Hakuna `~/.netrc`, hakuna `~/.config/gh/hosts.yml`, hakuna `CLOUDFLARE_API_TOKEN`, hakuna SSH key. Kwa hivyo **hauwezi kusukuma wala kuunda repo kutoka sandbox hii**. Usijaribu `--force`, usibadilishe historia. Ripoti kwa mtumiaji: atoe token yenye `Contents: Read and write` (fine-grained) au asukume kutoka Lovable/kompyuta yake.
+
+## Ku-deploy Cloudflare bila kuingia (imetumika)
+```
+npx vite build
+npx wrangler --cwd ./.output deploy --temporary
+```
+Hii hupeleka kwenye **temporary preview account** ya Cloudflare na kurudisha URL ya `https://<name>.<adjective>-<noun>.workers.dev`. Ni njia pekee ya ku-deploy kutoka sandbox hii (hakuna `CLOUDFLARE_API_TOKEN`). Angalizo: akaunti hii ni ya muda — si ya mtumiaji, na URL inaweza kuisha. Kwa deploy ya kudumu, mtumiaji aunganishe repo na Cloudflare au Lovable.
