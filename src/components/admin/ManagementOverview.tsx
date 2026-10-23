@@ -18,6 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useResolvedUrl } from "@/lib/storage-url";
 import { useI18n } from "@/lib/i18n";
+import { ensureOwnLeaderPage, escapeLike, leaderDb } from "@/lib/leader-profile";
 
 type Row = Record<string, any>;
 
@@ -86,9 +87,20 @@ export function ManagementOverview(props: ManagementOverviewProps) {
         if (alive) setOwnProfile(linked ?? null);
         return;
       }
+      // Hakuna ukurasa uliounganishwa: tunaunda mmoja kutoka ombi lililoidhinishwa
+      // ili kiongozi aone ukurasa wake mara moja baada ya kujisajili.
+      const created = await ensureOwnLeaderPage(user.id).catch(() => null);
+      if (created) {
+        const { data: fresh } = await leaderDb()
+          .select("id,slug,full_name,position,photo_url,published")
+          .eq("slug", created.slug)
+          .maybeSingle();
+        if (alive) setOwnProfile(fresh ?? null);
+        return;
+      }
       // Wasifu wa zamani haujaunganishwa na akaunti; tunaulinganisha kwa jina kamili.
       // `%` na `_` ni wildcards za ILIKE, hivyo tunaziepusha.
-      const pattern = name.trim().replace(/[%_\\]/g, "\\$&");
+      const pattern = escapeLike(name);
       const { data } = await (supabase.from("leaders") as any)
         .select("id,slug,full_name,position,photo_url,published")
         .ilike("full_name", pattern)

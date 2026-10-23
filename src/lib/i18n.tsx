@@ -170,6 +170,7 @@ const dict: Record<string, { sw: string; en: string }> = {
   "leaders.duty_value": { sw: "Uongozi wa MUMSO", en: "MUMSO Leadership" },
   "leaders.contact_label": { sw: "Mawasiliano", en: "Contact" },
   "leaders.share_profile": { sw: "Shiriki wasifu", en: "Share profile" },
+  "leaders.other_leaders": { sw: "Viongozi Wengine", en: "Other Leaders" },
   "leaders.signup_cta_title": { sw: "Wewe ni kiongozi wa MUMSO?", en: "Are you a MUMSO leader?" },
   "leaders.signup_cta_sub": {
     sw: "Jisajili ili uweze kuidhinishwa na menejimenti na kupata dashibodi yako ya wizara.",
@@ -674,6 +675,11 @@ const dict: Record<string, { sw: string; en: string }> = {
   "mgmt.tab_leaders": { sw: "Viongozi", en: "Leaders" },
   "mgmt.tab_users": { sw: "Watumiaji", en: "Users" },
   "mgmt.tab_password": { sw: "Nenosiri", en: "Password" },
+  "mgmt.register_leader": { sw: "Jisajili Kiongozi", en: "Register Leader" },
+  "mgmt.unauthorized_signup_hint": {
+    sw: "Kama wewe ni kiongozi wa MUMSO, unaweza kutuma ombi la akaunti hapa.",
+    en: "If you are a MUMSO leader, you can submit an account request here.",
+  },
   "mgmt.welcome": { sw: "Karibu", en: "Welcome" },
   "mgmt.badge_admin": { sw: "Menejimenti (Admin)", en: "Management (Admin)" },
   "mgmt.badge_leader": { sw: "Kiongozi Aliyedhinishwa", en: "Approved Leader" },

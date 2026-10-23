@@ -13,6 +13,59 @@ const slugify = (s: string) =>
 export const escapeLike = (s: string) => s.trim().replace(/[%_\\]/g, "\\$&");
 
 /**
+ * Jedwali la `leaders` halina safu za umiliki kwenye types zilizotengenezwa kwa
+ * otomatiki, hivyo tunatumia mteja asiye na types kama `ministry.ts` hufanya.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const leaderDb = () => supabase as any;
+const db = leaderDb;
+
+type OwnApplication = {
+  full_name: string;
+  position: string;
+  phone: string | null;
+  department_id: string | null;
+};
+
+/**
+ * Huhakikisha kiongozi aliyeingia ana ukurasa wake, bila kuhitaji ufunguo wa
+ * seva. Ombi lake lililoidhinishwa humpatia jina, cheo na wizara; RLS huruhusu
+ * kuunda ukurasa wake ukiwa umefungwa hadi menejimenti iuchapishe.
+ */
+export async function ensureOwnLeaderPage(userId: string): Promise<{ slug: string } | null> {
+  const { data: mine } = await db()
+    .from("leaders")
+    .select("slug")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (mine) return mine as { slug: string };
+
+  const { data: rows } = await db().rpc("my_leader_application");
+  const app: OwnApplication | null = Array.isArray(rows) ? rows[0] : null;
+  if (!app) return null;
+
+  const base = slugify(app.full_name) || `kiongozi-${Date.now().toString().slice(-6)}`;
+  const { data: clash } = await db().from("leaders").select("id").eq("slug", base).maybeSingle();
+  const slug = clash ? `${base}-${Date.now().toString().slice(-4)}` : base;
+
+  const { data: created, error } = await db()
+    .from("leaders")
+    .insert({
+      slug,
+      full_name: app.full_name,
+      position: app.position,
+      phone: app.phone,
+      published: false,
+      user_id: userId,
+      department_id: app.department_id,
+    })
+    .select("slug")
+    .maybeSingle();
+  if (error || !created) return null;
+  return created as { slug: string };
+}
+
+/**
  * Huhakikisha kiongozi aliyeidhinishwa ana ukurasa wake wa umma uliounganishwa
  * na akaunti yake (`user_id`), ili aone na kuhariri ukurasa wake mara moja.
  * Menejimenti (admin) ndiye anayeendesha hatua hii; RLS inaruhusu kuandika.

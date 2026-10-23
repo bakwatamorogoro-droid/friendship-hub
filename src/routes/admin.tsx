@@ -26,6 +26,7 @@ import { ManagementOverview } from "@/components/admin/ManagementOverview";
 import { LeaderProfileEditor } from "@/components/admin/LeaderProfileEditor";
 import { ensureLeaderPage } from "@/lib/leader-profile";
 import { RequestReply } from "@/components/admin/RequestReply";
+import { useI18n } from "@/lib/i18n";
 import type { TrackKind } from "@/lib/tracking.functions";
 
 export const Route = createFileRoute("/admin")({
@@ -49,6 +50,7 @@ export const Route = createFileRoute("/admin")({
 type Row = Record<string, any>;
 
 function AdminPage() {
+  const { t } = useI18n();
   const nav = useNavigate();
   const router = useRouter();
   const { queryClient } = Route.useRouteContext();
@@ -621,10 +623,19 @@ function AdminPage() {
         <p className="mt-2 text-muted-foreground">
           Akaunti yako haijapewa nafasi ya admin au leader. Wasiliana na msimamizi.
         </p>
-        <Button onClick={signOut} className="mt-6">
-          <LogOut className="mr-2 h-4 w-4" />
-          Toka
-        </Button>
+        <p className="mt-4 text-sm text-muted-foreground">{t("mgmt.unauthorized_signup_hint")}</p>
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
+          <Link to="/jisajili-kiongozi">
+            <Button className="btn-3d">
+              <UserPlus className="mr-2 h-4 w-4" />
+              {t("lsignup.title")}
+            </Button>
+          </Link>
+          <Button variant="outline" onClick={signOut}>
+            <LogOut className="mr-2 h-4 w-4" />
+            Toka
+          </Button>
+        </div>
       </div>
     );
   }

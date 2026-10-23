@@ -1,4 +1,4 @@
--- MUMSO: migrasheni 3 ambazo HAZIJATUMIKA kwenye database.
+-- MUMSO: migrasheni 4 ambazo HAZIJATUMIKA kwenye database.
 -- Project: gmmidfajxztdfpaogqqf
 -- Endesha faili hili lote kwenye Supabase SQL Editor.
 -- Ni idempotent: ON CONFLICT DO NOTHING / ADD COLUMN IF NOT EXISTS / DROP POLICY IF EXISTS.
@@ -11,7 +11,7 @@
 BEGIN;
 
 -- ============================================================
--- 0006_leader_own_profile.sql
+-- 20261021110000_leader_page_ownership.sql
 -- ============================================================
 -- Kila kiongozi aliyeidhinishwa anaunganishwa na wasifu wake wa umma (leaders.user_id)
 -- ili aone na kuhariri ukurasa wake mwenyewe. Wizara yake pia huhifadhiwa hapa.
@@ -81,6 +81,101 @@ DROP POLICY IF EXISTS "Leaders upload own photo" ON storage.objects;
 CREATE POLICY "Leaders upload own photo"
 ON storage.objects FOR INSERT TO authenticated
 WITH CHECK (
+  bucket_id = 'site-assets'
+  AND public.has_role(auth.uid(), 'leader')
+  AND (storage.foldername(name))[1] = 'leaders'
+  AND (storage.foldername(name))[2] = auth.uid()::text
+);
+
+-- Kiongozi aliyeidhinishwa huunda ukurasa wake mwenyewe, ukiwa umefungwa
+-- (`published = false`) hadi menejimenti iuchapishe. Hii huruhusu ukurasa wake
+-- kuonekana bila kuhitaji ufunguo wa seva.
+DROP POLICY IF EXISTS "Leaders create own page" ON public.leaders;
+CREATE POLICY "Leaders create own page"
+ON public.leaders FOR INSERT TO authenticated
+WITH CHECK (
+  user_id = auth.uid()
+  AND published = false
+  AND department_id IS NOT NULL
+  AND department_id = (
+    SELECT r.department_id FROM public.user_roles r
+    WHERE r.user_id = auth.uid() AND r.role = 'leader'
+    LIMIT 1
+  )
+);
+
+-- Cheo huchukuliwa kutoka ombi lililoidhinishwa; kiongozi hawezi kujipa cheo.
+CREATE OR REPLACE FUNCTION public.leaders_force_position()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = public
+AS $$
+DECLARE
+  approved_position text;
+BEGIN
+  IF auth.uid() IS NULL OR public.has_role(auth.uid(), 'admin') THEN
+    RETURN NEW;
+  END IF;
+  SELECT a.position INTO approved_position
+  FROM public.leader_applications a
+  WHERE a.approved_user_id = NEW.user_id AND a.status = 'approved'
+  LIMIT 1;
+  IF approved_position IS NULL THEN
+    RAISE EXCEPTION 'Hakuna ombi lililoidhinishwa kwa akaunti hii.' USING ERRCODE = '42501';
+  END IF;
+  NEW.position := approved_position;
+  RETURN NEW;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.leaders_force_position() FROM PUBLIC;
+
+DROP TRIGGER IF EXISTS leaders_force_position ON public.leaders;
+CREATE TRIGGER leaders_force_position
+BEFORE INSERT ON public.leaders
+FOR EACH ROW EXECUTE FUNCTION public.leaders_force_position();
+
+-- Ombi jipya lazima lielekee wizara inayofanya kazi, na lianze kama `pending`.
+CREATE OR REPLACE FUNCTION public.validate_leader_application()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = public
+AS $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM public.departments d WHERE d.id = NEW.department_id AND d.active
+  ) THEN
+    RAISE EXCEPTION 'Wizara uliyochagua haipatikani.';
+  END IF;
+  IF NEW.status IS DISTINCT FROM 'pending' THEN
+    RAISE EXCEPTION 'Ombi jipya huanza kama linasubiri idhini.';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.validate_leader_application() FROM PUBLIC;
+
+DROP TRIGGER IF EXISTS validate_leader_application ON public.leader_applications;
+CREATE TRIGGER validate_leader_application
+BEFORE INSERT ON public.leader_applications
+FOR EACH ROW EXECUTE FUNCTION public.validate_leader_application();
+
+-- Picha: kiongozi huhariri/kufuta picha yake mwenyewe.
+DROP POLICY IF EXISTS "Leaders update own photo" ON storage.objects;
+CREATE POLICY "Leaders update own photo"
+ON storage.objects FOR UPDATE TO authenticated
+USING (
+  bucket_id = 'site-assets'
+  AND public.has_role(auth.uid(), 'leader')
+  AND (storage.foldername(name))[1] = 'leaders'
+  AND (storage.foldername(name))[2] = auth.uid()::text
+);
+
+DROP POLICY IF EXISTS "Leaders delete own photo" ON storage.objects;
+CREATE POLICY "Leaders delete own photo"
+ON storage.objects FOR DELETE TO authenticated
+USING (
   bucket_id = 'site-assets'
   AND public.has_role(auth.uid(), 'leader')
   AND (storage.foldername(name))[1] = 'leaders'
@@ -610,5 +705,11 @@ COMMENT ON TABLE public.internal_messages IS
   'Mawasiliano ya ndani ya viongozi: waziri -> waziri mkuu, na waziri -> wizara ya habari.';
 COMMENT ON TABLE public.request_stage_history IS
   'Historia ya hatua za ombi; mwanafunzi na kiongozi huona hatua zote.';
+
+-- ============================================================
+-- 20261021140000_enable_mum_ai.sql
+-- ============================================================
+-- Washa MUMSO AI. Widget hufanya kazi bila ufunguo wowote (Pollinations).
+UPDATE public.service_status SET enabled = true WHERE key = 'ai';
 
 COMMIT;

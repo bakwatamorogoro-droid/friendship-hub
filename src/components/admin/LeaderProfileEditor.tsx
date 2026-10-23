@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createStorageUrl, useResolvedUrl } from "@/lib/storage-url";
-import { escapeLike } from "@/lib/leader-profile";
+import { ensureOwnLeaderPage, escapeLike, leaderDb as db } from "@/lib/leader-profile";
 import { linkOwnLeaderPage } from "@/lib/leader.functions";
 import { FormSection } from "@/components/FormSection";
 import { showStatus } from "@/lib/status";
@@ -35,6 +35,13 @@ const PROFILE_SELECT =
 
 /** `leaders.user_id` haipo hadi migrasheni ya umiliki wa wasifu inatumika. */
 const isMissingOwnerColumn = (message?: string) => !!message?.includes("user_id");
+
+type OwnApplication = {
+  full_name: string;
+  position: string;
+  phone: string | null;
+  department_id: string | null;
+};
 
 /**
  * Kiongozi huhariri ukurasa wake mwenyewe. Safu zake pekee huruhusiwa na RLS;
@@ -74,23 +81,54 @@ export function LeaderProfileEditor({ userId }: { userId: string }) {
       setLoading(false);
     };
 
-    const { data, error } = await (supabase.from("leaders") as any)
+    const { data, error } = await db()
+      .from("leaders")
       .select(PROFILE_SELECT)
       .eq("user_id", userId)
       .maybeSingle();
-    if (!error) {
-      apply((data as Profile) ?? null, true);
+    if (!error && data) {
+      apply(data as Profile, true);
       return;
     }
 
-    // Kabla ya migrasheni ya umiliki, safu `user_id` haipo: tunaomba seva
-    // iunde/kuunganisha ukurasa wetu kwa kutumia ombi letu lililothibitishwa.
-    if (isMissingOwnerColumn(error.message)) {
-      const linked = await linkOwn().catch(() => null);
-      if (linked?.fullName) {
-        const { data: byName } = await (supabase.from("leaders") as any)
+    // Ombi letu lililoidhinishwa humpatia jina, cheo na wizara bila ufunguo wa
+    // seva; RLS ya `leaders` huruhusu kiongozi kuunda ukurasa wake mwenyewe.
+    const created = await ensureOwnLeaderPage(userId).catch(() => null);
+    if (created) {
+      const { data: row } = await db()
+        .from("leaders")
+        .select(PROFILE_SELECT)
+        .eq("slug", created.slug)
+        .maybeSingle();
+      apply((row as Profile) ?? null, true);
+      return;
+    }
+
+    // Njia ya akiba kwa hosting yenye ufunguo wa seva; humiliki ukurasa kwa jina.
+    const viaServer = await linkOwn().catch(() => null);
+    if (viaServer?.fullName) {
+      const { data: byName } = await db()
+        .from("leaders")
+        .select(PROFILE_SELECT)
+        .ilike("full_name", escapeLike(viaServer.fullName))
+        .limit(1)
+        .maybeSingle();
+      if (byName) {
+        apply(byName as Profile, false);
+        return;
+      }
+    }
+
+    // Kabla ya migrasheni ya umiliki, safu `user_id` haipo: tunapatana na wasifu
+    // kwa jina kamili lililothibitishwa na ombi letu.
+    if (isMissingOwnerColumn(error?.message)) {
+      const { data: rows } = await db().rpc("my_leader_application");
+      const app: OwnApplication | null = Array.isArray(rows) ? rows[0] : null;
+      if (app) {
+        const { data: byName } = await db()
+          .from("leaders")
           .select(PROFILE_SELECT)
-          .ilike("full_name", escapeLike(linked.fullName))
+          .ilike("full_name", escapeLike(app.full_name))
           .limit(1)
           .maybeSingle();
         apply((byName as Profile) ?? null, false);
@@ -112,7 +150,8 @@ export function LeaderProfileEditor({ userId }: { userId: string }) {
       return;
     }
     setSaving(true);
-    let q = (supabase.from("leaders") as any)
+    let q = db()
+      .from("leaders")
       .update({
         full_name: draft.full_name.trim(),
         phone: draft.phone.trim() || null,
@@ -155,7 +194,8 @@ export function LeaderProfileEditor({ userId }: { userId: string }) {
       return;
     }
     const url = await createStorageUrl("site-assets", path);
-    let q = (supabase.from("leaders") as any)
+    let q = db()
+      .from("leaders")
       .update({ photo_url: url, updated_at: new Date().toISOString() })
       .eq("id", profile.id);
     if (linked) q = q.eq("user_id", userId);

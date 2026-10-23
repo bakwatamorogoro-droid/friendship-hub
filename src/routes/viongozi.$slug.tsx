@@ -14,7 +14,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
 import { useResolvedUrl } from "@/lib/storage-url";
-import { useLeader } from "@/lib/use-leaders";
+import { useLeader, useLeaders } from "@/lib/use-leaders";
 import { useDepartments } from "@/lib/use-site-settings";
 import { showStatus } from "@/lib/status";
 
@@ -41,6 +41,7 @@ export const Route = createFileRoute("/viongozi/$slug")({
 function LeaderProfilePage() {
   const { slug } = Route.useParams();
   const { leader, loading } = useLeader(slug);
+  const { leaders } = useLeaders();
   const departments = useDepartments();
   const photo = useResolvedUrl(leader?.photo_url);
   const { t } = useI18n();
@@ -74,6 +75,9 @@ function LeaderProfilePage() {
   const ministry = leader.department_id
     ? departments.find((d) => d.id === leader.department_id)
     : departments.find((d) => d.leader_name === leader.full_name);
+
+  // Viongozi wengine, kwa kuonyesha uhusiano wa uongozi bila kuonyesha wote.
+  const peers = leaders.filter((l) => l.id !== leader.id).slice(0, 4);
 
   const share = async () => {
     const url = `${window.location.origin}/viongozi/${leader.slug}`;
@@ -193,10 +197,92 @@ function LeaderProfilePage() {
           </div>
         </div>
 
-        <h2 className="mt-12 text-2xl font-bold text-foreground md:text-3xl">{t("leaders.bio")}</h2>
-        <div className="mt-4 whitespace-pre-wrap text-base leading-relaxed text-muted-foreground md:text-lg">
-          {leader.bio ?? leader.short_message ?? "—"}
+        <div className="mt-10 grid gap-6 lg:grid-cols-[1fr_320px] lg:items-start">
+          <div className="space-y-6">
+            <article className="panel-3d rounded-2xl p-6 sm:p-8">
+              <h2 className="text-xl font-bold text-foreground md:text-2xl">{t("leaders.bio")}</h2>
+              <div className="mt-4 whitespace-pre-wrap text-base leading-relaxed text-muted-foreground">
+                {leader.bio ?? leader.short_message ?? "—"}
+              </div>
+            </article>
+
+            {peers.length > 0 && (
+              <div>
+                <h2 className="text-lg font-bold text-foreground">{t("leaders.other_leaders")}</h2>
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  {peers.map((p) => (
+                    <Link
+                      key={p.id}
+                      to="/viongozi/$slug"
+                      params={{ slug: p.slug }}
+                      className="surface surface-hover flex items-center gap-3 p-4"
+                    >
+                      <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
+                        <UserRound className="h-5 w-5" />
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block truncate font-semibold text-foreground">
+                          {p.full_name}
+                        </span>
+                        <span className="block truncate text-xs text-muted-foreground">
+                          {p.position}
+                        </span>
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <aside className="surface surface-pad lg:sticky lg:top-24">
+            <h3 className="text-sm font-bold uppercase tracking-wide text-muted-foreground">
+              {t("leaders.contact_label")}
+            </h3>
+            <ul className="mt-4 space-y-3 text-sm">
+              <li className="flex items-start gap-3">
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
+                  <Phone className="h-4 w-4" />
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-xs text-muted-foreground">{t("form.phone")}</span>
+                  <span className="block truncate font-semibold text-foreground">
+                    {leader.phone ?? "—"}
+                  </span>
+                </span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
+                  <Mail className="h-4 w-4" />
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-xs text-muted-foreground">{t("mgmt.email")}</span>
+                  <span className="block truncate font-semibold text-foreground">
+                    {leader.email ?? "—"}
+                  </span>
+                </span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
+                  <Building2 className="h-4 w-4" />
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-xs text-muted-foreground">
+                    {t("leaders.duty_label")}
+                  </span>
+                  <span className="block font-semibold text-foreground">
+                    {ministry?.name ?? t("leaders.duty_value")}
+                  </span>
+                </span>
+              </li>
+            </ul>
+            <Button variant="outline" className="mt-5 w-full font-semibold" onClick={share}>
+              <Share2 className="mr-2 h-4 w-4" />
+              {copied ? t("common.copied") : t("leaders.share_profile")}
+            </Button>
+          </aside>
         </div>
+
         <Link to="/viongozi" className="mt-10 inline-block">
           <Button variant="outline" className="font-semibold">
             <ArrowLeft className="mr-2 h-4 w-4" />
