@@ -160,13 +160,30 @@ export const askMumAI = createServerFn({ method: "POST" })
     }
 
     const today = new Date().toISOString().slice(0, 10);
-    const system =
-      `${SYSTEM_PROMPT}\n\nTAREHE YA LEO: ${today}. Unaweza kutafuta Google kwa taarifa za muda halisi.` +
+    let system =
+      `${SYSTEM_PROMPT}\n\nTAREHE YA LEO: ${today}.` +
       (knowledge
         ? `\n\n=== TAARIFA HALISI KUTOKA MFUMO WA MUMSO (tumia hizi kwanza) ===\n${knowledge}`
         : "");
 
     const history = data.messages.slice(-10);
+    const lastUser = [...history].reverse().find((m) => m.role === "user")?.content ?? "";
+
+    // UTAFUTAJI WA MUDA HALISI (bila ufunguo): Google News RSS + Wikipedia.
+    // Huingizwa kwenye maelekezo ili AI ijibu kwa taarifa za sasa, sio za zamani.
+    let live = "";
+    try {
+      const { searchLive, looksTimeSensitive } = await import("./web-search.server");
+      const q = lastUser.slice(0, 160);
+      live =
+        looksTimeSensitive(q) || /HESLB|mikopo|MUMSO|MUM|chuo|wanafunzi|TCU|NECTA/i.test(q)
+          ? await searchLive(q)
+          : "";
+      if (live)
+        system += `\n\n=== TAARIFA ZA MUDA HALISI (zilizotafutwa sasa hivi) ===\n${live}\n\nTumia habari hizi kujibu. Taja chanzo na tarehe.`;
+    } catch (e) {
+      console.error("live search failed", e);
+    }
 
     let pendingError: Error | null = null;
 
