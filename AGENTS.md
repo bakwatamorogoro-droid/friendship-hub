@@ -1,3 +1,21 @@
+## MUMSO AI: Lovable Gateway HAIWEZI kutumika bila tokeni (imethibitishwa 2026-10-21)
+Msimbo upo: `src/lib/mum-ai.functions.ts` (server fn `askMumAI`), `src/lib/ai-gateway.server.ts` (Lovable Gateway), `src/components/MumAiWidget.tsx`, huonyeshwa kupitia `AiWidgetGate` kwenye `src/routes/__root.tsx`.
+
+- `GET https://ai.gateway.lovable.dev/v1/models` -> **200 BILA tokeni** (modeli 63: `openai/gpt-6-astra`, `google/gemini-3.6-flash`, n.k.). Orodha ni ya umma.
+- `POST .../v1/chat/completions` -> **401 kila wakati bila ufunguo halali**: `Missing API key`. Imethibitishwa kwa njia 6 (bila header, header tupu, `Bearer anonymous`, `X-Lovable-AIG-SDK` pekee, key ya uongo, modeli ya bure). **Hakuna njia ya kuzunguka.**
+- `LOVABLE_API_KEY` HAIPO kwenye `.env`, `.env.example` (thamani), historia ya git, wala `wrangler.jsonc` vars. Kwenye jukwaa la Lovable huwekwa kiotomatiki; kwenye Cloudflare/Vercel LAZIMA uiongeze mwenyewe.
+- `GEMINI_API_KEY` (njia ya akiba + Google Search) pia haipo; `generativelanguage.googleapis.com` hurudisha 403 bila key.
+- Kipimo cha moja kwa moja: `POST /_serverFn/e8f533fa95970d9de55abe86d44e53a8aa0cfb0a86b2063cc56929773b23fdc6` -> HTTP 200 + `MUMSO AI haijaunganishwa kwa sasa...`.
+
+**Kizuizi cha pili (muhimu):** `service_status.ai` ni `enabled=false` kwenye DB, kwa hivyo `AiWidgetGate` hurudisha `null` — **widget haionekani kabisa** kwenye tovuti. Menejimenti lazima iwashe "MUM AI" kwenye paneli.
+
+**Kupima server fn ya TanStack kwa curl:** mwili lazima uwe **seroval-encoded**, sio JSON tupu. Itumie:
+```
+node -e "const{toJSON}=require('seroval');require('fs').writeFileSync('/tmp/b.json',JSON.stringify(toJSON({data:{messages:[{role:'user',content:'hi'}]}})))"
+curl -X POST "http://localhost:12000/_serverFn/<ID>" -H 'Content-Type: application/json' --data-binary @/tmp/b.json
+```
+ID ya `askMumAI` = `e8f533fa95970d9de55abe86d44e53a8aa0cfb0a86b2063cc56929773b23fdc6` (kutoka `.output/server/_ssr/mum-ai.functions-*.mjs`). JSON tupu hurudisha 500 `SerovalDeserializationError`.
+
 <!-- LOVABLE:BEGIN -->
 > [!IMPORTANT]
 > This project is connected to [Lovable](https://lovable.dev). Avoid rewriting
