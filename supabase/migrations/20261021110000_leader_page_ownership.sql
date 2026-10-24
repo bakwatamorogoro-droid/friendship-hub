@@ -117,7 +117,7 @@ FOR EACH ROW EXECUTE FUNCTION public.leaders_force_position();
 CREATE OR REPLACE FUNCTION public.my_leader_application()
 RETURNS TABLE (
   full_name text,
-  position text,
+  "position" text,
   phone text,
   department_id uuid,
   status text

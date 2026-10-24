@@ -94,6 +94,7 @@ ON public.announcements FOR SELECT
 USING (published = true AND status = 'published');
 
 -- Wizara ya Habari, menejimenti, mwandishi na wizara yake wanaona yote.
+DROP POLICY IF EXISTS "Newsroom views announcements" ON public.announcements;
 DROP POLICY IF EXISTS "Admins view all announcements" ON public.announcements;
 CREATE POLICY "Newsroom views announcements"
 ON public.announcements FOR SELECT TO authenticated
@@ -105,6 +106,7 @@ USING (
 );
 
 -- ===== RLS: kutuma =====
+DROP POLICY IF EXISTS "Submit announcements" ON public.announcements;
 DROP POLICY IF EXISTS "Admins create announcements" ON public.announcements;
 CREATE POLICY "Submit announcements"
 ON public.announcements FOR INSERT TO authenticated
@@ -120,6 +122,7 @@ WITH CHECK (
 );
 
 -- ===== RLS: kuhariri =====
+DROP POLICY IF EXISTS "Newsroom updates announcements" ON public.announcements;
 DROP POLICY IF EXISTS "Admins update announcements" ON public.announcements;
 CREATE POLICY "Newsroom updates announcements"
 ON public.announcements FOR UPDATE TO authenticated
@@ -137,6 +140,7 @@ WITH CHECK (
 );
 
 -- ===== RLS: kufuta =====
+DROP POLICY IF EXISTS "Newsroom deletes announcements" ON public.announcements;
 DROP POLICY IF EXISTS "Admins delete announcements" ON public.announcements;
 CREATE POLICY "Newsroom deletes announcements"
 ON public.announcements FOR DELETE TO authenticated

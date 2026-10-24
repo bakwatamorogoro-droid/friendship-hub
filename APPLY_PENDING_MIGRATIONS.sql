@@ -104,6 +104,31 @@ WITH CHECK (
   )
 );
 
+-- Kiongozi husoma ombi lake mwenyewe ili mfumo umpatie ukurasa wake hata kama
+-- safu `user_id` haijawekwa. SECURITY DEFINER hurudisha mstari wake pekee.
+CREATE OR REPLACE FUNCTION public.my_leader_application()
+RETURNS TABLE (
+  full_name text,
+  "position" text,
+  phone text,
+  department_id uuid,
+  status text
+)
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT a.full_name, a.position, a.phone, a.department_id, a.status
+  FROM public.leader_applications a
+  WHERE a.approved_user_id = auth.uid()
+  ORDER BY a.updated_at DESC
+  LIMIT 1;
+$$;
+
+REVOKE ALL ON FUNCTION public.my_leader_application() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.my_leader_application() TO authenticated;
+
 -- Cheo huchukuliwa kutoka ombi lililoidhinishwa; kiongozi hawezi kujipa cheo.
 CREATE OR REPLACE FUNCTION public.leaders_force_position()
 RETURNS trigger
@@ -284,6 +309,7 @@ ON public.announcements FOR SELECT
 USING (published = true AND status = 'published');
 
 -- Wizara ya Habari, menejimenti, mwandishi na wizara yake wanaona yote.
+DROP POLICY IF EXISTS "Newsroom views announcements" ON public.announcements;
 DROP POLICY IF EXISTS "Admins view all announcements" ON public.announcements;
 CREATE POLICY "Newsroom views announcements"
 ON public.announcements FOR SELECT TO authenticated
@@ -295,6 +321,7 @@ USING (
 );
 
 -- ===== RLS: kutuma =====
+DROP POLICY IF EXISTS "Submit announcements" ON public.announcements;
 DROP POLICY IF EXISTS "Admins create announcements" ON public.announcements;
 CREATE POLICY "Submit announcements"
 ON public.announcements FOR INSERT TO authenticated
@@ -310,6 +337,7 @@ WITH CHECK (
 );
 
 -- ===== RLS: kuhariri =====
+DROP POLICY IF EXISTS "Newsroom updates announcements" ON public.announcements;
 DROP POLICY IF EXISTS "Admins update announcements" ON public.announcements;
 CREATE POLICY "Newsroom updates announcements"
 ON public.announcements FOR UPDATE TO authenticated
@@ -327,6 +355,7 @@ WITH CHECK (
 );
 
 -- ===== RLS: kufuta =====
+DROP POLICY IF EXISTS "Newsroom deletes announcements" ON public.announcements;
 DROP POLICY IF EXISTS "Admins delete announcements" ON public.announcements;
 CREATE POLICY "Newsroom deletes announcements"
 ON public.announcements FOR DELETE TO authenticated
