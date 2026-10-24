@@ -52,3 +52,14 @@ Hii hupeleka kwenye **temporary preview account** ya Cloudflare na kurudisha URL
 **Picha za viongozi:** sera za awali za bucket ya `site-assets` zilikuwa za **admin pekee** (`has_role(...,'admin')`), hivyo kiongozi alishindwa kupakia picha. Sera mpya huruhusu kiongozi kuandika chini ya `leaders/<user_id>/` pekee.
 
 **Uthibitisho:** `mailer_autoconfirm: true` kwenye `GET /auth/v1/settings`, hivyo usajili hufanya kazi bila uthibitisho wa barua pepe. Hakuna `SUPABASE_ACCESS_TOKEN`/DB password kwenye sandbox hii, kwa hivyo migrasheni hupangwa kwa mkono kupitia SQL Editor.
+
+## Kuthibitisha migrasheni kwa Postgres halisi (imetumika 2026-10-21)
+Sandbox hii haina `SUPABASE_ACCESS_TOKEN` wala DB password, hivyo huwezi kuendesha migrasheni kwenye database hai. Lakini unaweza kuzithibitisha kwa Postgres 17 ya ndani (`sudo apt-get install -y postgresql`):
+
+1. `initdb -D /tmp/pgdata -U postgres --auth=trust && pg_ctl -D /tmp/pgdata -l /tmp/pg.log -o "-p 55432 -k /tmp" start`
+2. Unda database, kisha iga Supabase: roles (`anon`, `authenticated`, `service_role BYPASSRLS`), schema `auth` + `storage`, `auth.users`, na `auth.uid()` inayosoma `current_setting('request.jwt.claim.sub')`. `storage.objects`/`foldername`/`buckets` lazima ziwepo (migrasheni huzitumia).
+3. `GRANT USAGE ON SCHEMA auth TO authenticated` — bila hii trigger zilizo `SECURITY DEFINER` hushindwa kwa `permission denied for schema auth` (Supabase halisi ina ruhusa hii tayari).
+4. Endesha `supabase/migrations/*.sql` kwa mpangilio, kisha `APPLY_PENDING_MIGRATIONS.sql` **mara mbili** (uthibitisho wa idempotency).
+5. Kujaribu RLS: `SET ROLE authenticated; SET request.jwt.claim.sub = '<uuid>';` kisha jaribu INSERT/UPDATE. **Angalizo:** trigger ya "first user becomes admin" humfanya mtumiaji wa kwanza kuwa admin, na admin hupita kinga zote — hivyo ondoa `user_roles` ya admin kabla ya kujaribu mipaka ya kiongozi.
+
+**Kasoro mbili zilizogundulika hivi (na kurekebishwa):** (a) `position` ni neno lililohifadhiwa, kwa hivyo `RETURNS TABLE (position text)` ilifanya `my_leader_application()` isichanganuliwe na migrasheni yote ya umiliki ikashindwa — sasa ni `"position"`; (b) sera nne za announcements zilifuta majina ya zamani lakini zikaunda mapya, hivyo mwendo wa pili ulishindwa. Tumia `python3 -c "from pglast import parse_sql; ..."` kukagua SQL kabla ya ku-commit.
