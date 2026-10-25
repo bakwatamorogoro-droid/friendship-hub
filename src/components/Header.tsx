@@ -16,6 +16,7 @@ const nav = [
   { to: "/mikopo", key: "nav.loans" },
   { to: "/misiba", key: "nav.deaths" },
   { to: "/matangazo", key: "nav.news" },
+  { to: "/ubunifu", key: "nav.innovation" },
   { to: "/mahafa", key: "nav.grad" },
   { to: "/fuatilia", key: "nav.track" },
   { to: "/jisajili", key: "nav.register" },

@@ -42,6 +42,11 @@ export function Footer() {
             <li><Link to="/mikopo" className="opacity-90 hover:opacity-100 hover:underline">{t("home.loan_form_title")}</Link></li>
             <li><Link to="/mahafa" className="opacity-90 hover:opacity-100 hover:underline">{t("nav.grad")}</Link></li>
             <li><Link to="/matangazo" className="opacity-90 hover:opacity-100 hover:underline">{t("nav.news")}</Link></li>
+            <li>
+              <Link to="/ubunifu" className="opacity-90 hover:opacity-100 hover:underline">
+                {t("nav.innovation")}
+              </Link>
+            </li>
           </ul>
         </div>
         <div>

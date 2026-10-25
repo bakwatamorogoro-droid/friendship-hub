@@ -23,6 +23,7 @@ import { Route as MatokeoRouteImport } from './routes/matokeo'
 import { Route as MikopoRouteImport } from './routes/mikopo'
 import { Route as MisibaRouteImport } from './routes/misiba'
 import { Route as PublicRouteImport } from './routes/public'
+import { Route as UbunifuRouteImport } from './routes/ubunifu'
 import { Route as HudumaIndexRouteImport } from './routes/huduma.index'
 import { Route as HudumaSlugRouteImport } from './routes/huduma.$slug'
 import { Route as MatangazoIdRouteImport } from './routes/matangazo.$id'
@@ -99,6 +100,11 @@ const PublicRoute = PublicRouteImport.update({
   path: '/public',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UbunifuRoute = UbunifuRouteImport.update({
+  id: '/ubunifu',
+  path: '/ubunifu',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HudumaIndexRoute = HudumaIndexRouteImport.update({
   id: '/huduma/',
   path: '/huduma/',
@@ -140,6 +146,7 @@ export interface FileRoutesByFullPath {
   '/mikopo': typeof MikopoRoute
   '/misiba': typeof MisibaRoute
   '/public': typeof PublicRoute
+  '/ubunifu': typeof UbunifuRoute
   '/huduma/$slug': typeof HudumaSlugRoute
   '/matangazo/$id': typeof MatangazoIdRoute
   '/viongozi/$slug': typeof ViongoziSlugRoute
@@ -161,6 +168,7 @@ export interface FileRoutesByTo {
   '/mikopo': typeof MikopoRoute
   '/misiba': typeof MisibaRoute
   '/public': typeof PublicRoute
+  '/ubunifu': typeof UbunifuRoute
   '/huduma/$slug': typeof HudumaSlugRoute
   '/matangazo/$id': typeof MatangazoIdRoute
   '/viongozi/$slug': typeof ViongoziSlugRoute
@@ -183,6 +191,7 @@ export interface FileRoutesById {
   '/mikopo': typeof MikopoRoute
   '/misiba': typeof MisibaRoute
   '/public': typeof PublicRoute
+  '/ubunifu': typeof UbunifuRoute
   '/huduma/$slug': typeof HudumaSlugRoute
   '/matangazo/$id': typeof MatangazoIdRoute
   '/viongozi/$slug': typeof ViongoziSlugRoute
@@ -206,6 +215,7 @@ export interface FileRouteTypes {
     | '/mikopo'
     | '/misiba'
     | '/public'
+    | '/ubunifu'
     | '/huduma/$slug'
     | '/matangazo/$id'
     | '/viongozi/$slug'
@@ -227,6 +237,7 @@ export interface FileRouteTypes {
     | '/mikopo'
     | '/misiba'
     | '/public'
+    | '/ubunifu'
     | '/huduma/$slug'
     | '/matangazo/$id'
     | '/viongozi/$slug'
@@ -248,6 +259,7 @@ export interface FileRouteTypes {
     | '/mikopo'
     | '/misiba'
     | '/public'
+    | '/ubunifu'
     | '/huduma/$slug'
     | '/matangazo/$id'
     | '/viongozi/$slug'
@@ -270,6 +282,7 @@ export interface RootRouteChildren {
   MikopoRoute: typeof MikopoRoute
   MisibaRoute: typeof MisibaRoute
   PublicRoute: typeof PublicRoute
+  UbunifuRoute: typeof UbunifuRoute
   HudumaSlugRoute: typeof HudumaSlugRoute
   ViongoziSlugRoute: typeof ViongoziSlugRoute
   HudumaIndexRoute: typeof HudumaIndexRoute
@@ -376,6 +389,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ubunifu': {
+      id: '/ubunifu'
+      path: '/ubunifu'
+      fullPath: '/ubunifu'
+      preLoaderRoute: typeof UbunifuRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/huduma/': {
       id: '/huduma/'
       path: '/huduma'
@@ -441,6 +461,7 @@ const rootRouteChildren: RootRouteChildren = {
   MikopoRoute: MikopoRoute,
   MisibaRoute: MisibaRoute,
   PublicRoute: PublicRoute,
+  UbunifuRoute: UbunifuRoute,
   HudumaSlugRoute: HudumaSlugRoute,
   ViongoziSlugRoute: ViongoziSlugRoute,
   HudumaIndexRoute: HudumaIndexRoute,

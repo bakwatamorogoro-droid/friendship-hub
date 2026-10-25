@@ -19,6 +19,7 @@ const dict: Record<string, { sw: string; en: string }> = {
   "nav.register": { sw: "Jisajili", en: "Register" },
   "nav.leader_signup": { sw: "Jisajili Kiongozi", en: "Leader Registration" },
   "nav.language": { sw: "Badili lugha", en: "Switch language" },
+  "nav.innovation": { sw: "Ubunifu na Ajira", en: "Innovation & Jobs" },
 
   // ===== Maneno ya jumla / Common =====
   "common.loading": { sw: "Inapakia...", en: "Loading..." },
@@ -1080,6 +1081,133 @@ const dict: Record<string, { sw: string; en: string }> = {
   "pw.same": {
     sw: "Nenosiri jipya linafanana na la sasa",
     en: "The new password matches the current one",
+  },
+
+  // ===== Ubunifu na Fursa za Kujiajiri =====
+  "inn.title": {
+    sw: "Fomu ya Ubunifu na Fursa za Kujiajiri",
+    en: "Innovation & Self-Employment Form",
+  },
+  "inn.lead": {
+    sw: "Viwango · Ubunifu, ajira na maendeleo ya wanafunzi",
+    en: "Viwango · Innovation, jobs and student development",
+  },
+  "inn.soon_badge": { sw: "Inakuja hivi karibuni", en: "Coming soon" },
+  "inn.soon_title": { sw: "Fomu hii bado haijafunguliwa", en: "This form is not open yet" },
+  "inn.soon_body": {
+    sw: "Tunamalizia mfumo wa kuwasilisha mawazo ya ubunifu na kuyafikisha kwa mamlaka husika. Hapa chini unaona kile kitakachopatikana — hakuna kinachotumwa kwa sasa.",
+    en: "We are finalising the system that receives innovation ideas and routes them to the right authority. Below is a preview of what is coming — nothing is submitted yet.",
+  },
+  "inn.soon_cta": { sw: "Nijulishe kifunguliwe", en: "Notify me when it opens" },
+  "inn.soon_note": {
+    sw: "Kwa sasa wasilisha maombi yako kupitia huduma za idara zetu.",
+    en: "For now, submit your requests through our ministry services.",
+  },
+  "inn.preview_tag": { sw: "Onyesho la awali", en: "Preview" },
+  "inn.step_student": { sw: "Taarifa za mwanachuo", en: "Student details" },
+  "inn.step_student_hint": {
+    sw: "Taarifa hizi hutumika kukutambua na kuwasilisha wazo lako kwa mamlaka husika.",
+    en: "These details identify you and route your idea to the right authority.",
+  },
+  "inn.step_idea": { sw: "Taarifa za ubunifu", en: "Innovation details" },
+  "inn.step_idea_hint": {
+    sw: "Eleza wazo lako kwa uwazi — changamoto, utekelezaji na fursa zitakazozalishwa.",
+    en: "Describe your idea clearly — the challenge, execution and opportunities it creates.",
+  },
+  "inn.full_name": { sw: "Jina kamili", en: "Full name" },
+  "inn.full_name_ph": { sw: "Andika jina lako", en: "Write your name" },
+  "inn.college": { sw: "Chuo unachosoma", en: "College you attend" },
+  "inn.college_ph": { sw: "Jina la chuo", en: "Name of the college" },
+  "inn.field": { sw: "Fani unayosoma", en: "Field of study" },
+  "inn.field_ph": {
+    sw: "Mfano: ICT, kilimo, uhandisi",
+    en: "Example: ICT, agriculture, engineering",
+  },
+  "inn.area": { sw: "Eneo la ubunifu", en: "Innovation area" },
+  "inn.area_ph": { sw: "Chagua eneo la ubunifu", en: "Choose an innovation area" },
+  "inn.area_self": { sw: "Kujiajiri na biashara", en: "Self-employment and business" },
+  "inn.area_tech": { sw: "Teknolojia na mifumo", en: "Technology and systems" },
+  "inn.area_field": {
+    sw: "Ubunifu unaohusiana na fani yangu",
+    en: "Innovation related to my field",
+  },
+  "inn.area_agri": { sw: "Kilimo na viwanda", en: "Agriculture and industry" },
+  "inn.area_dev": { sw: "Maendeleo ya wanafunzi", en: "Student development" },
+  "inn.area_other": { sw: "Sekta nyingine", en: "Other sector" },
+  "inn.idea_title": { sw: "Kichwa cha ubunifu wako", en: "Title of your innovation" },
+  "inn.idea_title_ph": { sw: "Jina la wazo au mradi", en: "Name of the idea or project" },
+  "inn.problem": {
+    sw: "Ni changamoto gani unayotaka kutatua?",
+    en: "Which challenge do you want to solve?",
+  },
+  "inn.problem_ph": {
+    sw: "Eleza tatizo la ajira, fani au jamii...",
+    en: "Describe the jobs, field or community problem...",
+  },
+  "inn.script": {
+    sw: "Andika maelezo au script ya ubunifu wako",
+    en: "Describe or script your innovation",
+  },
+  "inn.script_ph": {
+    sw: "Eleza wazo lako, jinsi litakavyofanya kazi na hatua za utekelezaji...",
+    en: "Explain your idea, how it works and the steps to implement it...",
+  },
+  "inn.jobs": {
+    sw: "Ubunifu wako utapunguza vipi ukosefu wa ajira?",
+    en: "How will your innovation reduce unemployment?",
+  },
+  "inn.jobs_ph": {
+    sw: "Eleza ajira zitakazozalishwa na manufaa yake...",
+    en: "Explain the jobs it will create and its benefits...",
+  },
+  "inn.resources": { sw: "Unahitaji rasilimali gani?", en: "What resources do you need?" },
+  "inn.resources_ph": {
+    sw: "Mfano: vifaa, mtaji, teknolojia au ushauri",
+    en: "Example: equipment, capital, technology or advice",
+  },
+  "inn.support": {
+    sw: "Unahitaji msaada gani kutoka kwa viongozi au Wizara?",
+    en: "What support do you need from leaders or the Ministry?",
+  },
+  "inn.support_ph": {
+    sw: "Mfano: idhini, ufadhili, mafunzo au ushirikiano",
+    en: "Example: approval, funding, training or partnership",
+  },
+  "inn.submit": { sw: "Wasilisha wazo", en: "Submit idea" },
+  "inn.flow_title": {
+    sw: "Mfumo utayafanyia nini mawazo yatakayowasilishwa?",
+    en: "What happens to the ideas submitted?",
+  },
+  "inn.flow_1_title": { sw: "Mwanachuo anawasilisha wazo", en: "A student submits an idea" },
+  "inn.flow_1_body": {
+    sw: "Anaandika ubunifu wake, changamoto inayotatuliwa na namna utakavyozalisha fursa za kujiajiri.",
+    en: "They write their innovation, the challenge it solves and how it creates self-employment.",
+  },
+  "inn.flow_2_title": { sw: "Viongozi wanapitia maombi", en: "Leaders review the applications" },
+  "inn.flow_2_body": {
+    sw: "Wanakagua ubora wa wazo, maelezo na uhusiano wake na fani ya mwanachuo.",
+    en: "They check the idea's quality, its detail and how it relates to the student's field.",
+  },
+  "inn.flow_3_title": {
+    sw: "Mawazo yanawasilishwa kwa mamlaka husika",
+    en: "Ideas go to the relevant authority",
+  },
+  "inn.flow_3_body": {
+    sw: "Mawazo yaliyochaguliwa yanatumwa kwa taasisi au Wizara yenye jukumu la eneo husika, pamoja na nyaraka zinazohitajika.",
+    en: "Selected ideas are sent to the institution or Ministry responsible for that area, with the required documents.",
+  },
+  "inn.flow_4_title": {
+    sw: "Mwanachuo anafuatilia majibu",
+    en: "The student follows up on replies",
+  },
+  "inn.flow_4_body": {
+    sw: "Anaona kama pendekezo limepokelewa, linasubiri mapitio, linahitaji marekebisho au limepata uamuzi.",
+    en: "They see whether the proposal was received, is under review, needs changes or has a decision.",
+  },
+  "inn.important_title": { sw: "Muhimu", en: "Important" },
+  "inn.important_body": {
+    sw: "Kuwasilisha wazo hakumaanishi moja kwa moja kwamba Wizara italikubali au kulifadhili. Mfumo utahifadhi kumbukumbu za uwasilishaji na majibu rasmi, na utaruhusu viongozi kuwasiliana na mwanachuo kwa maelezo ya ziada.",
+    en: "Submitting an idea does not mean the Ministry will accept or fund it. The system keeps records of submissions and official replies, and lets leaders contact the student for more details.",
   },
 
   // ===== Nyongeza za jumla =====
