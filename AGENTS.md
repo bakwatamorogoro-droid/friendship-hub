@@ -73,5 +73,14 @@ Sandbox hii haina `SUPABASE_ACCESS_TOKEN` wala DB password, hivyo huwezi kuendes
 
 **Kujaribu:** RLS huzuia `SELECT` ya moja kwa moja (0 mistari) lakini RPC ya `SECURITY DEFINER` hurudisha (1 mstari) — tumia tofauti hii kutambua trigger zisizo na `SECURITY DEFINER`.
 
-## Kusukuma GitHub (imetumika 2026-10-21, imezuiwa)
-`GITHUB_TOKEN` ya sandbox ina **metadata=read pekee** kwa `bakwatamorogoro-droid/friendship-hub`: API hurudisha `permissions: {admin: true, push: true}` lakini kila uandishi hushindwa kwa **403 `Resource not accessible by integration`**. Hakuna app installation (`GET /user/installations` → `total_count: 0`). Token iliyokuwa kwenye `origin` (`ghu_...` ndani ya URL) imeisha muda (401). Hivyo `git push` hushindwa; commit hufanyika ndani ya sandbox pekee na mtumiaji anapaswa kuipush mwenyewe.
+## Kusukuma GitHub (imetumika 2026-10-21)
+`GITHUB_TOKEN` ya mazingira ni installation token (`ghu_`) yenye **metadata=read pekee**: `POST /git/refs`, `POST /contents/...` na `git push` hurudisha **403 `Resource not accessible by integration`**. `GET /repos/...` hurudisha `permissions.push: true` hata hivyo — **usiamini**. Hakuna app installation (`GET /user/installations` → `total_count: 0`).
+
+**Kinachofanya kazi: classic PAT yenye scope `repo`.** Thibitisha kwanza kwa `x-oauth-scopes: repo` kwenye `HEAD /user`, kisha sukuma kwa `credential.helper` ya muda (usiiweke kwenye `git remote set-url`, hubaki kwenye `.git/config`):
+```
+umask 077
+printf 'https://x-access-token:%s@github.com\n' "$PAT" > /tmp/.gc && chmod 600 /tmp/.gc
+git -c credential.helper="store --file=/tmp/.gc" push origin main
+rm -f /tmp/.gc
+```
+Repo inaunganishwa na Lovable: **kabla ya push, fanya `git fetch origin main` na hakikisha `git merge-base --is-ancestor origin/main HEAD`** (fast-forward). Lovable husukuma commits mara kwa mara; usifanye force-push wala rebase ya commits zilizosukwa.
