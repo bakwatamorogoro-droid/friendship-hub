@@ -103,12 +103,23 @@ export function MumAiWidget() {
                 </Message>
               )}
               {error && (
-                <p
+                <div
                   role="alert"
-                  className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive"
+                  className="flex flex-col items-start gap-2 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive"
                 >
-                  {error}
-                </p>
+                  <p>{error}</p>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      const last = [...messages].reverse().find((m) => m.role === "user");
+                      if (last) void send({ text: last.content });
+                    }}
+                  >
+                    Jaribu tena
+                  </Button>
+                </div>
               )}
             </ConversationContent>
             <ConversationScrollButton />

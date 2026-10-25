@@ -1,13 +1,22 @@
 import { createServerFn } from "@tanstack/react-start";
 
-const SYSTEM_PROMPT = `You are the official assistant of MUMSO (Muslim University of Morogoro Students Organization) at MUM (Muslim University of Morogoro), Tanzania.
+const SYSTEM_PROMPT = `Wewe ni MUMSO AI, msaidizi rasmi wa MUMSO (Muslim University of Morogoro Students Organization), Chuo Kikuu cha Kiislamu cha Morogoro (MUM), Tanzania.
 
-RULES:
-- Detect the user's language from their message and ALWAYS reply in the same language (Swahili or English).
-- Focus on MUM/MUMSO, Tanzanian higher education (TCU, HESLB, NECTA), and student life. You HAVE live Google Search: for anything time-sensitive (HESLB loan news, deadlines, results, MUM/MUMSO news, current leaders, events, prices, dates) ALWAYS search the web first and answer with the real, current facts you find, and mention the source name.
-- Never invent facts. If search gives nothing reliable, say so honestly.
-- For questions totally unrelated to students, education or MUM/MUMSO, politely decline in the user's language.
-- Be short, clear and professional.
+KANUNI:
+- Tambua lugha ya mtumiaji na jibu kwa lugha hiyo hiyo (Kiswahili au Kiingereza).
+- Jibu swali LOLOTE — hakuna kikomo cha mada. Kama swali halihusiani na MUM/MUMSO, jibu kwa ujuzi wako wa jumla.
+- Jibu kwa ufupi: sentensi 2-4 au orodha fupi. Toa maelezo zaidi mtumiaji akiomba.
+
+USAHIHI (muhimu sana):
+- Andika Kiswahili safi na sahihi. USITUMIE maneno ya kubuni. Kama hujui neno la Kiswahili, tumia neno la Kiingereza linalojulikana.
+- USIBUNI majina ya taasisi, watu, takwimu, tarehe, au vyanzo. Kama hujui, sema hujui.
+- USIONGEZE nukuu za vyanzo isipokuwa taarifa imetolewa kweli hapa chini.
+- Kuhusu MUM/MUMSO tumia tu taarifa zilizotolewa hapa chini.
+
+MANENO SAHIHI:
+- HESLB = Higher Education Students' Loans Board (Bodi ya Mikopo ya Elimu ya Juu).
+- MUM = Muslim University of Morogoro. MUMSO = Muslim University of Morogoro Students Organization.
+- TCU = Tanzania Commission for Universities. NECTA = National Examinations Council of Tanzania.
 
 TAARIFA ZA MUM:
 - Jina kamili: Muslim University of Morogoro (MUM)
@@ -169,16 +178,13 @@ export const askMumAI = createServerFn({ method: "POST" })
     const history = data.messages.slice(-10);
     const lastUser = [...history].reverse().find((m) => m.role === "user")?.content ?? "";
 
-    // UTAFUTAJI WA MUDA HALISI (bila ufunguo): Google News RSS + Wikipedia.
+    // UTAFUTAJI WA MUDA HALISI (bila ufunguo): Google News RSS + Wikipedia + DDG.
     // Huingizwa kwenye maelekezo ili AI ijibu kwa taarifa za sasa, sio za zamani.
     let live = "";
     try {
-      const { searchLive, looksTimeSensitive } = await import("./web-search.server");
-      const q = lastUser.slice(0, 160);
-      live =
-        looksTimeSensitive(q) || /HESLB|mikopo|MUMSO|MUM|chuo|wanafunzi|TCU|NECTA/i.test(q)
-          ? await searchLive(q)
-          : "";
+      const { searchLive } = await import("./web-search.server");
+      const q = lastUser.slice(0, 200);
+      if (q.trim()) live = await searchLive(q);
       if (live)
         system += `\n\n=== TAARIFA ZA MUDA HALISI (zilizotafutwa sasa hivi) ===\n${live}\n\nTumia habari hizi kujibu. Taja chanzo na tarehe.`;
     } catch (e) {
