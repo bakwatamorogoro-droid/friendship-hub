@@ -84,3 +84,10 @@ git -c credential.helper="store --file=/tmp/.gc" push origin main
 rm -f /tmp/.gc
 ```
 Repo inaunganishwa na Lovable: **kabla ya push, fanya `git fetch origin main` na hakikisha `git merge-base --is-ancestor origin/main HEAD`** (fast-forward). Lovable husukuma commits mara kwa mara; usifanye force-push wala rebase ya commits zilizosukwa.
+
+## Fomu iliyofungwa ("inakuja hivi karibuni") (imetumika 2026-10-25)
+Ukurasa wa onyesho (`/ubunifu`) huonyesha fomu kamili bila kuruhusu uwasilishaji. Njia salama ni tabaka tatu pamoja: `<fieldset disabled>` inayozunguka sehemu zote, kila `Input`/`Textarea` ikiwa `disabled readOnly aria-disabled`, na `Select disabled`. **Muhimu:** usiweke `<form>` wala `onSubmit` kwenye faili — basi hakuna namna ya kuwasilisha hata kwa JS. Uthibitisho: `grep -E "supabase|insert|onSubmit"` kwenye faili la ukurasa lirejeshe tupu, na `<fieldset disabled>` iwe na inputs 0 zisizo `disabled`.
+
+Kinga ya macho (`.inn-lock-veil`) ni `pointer-events: none` na alama yake ni `position: sticky` ili ibaki ionekana kwenye fomu ndefu.
+
+**Angalizo la prettier:** `npx prettier --write` kwenye faili za repo hii huzalisha churn kubwa (mabadiliko yasiyohusiana). Usiendeshe kwa faili nzima; andika msimbo kwa muundo unaotakiwa tangu mwanzo. Kwa JSX ndefu, prettier hutaka `className` ibaki kwenye mstari mmoja na `{t(...)}` iende mstari unaofuata.
