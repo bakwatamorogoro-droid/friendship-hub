@@ -63,3 +63,15 @@ Sandbox hii haina `SUPABASE_ACCESS_TOKEN` wala DB password, hivyo huwezi kuendes
 5. Kujaribu RLS: `SET ROLE authenticated; SET request.jwt.claim.sub = '<uuid>';` kisha jaribu INSERT/UPDATE. **Angalizo:** trigger ya "first user becomes admin" humfanya mtumiaji wa kwanza kuwa admin, na admin hupita kinga zote — hivyo ondoa `user_roles` ya admin kabla ya kujaribu mipaka ya kiongozi.
 
 **Kasoro mbili zilizogundulika hivi (na kurekebishwa):** (a) `position` ni neno lililohifadhiwa, kwa hivyo `RETURNS TABLE (position text)` ilifanya `my_leader_application()` isichanganuliwe na migrasheni yote ya umiliki ikashindwa — sasa ni `"position"`; (b) sera nne za announcements zilifuta majina ya zamani lakini zikaunda mapya, hivyo mwendo wa pili ulishindwa. Tumia `python3 -c "from pglast import parse_sql; ..."` kukagua SQL kabla ya ku-commit.
+
+## Trigger za RLS zinahitaji `SECURITY DEFINER` (imetumika 2026-10-21)
+**Dalili:** kiongozi aliyeidhinishwa haoni ukurasa wake, na `ensureOwnLeaderPage()` hurudisha `null`. Konsoli huripoti `Hakuna ombi lililoidhinishwa kwa akaunti hii.`
+
+**Chanzo:** trigger `leaders_force_position` (BEFORE INSERT kwenye `leaders`) hurudia `leader_applications` ili kulazimisha cheo. Ilikuwa `SECURITY INVOKER`, hivyo RLS ya `leader_applications` (admin pekee) ilizuia utafutaji — `SELECT` hurudisha tupu ndani ya trigger. Hivyo `approved_position` ilikuwa `NULL` na kiongozi alishindwa kuunda ukurasa wake.
+
+**Suluhisho:** trigger yoyote inayosoma jedwali lenye RLS nyeti **kwa niaba ya mtumiaji** lazima iwe `SECURITY DEFINER` (na `SET search_path = public`). Tumia `SECURITY INVOKER` pale trigger inapaswa kuheshimu RLS ya mtumiaji.
+
+**Kujaribu:** RLS huzuia `SELECT` ya moja kwa moja (0 mistari) lakini RPC ya `SECURITY DEFINER` hurudisha (1 mstari) — tumia tofauti hii kutambua trigger zisizo na `SECURITY DEFINER`.
+
+## Kusukuma GitHub (imetumika 2026-10-21, imezuiwa)
+`GITHUB_TOKEN` ya sandbox ina **metadata=read pekee** kwa `bakwatamorogoro-droid/friendship-hub`: API hurudisha `permissions: {admin: true, push: true}` lakini kila uandishi hushindwa kwa **403 `Resource not accessible by integration`**. Hakuna app installation (`GET /user/installations` → `total_count: 0`). Token iliyokuwa kwenye `origin` (`ghu_...` ndani ya URL) imeisha muda (401). Hivyo `git push` hushindwa; commit hufanyika ndani ya sandbox pekee na mtumiaji anapaswa kuipush mwenyewe.
