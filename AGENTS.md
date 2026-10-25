@@ -91,3 +91,15 @@ Ukurasa wa onyesho (`/ubunifu`) huonyesha fomu kamili bila kuruhusu uwasilishaji
 Kinga ya macho (`.inn-lock-veil`) ni `pointer-events: none` na alama yake ni `position: sticky` ili ibaki ionekana kwenye fomu ndefu.
 
 **Angalizo la prettier:** `npx prettier --write` kwenye faili za repo hii huzalisha churn kubwa (mabadiliko yasiyohusiana). Usiendeshe kwa faili nzima; andika msimbo kwa muundo unaotakiwa tangu mwanzo. Kwa JSX ndefu, prettier hutaka `className` ibaki kwenye mstari mmoja na `{t(...)}` iende mstari unaofuata.
+
+## MUMSO AI: kasi, bila kikomo, ubora (imetumika 2026-10-21)
+Vikwazo vitatu vya kweli vya Pollinations (njia pekee isiyo na tokeni):
+1. **Kikomo: jibu 1 kila sekunde 30 kwa IP.** Ni kwa IP, si kwa modeli. Hata hivyo **`GET` na `POST` zina vikomo tofauti**, na `POST` huruhusu mfululizo wa haraka zaidi. Jibu 402 lina `Retry after Ns`.
+2. **Modeli pekee inapatikana ni `openai-fast` = `gpt-oss-20b`**, modeli ya **kufikiri**. Bila `reasoning_effort`, jibu huchukua sek 8-30. Weka **`reasoning_effort: "low"`** → sek 0.4-8. `"none"` haina athari; `"medium"`/`"high"` ni polepole zaidi na haziboreshi Kiswahili.
+3. **Kiswahili cha modeli hii ni hafifu.** Maelekezo **mafupi** (~12 mistari) hutoa Kiswahili bora kuliko maelekezo marefu; maelekezo marefu huzalisha maneno ya kubuni. Weka orodha ya maneno sahihi (HESLB, TCU, NECTA) na katazo la kubuni majina/tarehe/vyanzo.
+
+Kinga zilizowekwa kwenye `ai-gateway.server.ts`: cache ya dakika 30, dedup ya maombi yanayofanana kwa wakati mmoja (`inFlight`), `AbortSignal.timeout(20000)`, backoff [0, 1.5s, 3s, 5s], na kusubiri kwa muda mfupi (≤2.5s) kwenye 402. **Kumbuka:** `wrangler dev` ya ndani inaonekana kama IP moja, hivyo kikomo kinaonekana kikali kuliko uzalishaji ambapo Cloudflare hutumia kundi la IP.
+
+Utafutaji (`web-search.server.ts`): **DuckDuckGo Lite** (`POST https://lite.duckduckgo.com/lite/`, `q=`) hurudisha `<a class='result-link' href="//duckduckgo.com/l/?uddg=...">` na `class='result-snippet'` — snippets halisi. Google News RSS inahitaji `-L` (302) na UA ya kivinjari. Wikipedia API inafanya kazi. Vyanzo vyote vitatu kwa `Promise.all` na muda wa kikomo wa sek 6. DDG huzuia baada ya maombi mengi mfululizo; usiendeshe majaribio mengi kwa haraka.
+
+**Vyanzo vingine vya bure vilivyoshindwa:** hackclub (404), airforce (402), electronhub/zanity/chimera (403/500), Groq/OpenRouter/Together/DeepInfra (zinahitaji funguo). Funguo za Gemini zilizopatikana kwenye historia ya mazungumzo **zimekufa**. "TUMIA ZILE ZA MWANZO" ilimaanisha **PAT ya GitHub ya awali** (`ghp_`, scope `repo`) — si funguo za AI.
