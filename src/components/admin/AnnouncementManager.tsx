@@ -4,9 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { createStorageUrl, resolveStorageUrl } from "@/lib/storage-url";
 import {
   announcementDate,
+  deleteAnnouncement,
   isImage,
   isPdf,
   loadAnnouncements,
+  saveAnnouncement,
+  setAnnouncementStatus,
   statusKey,
   type Announcement,
 } from "@/lib/announcements";
@@ -192,29 +195,26 @@ export function AnnouncementManager({
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    const payload: Record<string, unknown> = {
-      title: draft.title.trim(),
-      content: draft.content,
-      excerpt: draft.excerpt.trim() || null,
-      image_url: draft.image_url || null,
-      attachment_url: draft.attachment_url || null,
-      attachment_name: draft.attachment_name || null,
-      announcement_date: draft.announcement_date
-        ? new Date(draft.announcement_date).toISOString()
-        : new Date().toISOString(),
-      status: canPublish ? draft.status : "pending",
-    };
-    if (!draft.id) {
-      payload.author_id = user?.id ?? null;
-      payload.author_department_id = departmentId;
-    }
-    const q = supabase.from("announcements") as any;
-    const { error } = draft.id
-      ? await q.update(payload).eq("id", draft.id)
-      : await q.insert(payload);
+    const res = await saveAnnouncement(
+      {
+        title: draft.title.trim(),
+        content: draft.content,
+        excerpt: draft.excerpt.trim() || null,
+        image_url: draft.image_url || null,
+        attachment_url: draft.attachment_url || null,
+        attachment_name: draft.attachment_name || null,
+        announcement_date: draft.announcement_date
+          ? new Date(draft.announcement_date).toISOString()
+          : new Date().toISOString(),
+        status: canPublish ? draft.status : "pending",
+        author_id: user?.id ?? null,
+        author_department_id: departmentId,
+      },
+      draft.id,
+    );
     setSaving(false);
-    if (error) {
-      toast.error(error.message);
+    if (!res.ok) {
+      toast.error(res.error ?? "Imeshindikana kuhifadhi tangazo.");
       return;
     }
     toast.success(draft.id ? "Tangazo limehifadhiwa" : t("news.submitted"));
@@ -223,15 +223,9 @@ export function AnnouncementManager({
   };
 
   const setStatus = async (row: Announcement, status: Announcement["status"], note?: string) => {
-    const { error } = await (supabase.from("announcements") as any)
-      .update({
-        status,
-        review_note: note ?? null,
-        reviewed_at: status === "pending" ? null : new Date().toISOString(),
-      })
-      .eq("id", row.id);
-    if (error) {
-      toast.error(error.message);
+    const res = await setAnnouncementStatus(row, status, note);
+    if (!res.ok) {
+      toast.error(res.error ?? t("common.error"));
       return;
     }
     toast.success(status === "published" ? t("news.published_ok") : t("common.success"));
@@ -240,9 +234,9 @@ export function AnnouncementManager({
 
   const remove = async (row: Announcement) => {
     if (!confirm("Futa tangazo hili?")) return;
-    const { error } = await (supabase.from("announcements") as any).delete().eq("id", row.id);
-    if (error) {
-      toast.error(error.message);
+    const res = await deleteAnnouncement(row.id);
+    if (!res.ok) {
+      toast.error(res.error ?? t("common.error"));
       return;
     }
     toast.success("Tangazo limefutwa");

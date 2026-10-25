@@ -182,16 +182,19 @@ export async function sendMessage(input: {
   recipientId?: string | null;
   subject: string;
   body: string;
-}): Promise<{ ok: boolean; error?: string }> {
-  const { error } = await db()
+}): Promise<{ ok: boolean; error?: string; id?: string }> {
+  const { data, error } = await db()
     .from("internal_messages")
     .insert({
       channel: input.channel,
       recipient_id: input.recipientId ?? null,
       subject: input.subject.trim(),
       body: input.body.trim(),
-    });
-  return error ? { ok: false, error: error.message } : { ok: true };
+    })
+    .select("id")
+    .maybeSingle();
+  if (error) return { ok: false, error: error.message };
+  return { ok: true, id: (data as { id: string } | null)?.id };
 }
 
 export async function markMessageRead(id: string): Promise<void> {
@@ -213,6 +216,184 @@ export async function loadCabinetContacts(): Promise<
     .not("user_id", "is", null);
   if (error) return [];
   return (data ?? []) as Array<{ user_id: string; full_name: string; position: string }>;
+}
+
+// ===== Kituo cha kazi cha viongozi =====
+
+export type LeaderContact = {
+  user_id: string;
+  full_name: string;
+  position: string | null;
+  department_id: string | null;
+  department_name: string | null;
+};
+
+export type MessageAttachment = {
+  id: string;
+  message_id: string;
+  file_url: string;
+  file_name: string;
+  mime_type: string | null;
+  size_bytes: number | null;
+  created_at: string;
+};
+
+export type ApprovalRequest = {
+  id: string;
+  kind: "mikopo" | "changamoto" | "idara" | "misiba" | "mengine";
+  request_id: string | null;
+  registration_number: string | null;
+  student_name: string | null;
+  title: string;
+  summary: string | null;
+  status: "submitted" | "pending" | "approved" | "rejected";
+  submitted_by: string | null;
+  submitted_department_id: string | null;
+  target_department_id: string | null;
+  decided_by: string | null;
+  decided_at: string | null;
+  decision_note: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type StudentRequest = {
+  kind: string;
+  id: string;
+  title: string;
+  status: string;
+  description: string | null;
+  created_at: string;
+  department_id: string | null;
+};
+
+export type StudentOverview = {
+  student: {
+    id: string;
+    full_name: string;
+    phone: string;
+    registration_number: string;
+    year_of_study: string;
+    course: string;
+  } | null;
+  requests: StudentRequest[];
+  history: StageEvent[];
+  approvals: ApprovalRequest[];
+};
+
+const ATTACHMENT_SELECT = "id,message_id,file_url,file_name,mime_type,size_bytes,created_at";
+const APPROVAL_SELECT =
+  "id,kind,request_id,registration_number,student_name,title,summary,status,submitted_by,submitted_department_id,target_department_id,decided_by,decided_at,decision_note,created_at,updated_at";
+
+/** Orodha ya viongozi wengine, kwa mawasiliano ya moja kwa moja. */
+export async function loadLeaderDirectory(): Promise<LeaderContact[]> {
+  const { data, error } = await db().rpc("leader_directory");
+  if (error) return [];
+  return (data ?? []) as LeaderContact[];
+}
+
+/** Nyaraka za ujumbe mmoja. */
+export async function loadMessageAttachments(messageIds: string[]): Promise<MessageAttachment[]> {
+  if (!messageIds.length) return [];
+  const { data, error } = await db()
+    .from("message_attachments")
+    .select(ATTACHMENT_SELECT)
+    .in("message_id", messageIds)
+    .order("created_at", { ascending: true });
+  if (error) return [];
+  return (data ?? []) as MessageAttachment[];
+}
+
+export async function attachFile(input: {
+  messageId: string;
+  fileUrl: string;
+  fileName: string;
+  mimeType?: string | null;
+  sizeBytes?: number | null;
+}): Promise<{ ok: boolean; error?: string }> {
+  const { error } = await db()
+    .from("message_attachments")
+    .insert({
+      message_id: input.messageId,
+      file_url: input.fileUrl,
+      file_name: input.fileName,
+      mime_type: input.mimeType ?? null,
+      size_bytes: input.sizeBytes ?? null,
+    });
+  return error ? { ok: false, error: error.message } : { ok: true };
+}
+
+/** Nyaraka zote zilizotumwa na mtumiaji (kwa sehemu ya nyaraka). */
+export async function loadSentAttachments(userId: string): Promise<MessageAttachment[]> {
+  const { data, error } = await db()
+    .from("message_attachments")
+    .select(ATTACHMENT_SELECT)
+    .eq("uploaded_by", userId)
+    .order("created_at", { ascending: false })
+    .limit(100);
+  if (error) return [];
+  return (data ?? []) as MessageAttachment[];
+}
+
+export async function loadApprovals(opts: { mine?: boolean } = {}): Promise<ApprovalRequest[]> {
+  let q = db().from("request_approvals").select(APPROVAL_SELECT).order("created_at", {
+    ascending: false,
+  });
+  if (opts.mine) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) q = q.eq("submitted_by", user.id);
+  }
+  const { data, error } = await q;
+  if (error) return [];
+  return (data ?? []) as ApprovalRequest[];
+}
+
+export async function submitApproval(input: {
+  kind: ApprovalRequest["kind"];
+  registrationNumber?: string | null;
+  studentName?: string | null;
+  title: string;
+  summary?: string | null;
+  requestId?: string | null;
+  targetDepartmentId?: string | null;
+}): Promise<{ ok: boolean; error?: string }> {
+  const { error } = await db()
+    .from("request_approvals")
+    .insert({
+      kind: input.kind,
+      registration_number: input.registrationNumber?.trim() || null,
+      student_name: input.studentName?.trim() || null,
+      title: input.title.trim(),
+      summary: input.summary?.trim() || null,
+      request_id: input.requestId ?? null,
+      target_department_id: input.targetDepartmentId ?? null,
+    });
+  return error ? { ok: false, error: error.message } : { ok: true };
+}
+
+export async function decideApproval(
+  id: string,
+  status: "approved" | "rejected",
+  note?: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const { error } = await db()
+    .from("request_approvals")
+    .update({ status, decision_note: note?.trim() || null })
+    .eq("id", id);
+  return error ? { ok: false, error: error.message } : { ok: true };
+}
+
+/** Taarifa za mwanafunzi, maombi yake na hatua iliyofikiwa. */
+export async function loadStudentOverview(
+  registrationNumber: string,
+): Promise<StudentOverview | null> {
+  const { data, error } = await db().rpc("student_overview", {
+    _registration_number: registrationNumber,
+  });
+  if (error || !data) return null;
+  return data as StudentOverview;
 }
 
 /**

@@ -83,9 +83,13 @@ FOR EACH ROW EXECUTE FUNCTION public.leaders_guard_columns();
 
 -- Kiongozi hawezi kujipa cheo anachokitaka: cheo huchukuliwa kutoka ombi lake
 -- lililoidhinishwa. Hii hufunga ughushi wa `position` kwenye uundaji wa ukurasa.
+-- `SECURITY DEFINER` ni muhimu: RLS ya `leader_applications` huzuia kiongozi
+-- kusoma maombi yote, hivyo bila hii utafutaji hurudisha tupu na kiongozi
+-- hushindwa kuunda ukurasa wake.
 CREATE OR REPLACE FUNCTION public.leaders_force_position()
 RETURNS TRIGGER
 LANGUAGE plpgsql
+SECURITY DEFINER
 SET search_path = public
 AS $$
 DECLARE

@@ -13,13 +13,21 @@ import {
   Pencil,
   Trash2,
   MessageSquare,
+  ClipboardList,
+  Paperclip,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { showStatus } from "@/lib/status";
-import { trackRequests, updateRequest, deleteRequest, downloadReplyAttachment, type TrackedRequest } from "@/lib/tracking.functions";
+import {
+  trackRequests,
+  updateRequest,
+  deleteRequest,
+  downloadReplyAttachment,
+  type TrackedRequest,
+} from "@/lib/tracking.functions";
 
 export const Route = createFileRoute("/matokeo")({
   validateSearch: (search: Record<string, unknown>) => {
@@ -31,7 +39,8 @@ export const Route = createFileRoute("/matokeo")({
       { title: "Matokeo ya Ufuatiliaji — MUMSO" },
       {
         name: "description",
-        content: "Ona hatua na taarifa za ombi lako la MUMSO: mkopo, changamoto, huduma ya idara au taarifa ya msiba.",
+        content:
+          "Ona hatua na taarifa za ombi lako la MUMSO: mkopo, changamoto, huduma ya idara au taarifa ya msiba.",
       },
       { property: "og:title", content: "Matokeo ya Ufuatiliaji — MUMSO" },
       { property: "og:description", content: "Hatua na taarifa za ombi lako MUMSO." },
@@ -73,9 +82,14 @@ function ResultsPage() {
   const [downloading, setDownloading] = useState<string | null>(null);
   const openAttachment = async (replyId: string) => {
     setDownloading(replyId);
-    try { const result = await download({ data: { query, replyId } }); window.location.assign(result.url); }
-    catch { showStatus("error", "Faili haijapatikana. Jaribu tena."); }
-    finally { setDownloading(null); }
+    try {
+      const result = await download({ data: { query, replyId } });
+      window.location.assign(result.url);
+    } catch {
+      showStatus("error", "Faili haijapatikana. Jaribu tena.");
+    } finally {
+      setDownloading(null);
+    }
   };
 
   const [loading, setLoading] = useState(true);
@@ -99,12 +113,17 @@ function ResultsPage() {
         showStatus({
           type: "error",
           title: "Hakuna ombi",
-          message: "Hakuna ombi lililopatikana. Hakikisha unatumia namba ya simu au namba ya usajili uliyoweka kwenye fomu.",
+          message:
+            "Hakuna ombi lililopatikana. Hakikisha unatumia namba ya simu au namba ya usajili uliyoweka kwenye fomu.",
         });
       }
       return res.items;
     } catch (err: any) {
-      showStatus({ type: "error", title: "Imeshindikana", message: err?.message ?? "Hitilafu imetokea." });
+      showStatus({
+        type: "error",
+        title: "Imeshindikana",
+        message: err?.message ?? "Hitilafu imetokea.",
+      });
       return [];
     } finally {
       setLoading(false);
@@ -138,7 +157,11 @@ function ResultsPage() {
         autoCloseMs: 4000,
       });
     } catch (err: any) {
-      showStatus({ type: "error", title: "Imeshindikana", message: err?.message ?? "Hitilafu imetokea." });
+      showStatus({
+        type: "error",
+        title: "Imeshindikana",
+        message: err?.message ?? "Hitilafu imetokea.",
+      });
     } finally {
       setBusy(false);
     }
@@ -157,7 +180,11 @@ function ResultsPage() {
         autoCloseMs: 3500,
       });
     } catch (err: any) {
-      showStatus({ type: "error", title: "Imeshindikana", message: err?.message ?? "Hitilafu imetokea." });
+      showStatus({
+        type: "error",
+        title: "Imeshindikana",
+        message: err?.message ?? "Hitilafu imetokea.",
+      });
     } finally {
       setBusy(false);
     }
@@ -171,7 +198,8 @@ function ResultsPage() {
             <Search className="h-6 w-6" /> Matokeo ya Ufuatiliaji
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Taarifa zilizotafutwa kwa: <span className="font-semibold text-foreground">{query || "—"}</span>
+            Taarifa zilizotafutwa kwa:{" "}
+            <span className="font-semibold text-foreground">{query || "—"}</span>
           </p>
         </div>
         <Link
@@ -189,15 +217,44 @@ function ResultsPage() {
       )}
 
       {!loading && items.length === 0 && (
-        <div className="mt-16 text-center">
-          <p className="text-muted-foreground">Hakuna ombi lililopatikana kwa taarifa hizi.</p>
-          <Button className="mt-4" onClick={() => navigate({ to: "/fuatilia" })}>
+        <div className="mw-empty-state mt-12">
+          <span className="mw-empty-icon">
+            <Search className="h-5 w-5" />
+          </span>
+          <p className="mw-empty-title">Hakuna ombi lililopatikana</p>
+          <p className="mw-empty-hint">
+            Hakikisha unatumia namba ya simu au namba ya usajili uliyoweka kwenye fomu.
+          </p>
+          <Button className="mt-3" onClick={() => navigate({ to: "/fuatilia" })}>
             Rudi Kufuatilia
           </Button>
         </div>
       )}
 
-      <div className="mt-8 space-y-6">
+      {!loading && items.length > 0 && (
+        <div className="tk-summary">
+          <div className="tk-stat">
+            <p className="tk-stat-key">Maombi</p>
+            <p className="tk-stat-value">{items.length}</p>
+          </div>
+          <div className="tk-stat">
+            <p className="tk-stat-key">Yanapitiwa</p>
+            <p className="tk-stat-value">{items.filter((i) => stageIndex(i.status) < 3).length}</p>
+          </div>
+          <div className="tk-stat">
+            <p className="tk-stat-key">Yamekamilika</p>
+            <p className="tk-stat-value">{items.filter((i) => stageIndex(i.status) >= 3).length}</p>
+          </div>
+          <div className="tk-stat">
+            <p className="tk-stat-key">Majibu</p>
+            <p className="tk-stat-value">
+              {items.reduce((n, i) => n + (i.replies?.length ?? 0), 0)}
+            </p>
+          </div>
+        </div>
+      )}
+
+      <div className="mt-6 space-y-6">
         {items.map((it) => {
           const idx = stageIndex(it.status);
           const rejected = it.status === "rejected";
@@ -205,87 +262,89 @@ function ResultsPage() {
           const isEditing = editing === it.id;
 
           return (
-            <article key={it.id} className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)] md:p-6">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-primary">
+            <article key={it.id} className="tk-card">
+              <div className="tk-head">
+                <div className="min-w-0">
+                  <span className="tk-kind">
+                    <ClipboardList className="h-3 w-3" />
                     {it.kindLabel}
                   </span>
-                  <h2 className="mt-2 text-lg font-bold md:text-xl">{it.title}</h2>
+                  <h2 className="tk-title">{it.title}</h2>
                 </div>
-                <span className="text-sm text-muted-foreground">
+                <span className="tk-date">
                   {new Date(it.createdAt).toLocaleDateString("sw-TZ", { dateStyle: "long" })}
                 </span>
               </div>
 
               {rejected ? (
-                <p className="mt-4 flex items-center gap-2 rounded-lg bg-destructive/10 px-4 py-3 text-sm font-semibold text-destructive">
-                  <XCircle className="h-4 w-4" /> Ombi hili limekataliwa. Wasiliana na ofisi ya MUMSO.
+                <p className="tk-note" style={{ borderLeftColor: "var(--destructive)" }}>
+                  <span className="tk-note-title" style={{ color: "var(--destructive)" }}>
+                    <XCircle className="h-4 w-4" /> Ombi hili limekataliwa
+                  </span>
+                  <span className="tk-note-body">
+                    Wasiliana na ofisi ya MUMSO kwa maelezo zaidi.
+                  </span>
                 </p>
               ) : (
-                <ol className="mt-5 flex items-stretch gap-2 overflow-x-auto pb-2">
-                  {STAGES.map((s, i) => {
-                    const done = i <= idx;
-                    const Icon = done ? CheckCircle2 : s.icon;
-                    return (
-                      <li key={s.key} className="flex flex-1 min-w-[130px] items-center gap-2">
-                        <div
-                          className={`flex w-full flex-col items-center gap-2 rounded-xl border px-3 py-3 text-center text-xs font-semibold ${
-                            done
-                              ? "border-primary/40 bg-primary/10 text-foreground"
-                              : "border-border bg-secondary/40 text-muted-foreground"
-                          }`}
-                        >
-                          <span
-                            className={`flex h-8 w-8 items-center justify-center rounded-full ${
-                              done ? "bg-primary text-primary-foreground" : "bg-secondary"
-                            }`}
-                          >
-                            <Icon className="h-4 w-4" />
+                <>
+                  <div className="tk-progress">
+                    <div className="tk-progress-top">
+                      <span>
+                        Hatua ya {idx + 1} kati ya {STAGES.length}
+                      </span>
+                      <span>{STAGES[idx]?.label}</span>
+                    </div>
+                    <div className="tk-progress-track">
+                      <div
+                        className="tk-progress-fill"
+                        style={{ width: `${((idx + 1) / STAGES.length) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  <ol className="tk-steps">
+                    {STAGES.map((s, i) => {
+                      const done = i <= idx;
+                      const Icon = done ? CheckCircle2 : s.icon;
+                      return (
+                        <li key={s.key} className={`tk-step ${done ? "is-done" : ""}`}>
+                          <span className="tk-step-dot">
+                            <Icon className="h-3.5 w-3.5" />
                           </span>
                           {s.label}
-                        </div>
-                        {i < STAGES.length - 1 && (
-                          <span className={`hidden h-0.5 w-4 shrink-0 sm:block ${i < idx ? "bg-primary" : "bg-border"}`} />
-                        )}
-                      </li>
-                    );
-                  })}
-                </ol>
+                        </li>
+                      );
+                    })}
+                  </ol>
+                </>
               )}
 
               {needsFix && (
-                <div className="mt-5 rounded-xl border border-accent/50 bg-accent/10 p-4">
-                  <p className="flex items-center gap-2 text-sm font-semibold">
+                <div className="tk-note" style={{ borderLeftColor: "var(--accent)" }}>
+                  <span className="tk-note-title">
                     <AlertTriangle className="h-4 w-4" /> Uongozi umeomba urekebishe taarifa zako
-                  </p>
-                  <p className="mt-1 whitespace-pre-wrap text-sm text-foreground/85">
+                  </span>
+                  <span className="tk-note-body">
                     {it.adminNote || "Tafadhali pitia taarifa zako na urekebishe zilizokosewa."}
-                  </p>
+                  </span>
                 </div>
               )}
 
               {!needsFix && (
-                <div
-                  className={`mt-5 rounded-xl border p-4 ${
-                    idx >= 3
-                      ? "border-primary/40 bg-primary/10"
-                      : rejected
-                        ? "border-destructive/40 bg-destructive/10"
-                        : "border-border bg-secondary/40"
-                  }`}
-                >
-                  <p className="flex items-center gap-2 text-sm font-bold">
-                    <MessageSquare className="h-4 w-4" />
-                    {idx >= 3 ? "Maelekezo ya uongozi (ombi limekamilika)" : "Maoni / maelekezo ya uongozi"}
-                  </p>
-                  <p className="mt-1 whitespace-pre-wrap text-sm text-foreground/85">
+                <div className="tk-note">
+                  <span className="tk-note-title">
+                    <MessageSquare className="h-4 w-4 text-primary" />
+                    {idx >= 3
+                      ? "Maelekezo ya uongozi (ombi limekamilika)"
+                      : "Maoni / maelekezo ya uongozi"}
+                  </span>
+                  <span className="tk-note-body">
                     {it.adminNote?.trim()
                       ? it.adminNote
                       : idx >= 3
                         ? "Ombi lako limekamilika. Uongozi haujaacha maelekezo ya ziada — wasiliana na ofisi ya MUMSO kwa msaada zaidi."
                         : "Uongozi haujaacha maoni bado. Maelekezo yatatokea hapa mara ombi lako litakapopitiwa."}
-                  </p>
+                  </span>
                   {it.updatedAt && (
                     <p className="mt-2 text-xs text-muted-foreground">
                       Imehuishwa: {new Date(it.updatedAt).toLocaleString("sw-TZ")}
@@ -294,7 +353,48 @@ function ResultsPage() {
                 </div>
               )}
 
-              {Boolean(it.replies?.length) && <section className="mt-6 border-t border-border pt-5" aria-label="Majibu ya wizara"><h3 className="flex items-center gap-2 font-bold"><MessageSquare className="h-4 w-4 text-primary" />Majibu ya wizara</h3><div className="mt-4 space-y-5">{it.replies?.map(reply => <div key={reply.id} className="border-l-2 border-primary pl-4"><p className="text-xs font-semibold text-primary">{reply.reply_type === "letter" ? "Barua" : reply.reply_type === "form" ? "Fomu" : "Ujumbe"} · {new Date(reply.created_at).toLocaleString("sw-TZ")}</p><h4 className="mt-1 font-semibold">{reply.subject}</h4><p className="mt-2 whitespace-pre-wrap break-words text-sm leading-6">{reply.body}</p>{reply.attachment_path && <Button className="mt-3 max-w-full whitespace-normal" variant="outline" size="sm" disabled={downloading === reply.id} onClick={() => openAttachment(reply.id)}>{downloading === reply.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}{reply.attachment_name ?? "Pakua faili"}</Button>}</div>)}</div></section>}
+              {Boolean(it.replies?.length) && (
+                <section className="mt-6 border-t border-border pt-5" aria-label="Majibu ya wizara">
+                  <h3 className="flex items-center gap-2 font-bold">
+                    <MessageSquare className="h-4 w-4 text-primary" />
+                    Majibu ya wizara
+                  </h3>
+                  <div className="mt-4 space-y-5">
+                    {it.replies?.map((reply) => (
+                      <div key={reply.id} className="border-l-2 border-primary pl-4">
+                        <p className="text-xs font-semibold text-primary">
+                          {reply.reply_type === "letter"
+                            ? "Barua"
+                            : reply.reply_type === "form"
+                              ? "Fomu"
+                              : "Ujumbe"}{" "}
+                          · {new Date(reply.created_at).toLocaleString("sw-TZ")}
+                        </p>
+                        <h4 className="mt-1 font-semibold">{reply.subject}</h4>
+                        <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-6">
+                          {reply.body}
+                        </p>
+                        {reply.attachment_path && (
+                          <Button
+                            className="mt-3 max-w-full whitespace-normal"
+                            variant="outline"
+                            size="sm"
+                            disabled={downloading === reply.id}
+                            onClick={() => openAttachment(reply.id)}
+                          >
+                            {downloading === reply.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Paperclip className="h-4 w-4" />
+                            )}
+                            {reply.attachment_name ?? "Pakua faili"}
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
 
               {isEditing ? (
                 <div className="mt-5 grid gap-3 rounded-xl border border-border bg-secondary/30 p-4 sm:grid-cols-2">
@@ -321,7 +421,8 @@ function ResultsPage() {
                   ))}
                   <div className="flex flex-wrap gap-2 sm:col-span-2">
                     <Button onClick={() => onSave(it)} disabled={busy}>
-                      {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null} Hifadhi Marekebisho
+                      {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null} Hifadhi
+                      Marekebisho
                     </Button>
                     <Button variant="outline" onClick={() => setEditing(null)} disabled={busy}>
                       Acha
@@ -330,21 +431,16 @@ function ResultsPage() {
                 </div>
               ) : (
                 <>
-                  <div className="mt-5 -mx-1 overflow-x-auto px-1 pb-2">
-                    <dl className="flex min-w-full gap-3">
-                      {it.fields
-                        .filter((f) => f.value)
-                        .map((f) => (
-                          <div
-                            key={f.key}
-                            className="min-w-[180px] max-w-[280px] shrink-0 rounded-xl border border-border bg-secondary/40 px-4 py-3"
-                          >
-                            <dt className="text-[11px] uppercase tracking-wide text-muted-foreground">{f.label}</dt>
-                            <dd className="mt-1 whitespace-pre-wrap text-sm font-medium">{f.value}</dd>
-                          </div>
-                        ))}
-                    </dl>
-                  </div>
+                  <ul className="tk-fields">
+                    {it.fields
+                      .filter((f) => f.value)
+                      .map((f) => (
+                        <li key={f.key} className="tk-field">
+                          <p className="tk-field-key">{f.label}</p>
+                          <p className="tk-field-value">{f.value}</p>
+                        </li>
+                      ))}
+                  </ul>
 
                   {it.status !== "approved" && (
                     <div className="mt-4 flex flex-wrap gap-2">

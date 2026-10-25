@@ -2405,3 +2405,495 @@ html { font-size: 17px; }
   font-size: 0.875rem;
   color: var(--muted-foreground);
 }
+
+/* ===== Kituo cha kazi cha viongozi: ufuatiliaji, idhini na nyaraka ===== */
+.mw-tools {
+  display: grid;
+  gap: 1.15rem;
+}
+
+.mw-searchbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+  border: 1px solid color-mix(in oklab, var(--border) 80%, var(--primary));
+  border-radius: var(--radius-xl);
+  background: var(--card);
+  box-shadow: var(--shadow-card);
+  padding: 1.15rem;
+}
+.mw-searchbar > .mw-field {
+  flex: 1 1 16rem;
+}
+.mw-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.mw-field-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+}
+
+.mw-student {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1fr);
+  border: 1px solid color-mix(in oklab, var(--border) 80%, var(--primary));
+  border-radius: var(--radius-xl);
+  background: var(--card);
+  box-shadow: var(--shadow-card);
+  padding: 1.15rem;
+}
+@media (min-width: 768px) {
+  .mw-student {
+    grid-template-columns: minmax(0, 18rem) minmax(0, 1fr);
+  }
+}
+.mw-student-id {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+.mw-student-avatar {
+  display: grid;
+  place-items: center;
+  height: 3.25rem;
+  width: 3.25rem;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--primary) 14%, transparent);
+  color: var(--primary);
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+.mw-student-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+.mw-student-reg {
+  margin-top: 0.1rem;
+  font-size: 0.78rem;
+  color: var(--muted-foreground);
+  overflow-wrap: anywhere;
+}
+.mw-stats {
+  display: grid;
+  gap: 0.6rem;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+}
+.mw-stat {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--background);
+  padding: 0.7rem 0.8rem;
+}
+.mw-stat-key {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted-foreground);
+}
+.mw-stat-value {
+  margin-top: 0.2rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.mw-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--accent) 16%, transparent);
+  padding: 0.18rem 0.55rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.mw-track-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.mw-track-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--background);
+  padding: 0.7rem 0.85rem;
+}
+.mw-track-item-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.mw-track-item-meta {
+  margin-top: 0.1rem;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+.mw-track-item-side {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mw-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.mw-timeline-item {
+  display: flex;
+  gap: 0.65rem;
+  border-left: 2px solid color-mix(in oklab, var(--primary) 35%, var(--border));
+  padding: 0 0 0.55rem 0.75rem;
+}
+.mw-timeline-dot {
+  display: grid;
+  place-items: center;
+  height: 1.5rem;
+  width: 1.5rem;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--primary) 14%, transparent);
+  color: var(--primary);
+}
+.mw-timeline-body {
+  min-width: 0;
+  flex: 1;
+}
+.mw-timeline-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.mw-timeline-note {
+  margin-top: 0.15rem;
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+  overflow-wrap: anywhere;
+}
+
+.mw-approval {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--background);
+  padding: 0.85rem 0.95rem;
+}
+.mw-approval-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.mw-approval-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.mw-approval-meta {
+  margin-top: 0.15rem;
+  font-size: 0.76rem;
+  color: var(--muted-foreground);
+  overflow-wrap: anywhere;
+}
+.mw-approval-summary {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+.mw-approval-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.7rem;
+}
+
+.mw-files {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.6rem;
+}
+.mw-file {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--background);
+  padding: 0.25rem 0.65rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--primary);
+  max-width: 100%;
+  transition:
+    border-color 0.18s,
+    background-color 0.18s;
+}
+.mw-file:hover {
+  border-color: color-mix(in oklab, var(--primary) 45%, var(--border));
+  background: color-mix(in oklab, var(--primary) 8%, transparent);
+}
+.mw-file-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 14rem;
+}
+.mw-drop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--background);
+  padding: 0.7rem 0.85rem;
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+}
+
+.mw-progress {
+  margin-top: 0.6rem;
+}
+.mw-progress-track {
+  height: 0.4rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--muted);
+}
+.mw-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--primary);
+  transition: width 0.3s var(--ease-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mw-progress-fill,
+  .mw-file {
+    transition: none;
+  }
+}
+
+/* ===== Ufuatiliaji wa umma: muhtasari na hatua za ombi ===== */
+.tk-summary {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+  margin-top: 1.25rem;
+}
+.tk-stat {
+  border: 1px solid color-mix(in oklab, var(--border) 80%, var(--primary));
+  border-radius: var(--radius-xl);
+  background: var(--card);
+  box-shadow: var(--shadow-card);
+  padding: 0.85rem 1rem;
+}
+.tk-stat-key {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted-foreground);
+}
+.tk-stat-value {
+  margin-top: 0.25rem;
+  font-size: 1.35rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.tk-card {
+  border: 1px solid color-mix(in oklab, var(--border) 82%, var(--primary));
+  border-radius: var(--radius-2xl);
+  background: var(--card);
+  box-shadow: var(--shadow-card);
+  padding: 1.15rem;
+  transition: box-shadow 0.2s var(--ease-soft);
+}
+@media (min-width: 768px) {
+  .tk-card {
+    padding: 1.5rem;
+  }
+}
+.tk-card:hover {
+  box-shadow: var(--shadow-elegant);
+}
+.tk-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.tk-kind {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--primary) 12%, transparent);
+  padding: 0.22rem 0.7rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--primary);
+}
+.tk-title {
+  margin-top: 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 800;
+  line-height: 1.3;
+}
+.tk-date {
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+}
+.tk-progress {
+  margin-top: 1rem;
+}
+.tk-progress-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+}
+.tk-progress-track {
+  margin-top: 0.4rem;
+  height: 0.45rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--muted);
+}
+.tk-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--primary);
+  transition: width 0.35s var(--ease-soft);
+}
+.tk-steps {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+}
+@media (min-width: 640px) {
+  .tk-steps {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.tk-step {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--secondary);
+  padding: 0.6rem 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+}
+.tk-step.is-done {
+  border-color: color-mix(in oklab, var(--primary) 40%, var(--border));
+  background: color-mix(in oklab, var(--primary) 10%, transparent);
+  color: var(--foreground);
+}
+.tk-step-dot {
+  display: grid;
+  place-items: center;
+  height: 1.6rem;
+  width: 1.6rem;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: var(--background);
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+.tk-step.is-done .tk-step-dot {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+.tk-fields {
+  display: grid;
+  gap: 0.6rem;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  margin-top: 1rem;
+  list-style: none;
+  padding: 0;
+}
+.tk-field {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--secondary);
+  padding: 0.7rem 0.85rem;
+}
+.tk-field-key {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted-foreground);
+}
+.tk-field-value {
+  margin-top: 0.2rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+.tk-note {
+  margin-top: 1rem;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--primary);
+  border-radius: var(--radius-lg);
+  background: var(--secondary);
+  padding: 0.85rem 1rem;
+}
+.tk-note-title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.tk-note-body {
+  margin-top: 0.35rem;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tk-progress-fill,
+  .tk-card {
+    transition: none;
+  }
+}

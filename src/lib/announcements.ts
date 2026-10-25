@@ -86,6 +86,87 @@ export async function loadAnnouncement(id: string): Promise<Announcement | null>
   return res.data ? fromLegacy(res.data) : null;
 }
 
+/**
+ * Je, kosa ni la safu ambazo bado hazipo (migrasheni haijatumika)?
+ * Hii hutokea kwa `42703` (column haipo) au `PGRST204` (schema cache).
+ */
+export function isMissingColumn(error: { code?: string; message?: string } | null): boolean {
+  if (!error) return false;
+  if (error.code === "42703" || error.code === "PGRST204") return true;
+  return /column .* does not exist|schema cache/i.test(error.message ?? "");
+}
+
+/** Safu za tangazo zinazopatikana kwenye mfumo wa sasa. */
+export type AnnouncementPayload = {
+  title: string;
+  content: string;
+  excerpt?: string | null;
+  image_url?: string | null;
+  attachment_url?: string | null;
+  attachment_name?: string | null;
+  announcement_date?: string;
+  status?: AnnouncementStatus;
+  author_id?: string | null;
+  author_department_id?: string | null;
+};
+
+/**
+ * Huhifadhi tangazo. Hujaribu safu kamili za mfumo wa wizara ya habari; kama
+ * migrasheni bado haijatumika, hurudi kwenye safu za zamani ili kuchapisha
+ * kusiendelee kushindwa.
+ */
+export async function saveAnnouncement(
+  payload: AnnouncementPayload,
+  id?: string | null,
+): Promise<{ ok: boolean; error?: string }> {
+  const full = { ...payload };
+  const run = async (body: Record<string, unknown>) =>
+    id
+      ? await (supabase.from("announcements") as any).update(body).eq("id", id)
+      : await (supabase.from("announcements") as any).insert(body);
+
+  const first = await run(full);
+  if (!first.error) return { ok: true };
+  if (!isMissingColumn(first.error)) return { ok: false, error: first.error.message };
+
+  // Safu za zamani pekee: `published` ndiyo hali inayowakilisha uchapishaji.
+  const legacy: Record<string, unknown> = {
+    title: payload.title,
+    content: payload.content,
+    published: payload.status === "published",
+  };
+  if (payload.image_url) legacy.image_url = payload.image_url;
+  if (!id && payload.author_id) legacy.author_id = payload.author_id;
+  const second = await run(legacy);
+  return second.error ? { ok: false, error: second.error.message } : { ok: true };
+}
+
+/** Huchapisha, hurejesha au hubadilisha hali ya tangazo. */
+export async function setAnnouncementStatus(
+  row: Pick<Announcement, "id" | "status">,
+  status: AnnouncementStatus,
+  note?: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const body: Record<string, unknown> = {
+    status,
+    review_note: note ?? null,
+    reviewed_at: status === "pending" ? null : new Date().toISOString(),
+  };
+  const first = await (supabase.from("announcements") as any).update(body).eq("id", row.id);
+  if (!first.error) return { ok: true };
+  if (!isMissingColumn(first.error)) return { ok: false, error: first.error.message };
+
+  const legacy = await (supabase.from("announcements") as any)
+    .update({ published: status === "published" })
+    .eq("id", row.id);
+  return legacy.error ? { ok: false, error: legacy.error.message } : { ok: true };
+}
+
+export async function deleteAnnouncement(id: string): Promise<{ ok: boolean; error?: string }> {
+  const { error } = await (supabase.from("announcements") as any).delete().eq("id", id);
+  return error ? { ok: false, error: error.message } : { ok: true };
+}
+
 /** Tarehe ya kuonyesha: tarehe rasmi ya tangazo, la sivyo tarehe ya kuundwa. */
 export function announcementDate(a: Pick<Announcement, "announcement_date" | "created_at">): Date {
   return new Date(a.announcement_date ?? a.created_at);

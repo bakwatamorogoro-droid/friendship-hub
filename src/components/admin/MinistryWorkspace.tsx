@@ -4,6 +4,7 @@ import {
   ArrowUpRight,
   BadgeCheck,
   CheckCircle2,
+  ClipboardCheck,
   ClipboardList,
   Clock,
   FileText,
@@ -15,6 +16,7 @@ import {
   Save,
   Send,
   Sparkles,
+  UserRound,
   XCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -28,6 +30,7 @@ import { useI18n } from "@/lib/i18n";
 import {
   formatWeek,
   loadCabinetContacts,
+  loadLeaderDirectory,
   loadMessages,
   loadNewsInbox,
   loadReports,
@@ -37,11 +40,15 @@ import {
   sendMessage,
   weekStart,
   type InternalMessage,
+  type LeaderContact,
   type MinistryReport,
   type MinistryRole,
   type StageEvent,
 } from "@/lib/ministry";
 import { CabinetOverview } from "@/components/admin/CabinetOverview";
+import { StudentTracker } from "@/components/admin/StudentTracker";
+import { ApprovalsPanel } from "@/components/admin/ApprovalsPanel";
+import { DocumentsPanel } from "@/components/admin/DocumentsPanel";
 
 type Row = Record<string, any>;
 
@@ -67,7 +74,8 @@ const stageIndex = (status: string) => {
   }
 };
 
-type Section = "huduma" | "changamoto" | "ripoti" | "mawasiliano";
+type Section =
+  "huduma" | "changamoto" | "wanafunzi" | "idhini" | "nyaraka" | "ripoti" | "mawasiliano";
 
 /**
  * Paneli ya kisasa ya wizara: huduma za wanafunzi, changamoto, hatua zao,
@@ -100,6 +108,9 @@ export function MinistryWorkspace({
   }> = [
     { key: "huduma", label: t("mw.services"), icon: ClipboardList, count: deptSubs.length },
     { key: "changamoto", label: t("mw.challenges"), icon: MessageSquare, count: challenges.length },
+    { key: "wanafunzi", label: t("mw.students"), icon: UserRound },
+    { key: "idhini", label: t("mw.approvals"), icon: ClipboardCheck },
+    { key: "nyaraka", label: t("mw.documents"), icon: Paperclip },
     { key: "ripoti", label: t("mw.report"), icon: FileText },
     { key: "mawasiliano", label: t("mw.messages"), icon: Mail },
   ];
@@ -183,6 +194,14 @@ export function MinistryWorkspace({
           onSaved={onSaved}
         />
       )}
+
+      {section === "wanafunzi" && <StudentTracker depts={depts} />}
+
+      {section === "idhini" && (
+        <ApprovalsPanel canDecide={role.isNewsMinistry || role.isAdmin} userId={userId} />
+      )}
+
+      {section === "nyaraka" && <DocumentsPanel />}
 
       {section === "ripoti" && (
         <WeeklyReportPanel role={role} deptSubs={deptSubs} challenges={challenges} depts={depts} />
@@ -641,26 +660,29 @@ function MessagingPanel({
   const [contacts, setContacts] = useState<
     Array<{ user_id: string; full_name: string; position: string }>
   >([]);
+  const [leaders, setLeaders] = useState<LeaderContact[]>([]);
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [recipient, setRecipient] = useState("");
-  const [channel, setChannel] = useState<"cabinet" | "news">("cabinet");
+  const [channel, setChannel] = useState<"direct" | "news" | "cabinet">("cabinet");
   const [busy, setBusy] = useState(false);
   const deptMap = useMemo(() => new Map(depts.map((d) => [d.id, d.name] as const)), [depts]);
 
   const reload = async () => {
-    const [inb, snt, news, cts] = await Promise.all([
+    const [inb, snt, news, cts, dir] = await Promise.all([
       loadMessages({ userId, box: "inbox" }),
       loadMessages({ userId, box: "sent" }),
       role.isNewsMinistry && role.departmentId
         ? loadNewsInbox(role.departmentId)
         : Promise.resolve([] as InternalMessage[]),
       loadCabinetContacts(),
+      loadLeaderDirectory(),
     ]);
     setInbox(inb);
     setSent(snt);
     setNewsInbox(news);
     setContacts(cts);
+    setLeaders(dir);
   };
 
   useEffect(() => {
@@ -677,10 +699,14 @@ function MessagingPanel({
       toast.error(t("mw.choose_recipient"));
       return;
     }
+    if (channel === "direct" && !recipient) {
+      toast.error(t("mw.choose_leader"));
+      return;
+    }
     setBusy(true);
     const res = await sendMessage({
       channel,
-      recipientId: channel === "cabinet" ? recipient : null,
+      recipientId: channel === "cabinet" || channel === "direct" ? recipient : null,
       subject,
       body,
     });
@@ -758,7 +784,43 @@ function MessagingPanel({
                 <small>{t("mw.to_news_lead")}</small>
               </span>
             </button>
+            <button
+              type="button"
+              onClick={() => setChannel("direct")}
+              className={`mw-channel ${channel === "direct" ? "is-active" : ""}`}
+            >
+              <UserRound className="h-4 w-4" />
+              <span>
+                <strong>{t("mw.to_leader")}</strong>
+                <small>{t("mw.to_leader_lead")}</small>
+              </span>
+            </button>
           </div>
+
+          {channel === "direct" && (
+            <div className="space-y-2">
+              <Label htmlFor="msg-leader">{t("mw.choose_leader")} *</Label>
+              <select
+                id="msg-leader"
+                className="mw-select w-full"
+                value={recipient}
+                onChange={(e) => setRecipient(e.target.value)}
+                required
+              >
+                <option value="">{t("mw.choose_leader")}</option>
+                {leaders.map((l) => (
+                  <option key={l.user_id} value={l.user_id}>
+                    {l.full_name}
+                    {l.position ? ` — ${l.position}` : ""}
+                    {l.department_name ? ` (${l.department_name})` : ""}
+                  </option>
+                ))}
+              </select>
+              {leaders.length === 0 && (
+                <p className="text-xs text-muted-foreground">{t("mw.no_contacts")}</p>
+              )}
+            </div>
+          )}
 
           {channel === "cabinet" && (
             <div className="space-y-2">
